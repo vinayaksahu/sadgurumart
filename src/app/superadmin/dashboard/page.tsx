@@ -4,6 +4,7 @@ import { cookies } from 'next/headers';
 import { verifySuperToken } from '@/lib/auth/jwt';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import AdminNavbar from '@/components/AdminNavbar';
 import { 
   ShieldCheck, 
   Terminal, 
@@ -44,38 +45,13 @@ export default async function SuperAdminDashboardPage() {
 
   return (
     <div className="min-h-screen bg-[#051810] text-[#e2e8f0] font-sans flex flex-col">
-      {/* Top Root Terminal Header */}
-      <header className="bg-[#0b2b1e] border-b border-[#d4a359]/30 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#051810] border border-[#d4a359] flex items-center justify-center text-[#d4a359]">
-              <ShieldCheck className="w-6 h-6" />
-            </div>
-            <div>
-              <div className="font-black text-lg text-white leading-none tracking-tight">
-                MASTER STEALTH TERMINAL
-              </div>
-              <div className="text-[10px] font-mono tracking-widest text-[#d4a359] mt-0.5">
-                LEVEL-0 SYSTEM GOVERNANCE • ROOT
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4 text-xs font-mono">
-            <span className="text-emerald-400 flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              STEALTH ACTIVE
-            </span>
-            <Link
-              href="/superadminlogin"
-              className="p-2 rounded-xl text-red-400 hover:bg-red-950/40 border border-red-900/40 flex items-center gap-1"
-            >
-              <LogOut className="w-4 h-4" />
-              <span>Exit Root</span>
-            </Link>
-          </div>
-        </div>
-      </header>
+      <AdminNavbar 
+        title="MASTER STEALTH TERMINAL"
+        subtitle="LEVEL-0 SYSTEM GOVERNANCE • ROOT"
+        role="SYSTEM_MASTER"
+        username={decoded.username}
+        isSuperAdmin={true}
+      />
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-1 w-full space-y-8">

@@ -4,6 +4,7 @@ import { cookies } from 'next/headers';
 import { verifyAdminToken, verifySuperToken } from '@/lib/auth/jwt';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import AdminNavbar from '@/components/AdminNavbar';
 import { 
   Users, 
   ShoppingBag, 
@@ -46,35 +47,12 @@ export default async function AdminDashboardPage() {
 
   return (
     <div className="min-h-screen bg-[#f6f4ed] text-[#2d3748] font-sans flex flex-col">
-      {/* Top Admin Bar */}
-      <header className="bg-white border-b border-[#e8e3d5] sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#144732] text-white flex items-center justify-center font-black text-lg border border-[#d4a359]">
-              SGM
-            </div>
-            <div>
-              <div className="font-black text-lg text-[#144732] leading-none">
-                SGM Mart Staff Admin Desk
-              </div>
-              <div className="text-[10px] font-extrabold uppercase tracking-widest text-[#92580a] mt-0.5">
-                Role: {adminDecoded?.role || 'SYSTEM_MASTER'}
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4 text-xs font-bold text-slate-700">
-            <span>Staff: <strong className="text-[#144732]">{adminDecoded?.username || 'Superadmin'}</strong></span>
-            <Link
-              href="/adminlogin"
-              className="p-2 rounded-xl text-red-600 hover:bg-red-50 flex items-center gap-1"
-            >
-              <LogOut className="w-4 h-4" />
-              <span className="hidden sm:inline">Logout</span>
-            </Link>
-          </div>
-        </div>
-      </header>
+      <AdminNavbar 
+        title="SGM Mart Staff Admin Desk"
+        subtitle="Staff Management Console"
+        role={adminDecoded?.role || 'STAFF_ADMIN'}
+        username={adminDecoded?.username || 'opsadmin'}
+      />
 
       {/* Main Admin Console */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-1 w-full space-y-8">

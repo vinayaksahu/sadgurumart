@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import Navbar from '@/components/Navbar';
 import { 
   ShoppingBag, 
   Sparkles, 
@@ -37,52 +38,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-[#f8f6f0] text-[#1f2937] font-sans flex flex-col selection:bg-[#d4a359] selection:text-[#0b2b1e]">
-      {/* Top Banner Notice */}
-      <div className="bg-[#0b2b1e] text-[#fef08a] px-4 py-2 text-xs font-bold text-center border-b border-[#d4a359]/30 tracking-wider">
-        🇮🇳 “बेरोजगारी और रोग मुक्त हो भारत हमारा” • SGM MART ONLINE SERVICE PVT. LTD.
-      </div>
-
-      {/* Navigation Bar */}
-      <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-[#e8e3d5]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-[#144732] flex items-center justify-center text-white font-black text-xl border-2 border-[#d4a359] shadow-md">
-              SGM
-            </div>
-            <div>
-              <div className="font-black text-2xl tracking-tight text-[#144732] leading-none">
-                SGM MART
-              </div>
-              <div className="text-[10px] font-extrabold uppercase tracking-[0.25em] text-[#d4a359] mt-0.5">
-                Online Service
-              </div>
-            </div>
-          </div>
-
-          <nav className="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-700">
-            <a href="#categories" className="hover:text-[#144732] transition-colors">उत्पाद श्रेणियाँ</a>
-            <a href="#incomes" className="hover:text-[#144732] transition-colors">16 इनकम प्लान</a>
-            <a href="#rewards" className="hover:text-[#144732] transition-colors">अवार्ड्स & रिवार्ड्स</a>
-            <a href="#compliance" className="hover:text-[#144732] transition-colors">कानूनी व नियम</a>
-          </nav>
-
-          <div className="flex items-center gap-3">
-            <Link
-              href="/login"
-              className="px-4 py-2.5 rounded-xl border-2 border-[#144732] text-[#144732] font-bold text-sm hover:bg-[#144732] hover:text-white transition-all duration-200"
-            >
-              Sign In (लॉगिन)
-            </Link>
-            <Link
-              href="/register"
-              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#144732] to-[#0b2b1e] text-white font-bold text-sm hover:shadow-lg hover:shadow-[#144732]/20 transition-all duration-200 flex items-center gap-2"
-            >
-              <Sparkles className="w-4 h-4 text-[#fef08a]" />
-              <span>Join Free</span>
-            </Link>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       {/* Hero Section */}
       <section className="relative pt-12 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden">

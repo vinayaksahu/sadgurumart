@@ -4,7 +4,8 @@ import { cookies } from 'next/headers';
 import { verifyAdminToken, verifySuperToken } from '@/lib/auth/jwt';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Wallet, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { Wallet, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import AdminNavbar from '@/components/AdminNavbar';
 import AdminWithdrawalActions from './AdminWithdrawalActions';
 
 export default async function AdminWithdrawalsPage() {
@@ -26,21 +27,12 @@ export default async function AdminWithdrawalsPage() {
 
   return (
     <div className="min-h-screen bg-[#f6f4ed] text-[#2d3748] font-sans flex flex-col">
-      <header className="bg-white border-b border-[#e8e3d5] sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link href="/admin/dashboard" className="p-2 rounded-xl hover:bg-slate-100">
-              <ArrowLeft className="w-5 h-5 text-slate-600" />
-            </Link>
-            <div>
-              <div className="font-black text-lg text-[#144732]">Bank Payout Settlements Desk</div>
-              <div className="text-[10px] font-extrabold uppercase tracking-widest text-[#92580a]">
-                Weekly Bank Transfer Approvals & Deductions
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
+      <AdminNavbar 
+        title="Payout Settlements Desk"
+        subtitle="Weekly Bank Transfer Approvals & Deductions"
+        role="STAFF_ADMIN"
+        username={isAdmin ? (isAdmin as any).username : 'Admin'}
+      />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full space-y-6">
         <div className="bg-white border border-[#e8e3d5] rounded-3xl p-6 sm:p-8 shadow-sm">
