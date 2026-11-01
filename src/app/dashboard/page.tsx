@@ -148,7 +148,7 @@ export default async function DashboardPage() {
             </div>
             <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-[#92580a]">
               <span>10% Self Repurchase</span>
-              <span>Shop Now →</span>
+              <Link href="/store" className="hover:underline">Shop Now →</Link>
             </div>
           </div>
 
@@ -162,17 +162,22 @@ export default async function DashboardPage() {
               <div className="flex items-center justify-between mt-2">
                 <div>
                   <div className="text-xs text-slate-500">Left PV</div>
-                  <div className="text-xl font-black text-[#144732]">{user.leftVolumePV}</div>
+                  <div className="text-xl font-black text-[#144732]">
+                    {user.leftVolumePV + user.leftCarryForwardPV}
+                  </div>
                 </div>
                 <div className="h-8 w-px bg-slate-200" />
                 <div>
                   <div className="text-xs text-slate-500">Right PV</div>
-                  <div className="text-xl font-black text-[#144732]">{user.rightVolumePV}</div>
+                  <div className="text-xl font-black text-[#144732]">
+                    {user.rightVolumePV + user.rightCarryForwardPV}
+                  </div>
                 </div>
               </div>
             </div>
-            <div className="mt-4 pt-3 border-t border-slate-100 text-xs font-bold text-slate-600">
-              10% मैचिंग अनुपात (1:1 Ratio)
+            <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-slate-600">
+              <span>10% 1:1 मैचिंग</span>
+              <Link href="/genealogy/binary" className="text-[#144732] hover:underline">View Tree →</Link>
             </div>
           </div>
 
@@ -190,8 +195,9 @@ export default async function DashboardPage() {
                 अगले लेवल अपग्रेड हेतु रिज़र्व
               </div>
             </div>
-            <div className="mt-4 pt-3 border-t border-slate-100 text-xs font-bold text-purple-700">
-              7 लेवल्स 2x2 ग्लोबल मैट्रिक्स
+            <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-purple-700">
+              <span>7 लेवल्स 2x2</span>
+              <Link href="/autopool" className="hover:underline">View Status →</Link>
             </div>
           </div>
         </div>
@@ -211,25 +217,31 @@ export default async function DashboardPage() {
             </p>
           </Link>
 
-          <div className="p-6 rounded-3xl bg-white border border-[#e8e3d5] shadow-sm opacity-90">
-            <div className="w-12 h-12 rounded-2xl bg-[#fdfaf3] text-[#92580a] flex items-center justify-center mb-4">
+          <Link
+            href="/genealogy/binary"
+            className="p-6 rounded-3xl bg-white border border-[#e8e3d5] hover:border-[#92580a] shadow-sm hover:shadow-md transition-all group"
+          >
+            <div className="w-12 h-12 rounded-2xl bg-[#fdfaf3] text-[#92580a] flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
               <Users className="w-6 h-6" />
             </div>
             <h3 className="font-black text-lg text-[#92580a]">Binary Genealogy Tree</h3>
             <p className="text-xs text-slate-500 mt-1">
               अपनी लेफ्ट व राइट डाउनलाइन टीम की स्थिति व मैचिंग कैलकुलेशन देखें।
             </p>
-          </div>
+          </Link>
 
-          <div className="p-6 rounded-3xl bg-white border border-[#e8e3d5] shadow-sm opacity-90">
-            <div className="w-12 h-12 rounded-2xl bg-purple-50 text-purple-700 flex items-center justify-center mb-4">
+          <Link
+            href="/autopool"
+            className="p-6 rounded-3xl bg-white border border-[#e8e3d5] hover:border-purple-600 shadow-sm hover:shadow-md transition-all group"
+          >
+            <div className="w-12 h-12 rounded-2xl bg-purple-50 text-purple-700 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
               <Layers className="w-6 h-6" />
             </div>
             <h3 className="font-black text-lg text-purple-900">2x2 AutoPool Matrix</h3>
             <p className="text-xs text-slate-500 mt-1">
               ₹13.19 करोड़ की ऑल इंडिया ऑटोपूल पोजीशन एवं लेवल अपग्रेड्स।
             </p>
-          </div>
+          </Link>
         </div>
 
         {/* Recent Orders Section */}

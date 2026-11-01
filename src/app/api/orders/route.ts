@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyUserToken } from '@/lib/auth/jwt';
+import { propagateBinaryVolume } from '@/lib/mlm/binaryEngine';
+import { creditDirectReferralBonus } from '@/lib/mlm/royaltyEngine';
 
 export async function POST(req: NextRequest) {
   try {
@@ -31,7 +33,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // If not logged in, link to root distributor or create customer record
+    // If not logged in, link to root distributor
     if (!userId) {
       const rootUser = await prisma.user.findFirst({
         where: { userCode: 'SGM10001' },
@@ -79,6 +81,8 @@ export async function POST(req: NextRequest) {
     const orderCount = await prisma.order.count();
     const orderNumber = `SGM-ORD-${10001 + orderCount}`;
 
+    let isNewActivation = false;
+
     // Create Order with Items in a transaction
     const order = await prisma.$transaction(async (tx) => {
       const newOrder = await tx.order.create({
@@ -92,21 +96,16 @@ export async function POST(req: NextRequest) {
           totalPV,
           totalBV,
           orderStatus: 'CONFIRMED',
-          paymentStatus: 'PAID', // Marked paid for immediate confirmation
+          paymentStatus: 'PAID',
           paymentMethod: paymentMethod || 'ONLINE',
           shippingAddress,
           items: {
             create: orderItemsData,
           },
         },
-        include: {
-          items: {
-            include: { product: true },
-          },
-        },
       });
 
-      // If user is logged in and not yet active, and this is an activation product, activate user!
+      // Check if user was inactive and now qualifies for activation
       const user = await tx.user.findUnique({ where: { id: userId } });
       if (user && !user.isActive && totalPV >= 100) {
         await tx.user.update({
@@ -116,16 +115,37 @@ export async function POST(req: NextRequest) {
             activatedAt: new Date(),
           },
         });
+        isNewActivation = true;
       }
 
       return newOrder;
     });
+
+    // Propagate Binary PV points up the tree
+    if (totalPV > 0) {
+      try {
+        await propagateBinaryVolume(userId, totalPV);
+      } catch (err) {
+        console.error('Binary volume propagation warning:', err);
+      }
+    }
+
+    // If newly activated, credit Direct Referral Bonus (10%) to direct sponsor immediately!
+    if (isNewActivation && totalPV > 0) {
+      try {
+        await creditDirectReferralBonus(userId, totalPV);
+      } catch (err) {
+        console.error('Direct bonus credit warning:', err);
+      }
+    }
 
     return NextResponse.json({
       success: true,
       message: 'Order placed successfully',
       orderNumber: order.orderNumber,
       orderId: order.id,
+      pvCredited: totalPV,
+      bvCredited: totalBV,
     });
   } catch (error: any) {
     console.error('Order creation error:', error);

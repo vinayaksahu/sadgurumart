@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
+import { findSpilloverPlacement } from '@/lib/mlm/binaryEngine';
+import { placeInAutoPool } from '@/lib/mlm/autoPoolEngine';
 
 export async function POST(req: NextRequest) {
   try {
@@ -47,13 +49,17 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Determine Binary Placement Parent (with automatic spillover)
+    const position = placementPosition === 'RIGHT' ? 'RIGHT' : 'LEFT';
+    const placement = await findSpilloverPlacement(sponsor.id, position);
+
     // Generate unique sequential SGM User Code (e.g. SGM10002)
     const userCount = await prisma.user.count();
     const nextCode = `SGM${10001 + userCount}`;
 
     const passwordHash = await bcrypt.hash(password, 10);
 
-    // Create user with default wallet
+    // Create user with default wallet and binary parent link
     const newUser = await prisma.user.create({
       data: {
         userCode: nextCode,
@@ -62,7 +68,8 @@ export async function POST(req: NextRequest) {
         email: email ? email.trim() : null,
         passwordHash,
         sponsorId: sponsor.id,
-        placementPosition: placementPosition === 'RIGHT' ? 'RIGHT' : 'LEFT',
+        placementParentId: placement.parentId,
+        placementPosition: placement.position,
         wallet: {
           create: {
             mainBalance: 0,
@@ -74,11 +81,20 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    // Enter user into 2x2 AutoPool Level 1
+    try {
+      await placeInAutoPool(newUser.id, 1);
+    } catch (poolErr) {
+      console.error('AutoPool entry warning:', poolErr);
+    }
+
     return NextResponse.json({
       success: true,
       message: 'Registration successful',
       userCode: newUser.userCode,
       name: newUser.name,
+      placementParent: placement.parentId,
+      placementPosition: placement.position,
     });
   } catch (error: any) {
     console.error('Registration error:', error);
