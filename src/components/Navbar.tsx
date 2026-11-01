@@ -18,7 +18,8 @@ import {
   FileCheck, 
   Smartphone,
   ChevronRight,
-  LogIn
+  LogIn,
+  Image as ImageIcon
 } from 'lucide-react';
 import { useCart } from '@/lib/cartContext';
 
@@ -40,7 +41,8 @@ export default function Navbar() {
 
   const mainLinks = [
     { label: 'Home (होम)', href: '/', icon: Home },
-    { label: 'All Products (उत्पाद)', href: '/store', icon: ShoppingBag },
+    { label: 'Products (उत्पाद)', href: '/#products', icon: ShoppingBag },
+    { label: 'Photo Gallery (गैलरी)', href: '/#gallery', icon: ImageIcon },
     { label: '16 Income Plan (प्लान)', href: '/#incomes', icon: TrendingUp },
     { label: 'Awards & Ranks (रिवार्ड्स)', href: '/#rewards', icon: Award },
     { label: 'Rules & Legal (नियम)', href: '/#compliance', icon: ShieldCheck },
@@ -83,9 +85,10 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-6 xl:gap-8 text-sm font-bold text-slate-700">
+          <nav className="hidden lg:flex items-center gap-6 xl:gap-7 text-sm font-bold text-slate-700">
             <Link href="/" className="hover:text-[#144732] transition-colors">Home (होम)</Link>
-            <Link href="/store" className="hover:text-[#144732] transition-colors">All Products (उत्पाद)</Link>
+            <Link href="/#products" className="hover:text-[#144732] transition-colors">Products (उत्पाद)</Link>
+            <Link href="/#gallery" className="hover:text-[#144732] transition-colors">Gallery (गैलरी)</Link>
             <Link href="/#incomes" className="hover:text-[#144732] transition-colors">16 Income Plan</Link>
             <Link href="/dashboard" className="hover:text-[#144732] transition-colors text-[#92580a]">Member Portal</Link>
             <Link href="/#compliance" className="hover:text-[#144732] transition-colors">Rules & Legal</Link>

@@ -1,6 +1,9 @@
 import React from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
+import ProductCard from '@/components/ProductCard';
+import HomeGallery from '@/components/HomeGallery';
+import { prisma } from '@/lib/prisma';
 import { 
   ShoppingBag, 
   Sparkles, 
@@ -13,10 +16,23 @@ import {
   Layers, 
   PhoneCall, 
   MessageSquare,
-  Lock
+  Lock,
+  ChevronRight
 } from 'lucide-react';
 
-export default function HomePage() {
+export default async function HomePage() {
+  const [featuredProducts, galleryItems] = await Promise.all([
+    prisma.product.findMany({
+      where: { isActive: true },
+      include: { category: true },
+      orderBy: { createdAt: 'desc' },
+      take: 8,
+    }),
+    prisma.galleryItem.findMany({
+      where: { isActive: true },
+      orderBy: [{ sortOrder: 'asc' }, { createdAt: 'desc' }],
+    }),
+  ]);
   const categories = [
     { name: 'किचन केयर (Kitchen Care)', count: 'इलायची व अमृततुल्य चाय', icon: '🍃', desc: 'असम की चुनिंदा पत्तियाँ व प्राकृतिक इलायची' },
     { name: 'हेल्थ केयर (Health Care)', count: 'तुलसी ड्रॉप्स व बेरी जूस', icon: '🌿', desc: 'रोगमुक्त जीवन हेतु 100% प्राकृतिक सप्लीमेंट्स' },
@@ -182,6 +198,51 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Live Products Showcase Section (Direct from DB, No Login Required) */}
+      <section id="products" className="py-20 bg-[#f8f6f0] border-b border-[#e8e3d5]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-12">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#144732]/10 border border-[#144732]/20 text-[#144732] text-xs font-black tracking-wide uppercase mb-3">
+                <ShoppingBag className="w-3.5 h-3.5 text-[#d4a359]" />
+                लाइव प्रोडक्ट कैटलॉग (Live Products)
+              </div>
+              <h2 className="text-3xl sm:text-4xl font-black text-[#144732] tracking-tight">
+                लोकप्रिय उत्पाद एवं <span className="text-[#92580a]">एक्टिवेशन पैकेज</span>
+              </h2>
+              <p className="text-slate-600 text-sm font-medium mt-1">
+                एडमिन पैनल से लाइव अपडेटेड प्रोडक्ट्स — बिना लॉगिन किए भी सीधे कार्ट में जोड़ें व ऑर्डर करें।
+              </p>
+            </div>
+
+            <Link
+              href="/store"
+              className="px-6 py-3 rounded-2xl bg-[#144732] hover:bg-[#0b2b1e] text-[#fef08a] font-black text-xs shadow-md transition-all flex items-center gap-2 shrink-0 group"
+            >
+              <span>सभी उत्पाद स्टोर देखें (View Full Store)</span>
+              <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </div>
+
+          {featuredProducts.length === 0 ? (
+            <div className="p-12 text-center bg-white rounded-3xl border border-[#e8e3d5]">
+              <ShoppingBag className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+              <div className="text-sm font-bold text-slate-600">प्रोडक्ट्स लोड हो रहे हैं...</div>
+              <p className="text-xs text-slate-400 mt-1">एडमिन इन्वेंट्री डेस्क से नए प्रोडक्ट्स जोड़े जा सकते हैं।</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {featuredProducts.map((p) => (
+                <ProductCard key={p.id} product={p as any} />
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Photo Gallery Section (Updated from Admin Panel) */}
+      <HomeGallery items={galleryItems as any} />
 
       {/* Footer */}
       <footer className="bg-[#0b2b1e] text-white pt-14 pb-8 border-t-4 border-[#d4a359]">

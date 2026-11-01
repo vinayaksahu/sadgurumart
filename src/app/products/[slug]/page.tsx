@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ShoppingBag, ArrowLeft, ShieldCheck, Truck, RefreshCw, Sparkles } from 'lucide-react';
 import ProductDetailActions from './ProductDetailActions';
+import { formatGoogleDriveUrl } from '@/lib/imageUtils';
 
 interface ProductDetailPageProps {
   params: Promise<{ slug: string }>;
@@ -46,18 +47,26 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
         <div className="bg-white border border-[#e8e3d5] rounded-3xl p-6 sm:p-10 shadow-sm">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
             {/* Left: Product Showcase */}
-            <div className="lg:col-span-5 flex flex-col items-center justify-center p-8 bg-[#faf8f4] border border-[#e8e3d5] rounded-2xl relative aspect-square">
+            <div className="lg:col-span-5 flex flex-col items-center justify-center bg-[#faf8f4] border border-[#e8e3d5] rounded-2xl relative aspect-square overflow-hidden">
               {product.isActivation && (
                 <div className="absolute top-4 left-4 z-10 bg-[#144732] text-[#fef08a] text-xs font-black uppercase tracking-wider px-3 py-1 rounded-full shadow-sm">
                   ⭐ एक्टिवेशन पैकेज बंडल
                 </div>
               )}
-              <div className="w-40 h-40 rounded-full bg-[#144732]/10 border-4 border-[#d4a359]/30 flex items-center justify-center text-7xl">
-                {product.category?.slug === 'kitchen-care' ? '🍵' : 
-                 product.category?.slug === 'health-care' ? '🌿' : 
-                 product.category?.slug === 'personal-care' ? '✨' : 
-                 product.category?.slug === 'home-care' ? '🪔' : '📦'}
-              </div>
+              {product.images && product.images.length > 0 && product.images[0] ? (
+                <img 
+                  src={formatGoogleDriveUrl(product.images[0])} 
+                  alt={product.title} 
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-40 h-40 rounded-full bg-[#144732]/10 border-4 border-[#d4a359]/30 flex items-center justify-center text-7xl">
+                  {product.category?.slug === 'kitchen-care' ? '🍵' : 
+                   product.category?.slug === 'health-care' ? '🌿' : 
+                   product.category?.slug === 'personal-care' ? '✨' : 
+                   product.category?.slug === 'home-care' ? '🪔' : '📦'}
+                </div>
+              )}
             </div>
 
             {/* Right: Product Info & Purchase Actions */}

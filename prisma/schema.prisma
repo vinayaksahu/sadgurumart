@@ -449,3 +449,21 @@ model AdminAuditLog {
 
   @@map("admin_audit_logs")
 }
+
+// ==========================================
+// 12. GALLERY ITEMS (Photos & Company Events)
+// ==========================================
+model GalleryItem {
+  id          String   @id @default(uuid())
+  title       String
+  caption     String?
+  imageUrl    String
+  category    String   @default("EVENT") // EVENT, AWARD, PRODUCT, SEMINAR, OFFICE
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("gallery_items")
+}
+

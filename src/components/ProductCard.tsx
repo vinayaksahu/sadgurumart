@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { ShoppingBag, Check, Sparkles } from 'lucide-react';
 import { useCart } from '@/lib/cartContext';
+import { formatGoogleDriveUrl } from '@/lib/imageUtils';
 
 interface ProductCardProps {
   product: {
@@ -52,13 +53,22 @@ export default function ProductCard({ product }: ProductCardProps) {
 
       <div>
         {/* Product Image / Visual Showcase */}
-        <Link href={`/products/${product.slug}`} className="block overflow-hidden rounded-2xl mb-4 bg-[#faf8f4] relative aspect-square flex items-center justify-center p-4">
-          <div className="w-28 h-28 rounded-full bg-[#144732]/5 border-2 border-[#d4a359]/30 flex items-center justify-center text-4xl group-hover:scale-110 transition-transform duration-300">
-            {product.category?.slug === 'kitchen-care' ? '🍵' : 
-             product.category?.slug === 'health-care' ? '🌿' : 
-             product.category?.slug === 'personal-care' ? '✨' : 
-             product.category?.slug === 'home-care' ? '🪔' : '📦'}
-          </div>
+        <Link href={`/products/${product.slug}`} className="block overflow-hidden rounded-2xl mb-4 bg-[#faf8f4] relative aspect-square flex items-center justify-center border border-[#e8e3d5]">
+          {product.images && product.images.length > 0 && product.images[0] ? (
+            <img 
+              src={formatGoogleDriveUrl(product.images[0])} 
+              alt={product.title} 
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              loading="lazy"
+            />
+          ) : (
+            <div className="w-24 h-24 rounded-full bg-[#144732]/5 border-2 border-[#d4a359]/30 flex items-center justify-center text-4xl group-hover:scale-110 transition-transform duration-300">
+              {product.category?.slug === 'kitchen-care' ? '🍵' : 
+               product.category?.slug === 'health-care' ? '🌿' : 
+               product.category?.slug === 'personal-care' ? '✨' : 
+               product.category?.slug === 'home-care' ? '🪔' : '📦'}
+            </div>
+          )}
         </Link>
 
         {/* Category & Title */}

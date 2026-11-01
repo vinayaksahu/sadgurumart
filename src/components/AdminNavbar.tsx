@@ -13,7 +13,9 @@ import {
   X, 
   ShieldCheck, 
   ExternalLink,
-  Clock
+  Clock,
+  Package,
+  Image as ImageIcon
 } from 'lucide-react';
 
 interface AdminNavbarProps {
@@ -47,10 +49,12 @@ export default function AdminNavbar({
 
   const navLinks = [
     { label: 'Admin Dashboard (डैशबोर्ड)', href: isSuperAdmin ? '/superadmin/dashboard' : '/admin/dashboard', icon: Layers },
+    { label: 'Inventory Desk (इन्वेंट्री व उत्पाद)', href: '/admin/inventory', icon: Package },
+    { label: 'Photo Gallery (फोटो गैलरी)', href: '/admin/gallery', icon: ImageIcon },
     { label: 'KYC Verification (केवाईसी सत्यापन)', href: '/admin/kyc', icon: FileCheck },
     { label: 'Withdrawal Approvals (विड्रॉल अप्रूवल)', href: '/admin/withdrawals', icon: Wallet },
     { label: 'Genealogy Network (बाइनरी ट्री)', href: '/genealogy/binary', icon: Users },
-    { label: 'Store Products (उत्पाद स्टोर)', href: '/store', icon: ShoppingBag },
+    { label: 'Public Store (स्टोर व्यू)', href: '/store', icon: ShoppingBag },
     { label: 'Trigger Daily Closing (दैनिक क्लोजिंग)', href: '/api/cron/daily-closing', icon: Clock, external: true },
   ];
 
@@ -94,6 +98,18 @@ export default function AdminNavbar({
               className={`hover:underline transition-colors ${isSuperAdmin ? 'text-slate-200 hover:text-white' : 'text-slate-700 hover:text-[#144732]'}`}
             >
               Dashboard
+            </Link>
+            <Link 
+              href="/admin/inventory" 
+              className={`hover:underline transition-colors ${isSuperAdmin ? 'text-slate-200 hover:text-white' : 'text-slate-700 hover:text-[#144732]'}`}
+            >
+              Inventory
+            </Link>
+            <Link 
+              href="/admin/gallery" 
+              className={`hover:underline transition-colors ${isSuperAdmin ? 'text-slate-200 hover:text-white' : 'text-slate-700 hover:text-[#144732]'}`}
+            >
+              Gallery
             </Link>
             <Link 
               href="/admin/kyc" 

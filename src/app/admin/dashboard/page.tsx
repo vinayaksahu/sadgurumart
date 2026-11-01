@@ -111,37 +111,69 @@ export default async function AdminDashboardPage() {
         </div>
 
         {/* Action Desks Navigation Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Link
+            href="/admin/inventory"
+            className="p-6 rounded-3xl bg-white border border-[#e8e3d5] hover:border-[#144732] shadow-sm hover:shadow-md transition-all flex items-center justify-between group"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-[#eaf5ed] text-[#144732] flex items-center justify-center shrink-0">
+                <Package className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="font-black text-sm text-[#144732]">इन्वेंट्री व उत्पाद</h3>
+                <p className="text-[11px] text-slate-500 mt-0.5">फोटो URL, DP, PV व स्टॉक अपडेट</p>
+              </div>
+            </div>
+            <ArrowRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
+          </Link>
+
+          <Link
+            href="/admin/gallery"
+            className="p-6 rounded-3xl bg-white border border-[#e8e3d5] hover:border-[#92580a] shadow-sm hover:shadow-md transition-all flex items-center justify-between group"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-amber-50 text-[#92580a] flex items-center justify-center shrink-0">
+                <ShoppingBag className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="font-black text-sm text-[#92580a]">कंपनी फोटो गैलरी</h3>
+                <p className="text-[11px] text-slate-500 mt-0.5">सेमिनार, अवार्ड्स व इवेंट फोटोज</p>
+              </div>
+            </div>
+            <ArrowRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
+          </Link>
+
           <Link
             href="/admin/kyc"
-            className="p-6 rounded-3xl bg-white border border-[#e8e3d5] hover:border-[#144732] shadow-sm hover:shadow-md transition-all flex items-center justify-between"
+            className="p-6 rounded-3xl bg-white border border-[#e8e3d5] hover:border-[#144732] shadow-sm hover:shadow-md transition-all flex items-center justify-between group"
           >
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-[#eaf5ed] text-[#144732] flex items-center justify-center">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-[#eaf5ed] text-[#144732] flex items-center justify-center shrink-0">
                 <FileCheck className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="font-black text-base text-[#144732]">KYC Verification Desk</h3>
-                <p className="text-xs text-slate-500 mt-0.5">पैन कार्ड व बैंक खाता सत्यापन और अनुमोदन</p>
+                <h3 className="font-black text-sm text-[#144732]">KYC Verification</h3>
+                <p className="text-[11px] text-slate-500 mt-0.5">पैन व बैंक खाता अनुमोदन</p>
               </div>
             </div>
-            <ArrowRight className="w-5 h-5 text-slate-400" />
+            <ArrowRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
           </Link>
 
           <Link
             href="/admin/withdrawals"
-            className="p-6 rounded-3xl bg-white border border-[#e8e3d5] hover:border-emerald-600 shadow-sm hover:shadow-md transition-all flex items-center justify-between"
+            className="p-6 rounded-3xl bg-white border border-[#e8e3d5] hover:border-emerald-600 shadow-sm hover:shadow-md transition-all flex items-center justify-between group"
           >
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
                 <Building className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="font-black text-base text-emerald-800">Weekly Payout Settlements Desk</h3>
-                <p className="text-xs text-slate-500 mt-0.5">बैंक ट्रांसफर UTR प्रविष्टि एवं 5% + 5% कटौती समाधान</p>
+                <h3 className="font-black text-sm text-emerald-800">Payout Settlements</h3>
+                <p className="text-[11px] text-slate-500 mt-0.5">बैंक ट्रांसफर UTR प्रविष्टि</p>
               </div>
             </div>
-            <ArrowRight className="w-5 h-5 text-slate-400" />
+            <ArrowRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
 
