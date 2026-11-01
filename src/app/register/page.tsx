@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { UserPlus, ArrowRight, Check, AlertCircle, Sparkles } from 'lucide-react';
+import { UserPlus, ArrowRight, Check, AlertCircle, Sparkles, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 
 export default function RegisterPage() {
@@ -11,6 +11,7 @@ export default function RegisterPage() {
     name: '',
     mobile: '',
     email: '',
+    pan: '',
     password: '',
   });
 
@@ -20,7 +21,12 @@ export default function RegisterPage() {
   const [success, setSuccess] = useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    if (name === 'pan') {
+      setFormData({ ...formData, [name]: value.toUpperCase() });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -176,6 +182,27 @@ export default function RegisterPage() {
                 </div>
               </div>
 
+              {/* PAN Card Number */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                    PAN Card Number (पैन कार्ड नंबर)
+                  </label>
+                  <span className="text-[11px] font-semibold text-[#92580a]">
+                    वैकल्पिक (Optional)
+                  </span>
+                </div>
+                <input
+                  type="text"
+                  name="pan"
+                  maxLength={10}
+                  value={formData.pan}
+                  onChange={handleChange}
+                  placeholder="ABCDE1234F"
+                  className="w-full bg-[#fdfaf3] border border-[#d8d0bf] focus:border-[#144732] rounded-xl px-4 py-2.5 text-sm font-mono font-bold text-slate-900 uppercase focus:outline-none focus:ring-1 focus:ring-[#144732]"
+                />
+              </div>
+
               {/* Password */}
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
@@ -191,6 +218,14 @@ export default function RegisterPage() {
                   minLength={6}
                   className="w-full bg-[#fdfaf3] border border-[#d8d0bf] focus:border-[#144732] rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#144732]"
                 />
+              </div>
+
+              {/* Policy note: 1 Email, 1 Mobile, 1 PAN = Max 3 IDs */}
+              <div className="p-3 bg-[#eaf5ed] border border-[#144732]/20 rounded-xl text-[11px] text-[#144732] flex items-start gap-2.5">
+                <ShieldCheck className="w-4 h-4 flex-shrink-0 text-[#144732] mt-0.5" />
+                <div className="leading-relaxed">
+                  <span className="font-bold text-[#144732]">आईडी रजिस्ट्रेशन नियम:</span> 1 ईमेल आईडी, 1 मोबाइल नंबर और 1 पैन कार्ड से अधिकतम <strong>3 आईडी (Tri-pod ID)</strong> का रजिस्ट्रेशन अनुमत है।
+                </div>
               </div>
 
               <div className="pt-2">

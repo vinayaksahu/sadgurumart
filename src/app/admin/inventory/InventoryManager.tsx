@@ -17,6 +17,7 @@ import {
   X
 } from 'lucide-react';
 import { formatGoogleDriveUrl } from '@/lib/imageUtils';
+import ImageUploader from '@/components/ImageUploader';
 
 interface Category {
   id: string;
@@ -198,7 +199,7 @@ export default function InventoryManager({ initialProducts, categories }: Invent
             इन्वेंट्री व प्रोडक्ट मैनेजमेंट (Inventory Desk)
           </h1>
           <p className="text-xs text-slate-500 mt-1">
-            Google Drive फोटो लिंक, DP प्राइस, PV/BV व स्टॉक अपडेट करें — यह मेम्बर व होमपेज पर तुरंत लाइव होगा।
+            मोबाइल गैलरी से फोटो अपलोड करें या Google Drive लिंक, DP प्राइस, PV/BV व स्टॉक अपडेट करें — यह मेम्बर व होमपेज पर तुरंत लाइव होगा।
           </p>
         </div>
 
@@ -455,40 +456,12 @@ export default function InventoryManager({ initialProducts, categories }: Invent
                 </div>
               </div>
 
-              {/* Google Drive Image Link Input with Instant Preview */}
-              <div className="bg-[#faf8f4] border border-[#d4a359]/30 rounded-2xl p-4 space-y-3">
-                <label className="block text-xs font-black text-[#144732]">
-                  📸 प्रोडक्ट फोटो लिंक (Google Drive / Web URL)
-                </label>
-                <input
-                  type="url"
-                  placeholder="https://drive.google.com/file/d/1A2B3C.../view?usp=sharing"
-                  value={imageUrl}
-                  onChange={(e) => setImageUrl(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-xs font-mono focus:outline-none focus:border-[#144732]"
-                />
-                <p className="text-[11px] text-slate-500">
-                  💡 <strong>Google Drive टिप:</strong> गूगल ड्राइव में फोटो पर Right Click करके <em>"Anyone with the link can view"</em> सेट करें और लिंक यहाँ पेस्ट करें। सिस्टम अपने आप फोटो को प्रोसेस कर देगा।
-                </p>
-
-                {previewFormattedUrl && (
-                  <div className="pt-2 flex items-center gap-3">
-                    <div className="w-16 h-16 rounded-xl bg-white border border-slate-200 overflow-hidden shrink-0 shadow-sm">
-                      <img 
-                        src={previewFormattedUrl} 
-                        alt="Preview" 
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          (e.target as any).src = '/sgm_logo.png';
-                        }}
-                      />
-                    </div>
-                    <div className="text-[11px] text-emerald-700 font-bold">
-                      ✓ फोटो लिंक पहचानी गई (लाइव प्रिव्यू तैयार)
-                    </div>
-                  </div>
-                )}
-              </div>
+              {/* Image Uploader: Mobile Gallery / Camera + Google Drive */}
+              <ImageUploader
+                value={imageUrl}
+                onChange={setImageUrl}
+                label="प्रोडक्ट फोटो (Phone Gallery / Google Drive)"
+              />
 
               {/* Pricing, PV & BV */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

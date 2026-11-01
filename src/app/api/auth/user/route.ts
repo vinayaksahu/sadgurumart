@@ -5,7 +5,7 @@ import { signUserToken } from '@/lib/auth/jwt';
 
 export async function POST(req: NextRequest) {
   try {
-    const { identifier, password } = await req.json(); // identifier can be userCode or mobile
+    const { identifier, password } = await req.json(); // identifier can be userCode, mobile, or email
 
     if (!identifier || !password) {
       return NextResponse.json(
@@ -14,31 +14,80 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const user = await prisma.user.findFirst({
+    const cleanId = identifier.trim();
+
+    // 1. Try finding by unique userCode first (e.g. SGM10001)
+    let user = await prisma.user.findFirst({
       where: {
-        OR: [
-          { userCode: identifier.trim().toUpperCase() },
-          { mobile: identifier.trim() },
-        ],
+        userCode: cleanId.toUpperCase(),
       },
       include: {
         wallet: true,
       },
     });
 
-    if (!user) {
-      return NextResponse.json(
-        { error: 'Invalid Member ID / Mobile or Password' },
-        { status: 401 }
-      );
-    }
+    if (user) {
+      const isValid = await bcrypt.compare(password, user.passwordHash);
+      if (!isValid) {
+        return NextResponse.json(
+          { error: 'Invalid Member ID / Mobile or Password' },
+          { status: 401 }
+        );
+      }
+    } else {
+      // 2. Try finding by mobile or email (where multiple IDs up to 3 may exist)
+      const matchingUsers = await prisma.user.findMany({
+        where: {
+          OR: [
+            { mobile: cleanId },
+            { email: cleanId.toLowerCase() },
+          ],
+        },
+        include: {
+          wallet: true,
+        },
+      });
 
-    const isValid = await bcrypt.compare(password, user.passwordHash);
-    if (!isValid) {
-      return NextResponse.json(
-        { error: 'Invalid Member ID / Mobile or Password' },
-        { status: 401 }
-      );
+      if (!matchingUsers || matchingUsers.length === 0) {
+        return NextResponse.json(
+          { error: 'Invalid Member ID / Mobile or Password' },
+          { status: 401 }
+        );
+      }
+
+      // Check which account matches the provided password
+      const passwordMatches: typeof matchingUsers = [];
+      for (const candidate of matchingUsers) {
+        const matches = await bcrypt.compare(password, candidate.passwordHash);
+        if (matches) {
+          passwordMatches.push(candidate);
+        }
+      }
+
+      if (passwordMatches.length === 0) {
+        return NextResponse.json(
+          { error: 'Invalid Member ID / Mobile or Password' },
+          { status: 401 }
+        );
+      }
+
+      if (passwordMatches.length === 1) {
+        user = passwordMatches[0];
+      } else {
+        // Multiple IDs with same password linked to this mobile/email
+        return NextResponse.json(
+          {
+            error: 'आपके मोबाइल/ईमेल से कई आईडी लिंक हैं। कृपया अपनी मेम्बर आईडी दर्ज करके लॉगिन करें।',
+            multipleAccounts: true,
+            accounts: passwordMatches.map((u) => ({
+              userCode: u.userCode,
+              name: u.name,
+              rank: u.rank,
+            })),
+          },
+          { status: 400 }
+        );
+      }
     }
 
     const token = signUserToken({

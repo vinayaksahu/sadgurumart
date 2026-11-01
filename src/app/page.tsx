@@ -4,6 +4,9 @@ import Navbar from '@/components/Navbar';
 import ProductCard from '@/components/ProductCard';
 import HomeGallery from '@/components/HomeGallery';
 import { prisma } from '@/lib/prisma';
+import { getSystemSettings } from '@/lib/settings';
+import AdminNoticeBanner from '@/components/AdminNoticeBanner';
+import AdminPopupModal from '@/components/AdminPopupModal';
 import { 
   ShoppingBag, 
   Sparkles, 
@@ -20,19 +23,33 @@ import {
   ChevronRight
 } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+
 export default async function HomePage() {
-  const [featuredProducts, galleryItems] = await Promise.all([
-    prisma.product.findMany({
-      where: { isActive: true },
-      include: { category: true },
-      orderBy: { createdAt: 'desc' },
-      take: 8,
-    }),
-    prisma.galleryItem.findMany({
-      where: { isActive: true },
-      orderBy: [{ sortOrder: 'asc' }, { createdAt: 'desc' }],
-    }),
-  ]);
+  let featuredProducts: any[] = [];
+  let galleryItems: any[] = [];
+  let settings: any = null;
+
+  try {
+    const [prods, gallery, stngs] = await Promise.all([
+      prisma.product.findMany({
+        where: { isActive: true },
+        include: { category: true },
+        orderBy: { createdAt: 'desc' },
+        take: 8,
+      }),
+      prisma.galleryItem.findMany({
+        where: { isActive: true },
+        orderBy: [{ sortOrder: 'asc' }, { createdAt: 'desc' }],
+      }),
+      getSystemSettings(),
+    ]);
+    featuredProducts = prods;
+    galleryItems = gallery;
+    settings = stngs;
+  } catch (err) {
+    console.error('HomePage data fetch error:', err);
+  }
   const categories = [
     { name: 'किचन केयर (Kitchen Care)', count: 'इलायची व अमृततुल्य चाय', icon: '🍃', desc: 'असम की चुनिंदा पत्तियाँ व प्राकृतिक इलायची' },
     { name: 'हेल्थ केयर (Health Care)', count: 'तुलसी ड्रॉप्स व बेरी जूस', icon: '🌿', desc: 'रोगमुक्त जीवन हेतु 100% प्राकृतिक सप्लीमेंट्स' },
@@ -55,6 +72,32 @@ export default async function HomePage() {
   return (
     <div className="min-h-screen bg-[#f8f6f0] text-[#1f2937] font-sans flex flex-col selection:bg-[#d4a359] selection:text-[#0b2b1e]">
       <Navbar />
+
+      {/* Admin Broadcast Notice (If enabled) */}
+      {settings.noticeEnabled && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 w-full">
+          <AdminNoticeBanner
+            enabled={settings.noticeEnabled}
+            type={settings.noticeType}
+            title={settings.noticeTitle}
+            text={settings.noticeText}
+            link={settings.noticeLink}
+          />
+        </div>
+      )}
+
+      {/* Global Screen Popup Modal (If enabled for ALL or GUESTS) */}
+      {settings.popupEnabled && (settings.popupTarget === 'ALL' || settings.popupTarget === 'GUESTS') && (
+        <AdminPopupModal
+          enabled={settings.popupEnabled}
+          title={settings.popupTitle}
+          content={settings.popupContent}
+          imageUrl={settings.popupImageUrl}
+          buttonText={settings.popupButtonText}
+          buttonLink={settings.popupButtonLink}
+          updatedAt={settings.updatedAt}
+        />
+      )}
 
       {/* Hero Section */}
       <section className="relative pt-12 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden">

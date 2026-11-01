@@ -3,10 +3,19 @@ import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import { findSpilloverPlacement } from '@/lib/mlm/binaryEngine';
 import { placeInAutoPool } from '@/lib/mlm/autoPoolEngine';
+import { getSystemSettings } from '@/lib/settings';
 
 export async function POST(req: NextRequest) {
   try {
-    const { sponsorId, placementPosition, name, mobile, email, password } = await req.json();
+    const settings = await getSystemSettings();
+    if (!settings.registrationEnabled) {
+      return NextResponse.json(
+        { error: 'नया पंजीकरण वर्तमान में अस्थायी रूप से बंद है (New registration temporarily paused by Admin).' },
+        { status: 403 }
+      );
+    }
+
+    const { sponsorId, placementPosition, name, mobile, email, pan, password } = await req.json();
 
     if (!sponsorId || !name || !mobile || !password) {
       return NextResponse.json(
@@ -32,21 +41,63 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Check if mobile already registered
-    const existing = await prisma.user.findFirst({
-      where: {
-        OR: [
-          { mobile: mobile.trim() },
-          ...(email ? [{ email: email.trim() }] : []),
-        ],
-      },
-    });
-
-    if (existing) {
+    // 1. Mobile Check - Exactly 10 digits & Max 3 IDs allowed per phone number
+    const cleanMobile = mobile.trim();
+    if (!/^\d{10}$/.test(cleanMobile)) {
       return NextResponse.json(
-        { error: 'Mobile number or Email is already registered with SGM Mart' },
+        { error: 'कृपया मान्य 10 अंकों का मोबाइल नंबर दर्ज करें (Invalid 10-digit mobile number)' },
         { status: 400 }
       );
+    }
+
+    const mobileCount = await prisma.user.count({
+      where: { mobile: cleanMobile },
+    });
+
+    if (mobileCount >= 3) {
+      return NextResponse.json(
+        { error: `इस मोबाइल नंबर (${cleanMobile}) से अधिकतम 3 आईडी की अनुमति है। यह सीमा पूरी हो चुकी है। (Maximum 3 IDs allowed per Mobile number)` },
+        { status: 400 }
+      );
+    }
+
+    // 2. Email Check - Max 3 IDs allowed per email ID
+    const cleanEmail = email && typeof email === 'string' && email.trim() ? email.trim().toLowerCase() : null;
+    if (cleanEmail) {
+      const emailCount = await prisma.user.count({
+        where: { email: cleanEmail },
+      });
+
+      if (emailCount >= 3) {
+        return NextResponse.json(
+          { error: `इस ईमेल आईडी (${cleanEmail}) से अधिकतम 3 आईडी की अनुमति है। यह सीमा पूरी हो चुकी है। (Maximum 3 IDs allowed per Email ID)` },
+          { status: 400 }
+        );
+      }
+    }
+
+    // 3. PAN Check - Max 3 IDs allowed per PAN card (if provided during registration)
+    const cleanPAN = pan && typeof pan === 'string' && pan.trim() ? pan.trim().toUpperCase() : null;
+    if (cleanPAN) {
+      if (!/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(cleanPAN)) {
+        return NextResponse.json(
+          { error: 'अमान्य पैन कार्ड नंबर (Invalid PAN format, e.g. ABCDE1234F)' },
+          { status: 400 }
+        );
+      }
+
+      const [panUserCount, panKycCount] = await Promise.all([
+        prisma.user.count({ where: { pan: cleanPAN } }),
+        prisma.kYCDetail.count({ where: { panNumber: cleanPAN } }),
+      ]);
+      const panCount = Math.max(panUserCount, panKycCount);
+
+      if (panCount >= 3) {
+        return NextResponse.json(
+          { error: `इस पैन कार्ड (${cleanPAN}) से अधिकतम 3 आईडी की अनुमति है। यह सीमा पूरी हो चुकी है। (Maximum 3 IDs allowed per PAN Card)` },
+          { status: 400 }
+        );
+      }
     }
 
     // Determine Binary Placement Parent (with automatic spillover)
@@ -64,8 +115,9 @@ export async function POST(req: NextRequest) {
       data: {
         userCode: nextCode,
         name: name.trim(),
-        mobile: mobile.trim(),
-        email: email ? email.trim() : null,
+        mobile: cleanMobile,
+        email: cleanEmail,
+        pan: cleanPAN,
         passwordHash,
         sponsorId: sponsor.id,
         placementParentId: placement.parentId,

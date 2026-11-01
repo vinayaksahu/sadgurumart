@@ -12,6 +12,7 @@ import {
   Tag
 } from 'lucide-react';
 import { formatGoogleDriveUrl } from '@/lib/imageUtils';
+import ImageUploader from '@/components/ImageUploader';
 
 interface GalleryItem {
   id: string;
@@ -103,7 +104,7 @@ export default function GalleryManager({ initialItems }: GalleryManagerProps) {
             कंपनी फोटो गैलरी (Gallery Desk)
           </h1>
           <p className="text-xs text-slate-500 mt-1">
-            Google Drive फोटो लिंक डालकर सेमिनार, लीडरशिप अवार्ड्स व प्रोडक्ट्स की फोटो अपलोड करें — यह सीधे होमपेज गैलरी में दिखेगी।
+            मोबाइल गैलरी से फोटो अपलोड करें या Google Drive लिंक डालकर सेमिनार, लीडरशिप अवार्ड्स व प्रोडक्ट्स की फोटो जोड़ें — यह सीधे होमपेज गैलरी में दिखेगी।
           </p>
         </div>
 
@@ -209,7 +210,7 @@ export default function GalleryManager({ initialItems }: GalleryManagerProps) {
                   गैलरी में फोटो जोड़ें
                 </h3>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  Google Drive शेयर लिंक पेस्ट करें — यह तुरंत होमपेज पर दिखेगी।
+                  मोबाइल गैलरी से फोटो चुनें या Google Drive शेयर लिंक पेस्ट करें।
                 </p>
               </div>
               <button
@@ -265,41 +266,13 @@ export default function GalleryManager({ initialItems }: GalleryManagerProps) {
                 </div>
               </div>
 
-              {/* Google Drive Link with Live Preview */}
-              <div className="bg-[#faf8f4] border border-[#d4a359]/30 rounded-2xl p-4 space-y-3">
-                <label className="block text-xs font-black text-[#144732]">
-                  📸 फोटो लिंक (Google Drive / Web URL) *
-                </label>
-                <input
-                  type="url"
-                  required
-                  placeholder="https://drive.google.com/file/d/1A2B3C.../view?usp=sharing"
-                  value={imageUrl}
-                  onChange={(e) => setImageUrl(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-xs font-mono focus:outline-none focus:border-[#144732]"
-                />
-                <p className="text-[11px] text-slate-500">
-                  💡 <strong>Google Drive टिप:</strong> फोटो पर "Share" &rarr; "Anyone with link can view" ऑन करें और लिंक पेस्ट करें।
-                </p>
-
-                {previewFormattedUrl && (
-                  <div className="pt-2 flex items-center gap-3">
-                    <div className="w-20 h-14 rounded-xl bg-white border border-slate-200 overflow-hidden shrink-0 shadow-sm">
-                      <img 
-                        src={previewFormattedUrl} 
-                        alt="Preview" 
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          (e.target as any).src = '/sgm_logo.png';
-                        }}
-                      />
-                    </div>
-                    <div className="text-[11px] text-emerald-700 font-bold">
-                      ✓ फोटो लिंक पहचानी गई (लाइव प्रिव्यू)
-                    </div>
-                  </div>
-                )}
-              </div>
+              {/* Image Uploader: Mobile Gallery / Camera + Google Drive */}
+              <ImageUploader
+                value={imageUrl}
+                onChange={setImageUrl}
+                label="गैलरी फोटो (Phone Gallery / Google Drive)"
+                required
+              />
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">

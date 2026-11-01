@@ -14,7 +14,8 @@ import {
   Layers, 
   LogOut, 
   Activity,
-  UserCheck
+  UserCheck,
+  Sliders
 } from 'lucide-react';
 
 export default async function SuperAdminDashboardPage() {
@@ -114,6 +115,30 @@ export default async function SuperAdminDashboardPage() {
               Separate system_masters entity
             </div>
           </div>
+        </div>
+
+        {/* Root Settings Shortcut */}
+        <div className="bg-[#0b2b1e]/90 border-2 border-[#d4a359] rounded-3xl p-6 shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="space-y-1.5">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#144732] text-[#fef08a] text-[10px] font-mono uppercase tracking-wider border border-[#d4a359]/30">
+              <Sliders className="w-3.5 h-3.5 text-[#d4a359]" />
+              <span>CORE SYSTEM GOVERNANCE</span>
+            </div>
+            <h3 className="text-xl font-black text-white">
+              System Settings, Plan Modifiers, Database Backup & Announcements
+            </h3>
+            <p className="text-xs text-slate-300 max-w-2xl leading-relaxed">
+              Modify MLM percentages, daily capping, trigger 1-click full JSON & CSV backups, and post broadcast notices and modal popups.
+            </p>
+          </div>
+
+          <Link
+            href="/admin/settings"
+            className="w-full md:w-auto flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-[#d4a359] hover:bg-[#bc853c] text-[#0b2b1e] font-black text-xs shadow-xl transition-all hover:scale-105 active:scale-95 shrink-0"
+          >
+            <Sliders className="w-4 h-4" />
+            <span>Open System Settings →</span>
+          </Link>
         </div>
 
         {/* Staff Admins Management by Superadmin */}

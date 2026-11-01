@@ -71,7 +71,7 @@ export default async function KYCPage() {
 
         {/* Form Container */}
         <div className="bg-white border border-[#e8e3d5] rounded-3xl p-6 sm:p-10 shadow-sm space-y-6">
-          <KYCForm initialData={kyc} />
+          <KYCForm initialData={kyc ? kyc : (user.pan ? { panNumber: user.pan } : undefined)} />
         </div>
       </main>
     </div>

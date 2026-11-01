@@ -12,6 +12,8 @@ interface StorePageProps {
   }>;
 }
 
+export const dynamic = 'force-dynamic';
+
 export default async function StorePage({ searchParams }: StorePageProps) {
   const { category, search } = await searchParams;
 
@@ -26,19 +28,27 @@ export default async function StorePage({ searchParams }: StorePageProps) {
     ];
   }
 
-  const [products, categories] = await Promise.all([
-    prisma.product.findMany({
-      where,
-      include: { category: true },
-      orderBy: { createdAt: 'desc' },
-    }),
-    prisma.category.findMany({
-      include: {
-        _count: { select: { products: true } },
-      },
-      orderBy: { name: 'asc' },
-    }),
-  ]);
+  let products: any[] = [];
+  let categories: any[] = [];
+  try {
+    const [pList, cList] = await Promise.all([
+      prisma.product.findMany({
+        where,
+        include: { category: true },
+        orderBy: { createdAt: 'desc' },
+      }),
+      prisma.category.findMany({
+        include: {
+          _count: { select: { products: true } },
+        },
+        orderBy: { name: 'asc' },
+      }),
+    ]);
+    products = pList;
+    categories = cList;
+  } catch (err) {
+    console.error('StorePage data fetch error:', err);
+  }
 
   return (
     <div className="min-h-screen bg-[#f8f6f0] text-[#1f2937] font-sans flex flex-col">

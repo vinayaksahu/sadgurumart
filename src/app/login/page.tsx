@@ -11,6 +11,7 @@ export default function UserLoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [matchedAccounts, setMatchedAccounts] = useState<Array<{ userCode: string; name: string; rank?: string }>>([]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,9 +27,13 @@ export default function UserLoginPage() {
 
       const data = await res.json();
       if (!res.ok) {
+        if (data.multipleAccounts && data.accounts) {
+          setMatchedAccounts(data.accounts);
+        }
         throw new Error(data.error || 'Login failed');
       }
 
+      setMatchedAccounts([]);
       setSuccess(true);
       setTimeout(() => {
         window.location.href = '/dashboard';
@@ -66,6 +71,36 @@ export default function UserLoginPage() {
             </div>
           )}
 
+          {matchedAccounts.length > 0 && (
+            <div className="mb-6 p-4 rounded-2xl bg-amber-50 border border-amber-300">
+              <div className="text-xs font-bold text-amber-900 mb-2">
+                इस मोबाइल/ईमेल से {matchedAccounts.length} आईडी लिंक हैं। लॉगिन करने के लिए आईडी चुनें:
+              </div>
+              <div className="space-y-2">
+                {matchedAccounts.map((acc) => (
+                  <button
+                    key={acc.userCode}
+                    type="button"
+                    onClick={() => {
+                      setIdentifier(acc.userCode);
+                      setMatchedAccounts([]);
+                      setError('');
+                    }}
+                    className="w-full text-left p-2.5 rounded-xl bg-white border border-amber-300 hover:border-[#144732] hover:bg-emerald-50 transition-all flex items-center justify-between cursor-pointer"
+                  >
+                    <div>
+                      <div className="text-xs font-black font-mono text-[#144732]">{acc.userCode}</div>
+                      <div className="text-[11px] text-slate-600">{acc.name}</div>
+                    </div>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-800">
+                      Login With This ID →
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {success && (
             <div className="mb-6 p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold text-center flex items-center justify-center gap-2">
               <Sparkles className="w-4 h-4 text-emerald-600" />
@@ -99,7 +134,7 @@ export default function UserLoginPage() {
                   href="/forgot-password"
                   className="text-xs font-semibold text-[#144732] hover:underline"
                 >
-                  Forgot?
+                  Forgot Password?
                 </Link>
               </div>
               <div className="relative">
@@ -107,14 +142,14 @@ export default function UserLoginPage() {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your member password"
+                  placeholder="Enter your password"
                   required
-                  className="w-full bg-[#fdfaf3] border border-[#d8d0bf] focus:border-[#144732] rounded-xl pl-4 pr-11 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-[#144732] transition-all"
+                  className="w-full bg-[#fdfaf3] border border-[#d8d0bf] focus:border-[#144732] rounded-xl px-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-[#144732] transition-all"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -123,39 +158,35 @@ export default function UserLoginPage() {
 
             <button
               type="submit"
-              disabled={loading || success}
-              className="w-full mt-2 bg-gradient-to-r from-[#144732] to-[#0b2b1e] hover:opacity-95 text-white font-bold py-3.5 px-4 rounded-xl text-sm transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-[#144732]/25 disabled:opacity-50 cursor-pointer"
+              disabled={loading}
+              className="w-full bg-gradient-to-r from-[#144732] to-[#0b2b1e] hover:opacity-95 text-white font-black py-3.5 px-4 rounded-xl text-sm transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-[#144732]/25 cursor-pointer disabled:opacity-50"
             >
               {loading ? (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
               ) : (
                 <>
-                  <span>LOGIN TO MY ACCOUNT</span>
+                  <span>SIGN IN TO DASHBOARD</span>
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
             </button>
           </form>
 
-          <div className="mt-8 pt-6 border-t border-slate-100 text-center space-y-3">
+          <div className="mt-8 pt-6 border-t border-slate-100 flex flex-col gap-3 text-center">
             <p className="text-xs text-slate-600">
-              New to SGM Mart?{' '}
-              <Link
-                href="/register"
-                className="font-bold text-[#144732] hover:underline"
-              >
-                Join as Distributor (रजिस्टर करें)
+              Don&apos;t have an SGM Mart ID yet?{' '}
+              <Link href="/register" className="font-bold text-[#144732] hover:underline">
+                Register Free here
               </Link>
             </p>
-
-            <div className="flex items-center justify-center gap-4 text-[11px] text-slate-500 pt-2">
-              <Link href="/" className="hover:text-[#144732] flex items-center gap-1">
+            <div className="flex items-center justify-center gap-4 text-xs font-semibold text-slate-500 pt-2">
+              <Link href="/store" className="hover:text-[#144732] flex items-center gap-1">
                 <ShoppingBag className="w-3.5 h-3.5" />
-                <span>Visit Store</span>
+                Shop Products
               </Link>
               <span>•</span>
               <Link href="/adminlogin" className="hover:text-[#144732]">
-                Staff Portal
+                Admin Desk
               </Link>
             </div>
           </div>

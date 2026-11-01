@@ -101,8 +101,9 @@ model User {
   id                  String           @id @default(uuid())
   userCode            String           @unique // e.g. SGM10001
   name                String
-  email               String?          @unique
-  mobile              String           @unique
+  email               String?
+  mobile              String
+  pan                 String?
   passwordHash        String
   
   // Binary & Sponsor Relationships
@@ -142,6 +143,9 @@ model User {
   @@index([sponsorId])
   @@index([placementParentId])
   @@index([userCode])
+  @@index([mobile])
+  @@index([email])
+  @@index([pan])
   @@map("users")
 }
 
@@ -153,9 +157,9 @@ model KYCDetail {
   userId              String     @unique
   user                User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   
-  panNumber           String     @unique
+  panNumber           String
   panPhotoUrl         String?
-  aadhaarNumber       String     @unique
+  aadhaarNumber       String
   aadhaarFrontUrl     String?
   aadhaarBackUrl      String?
 
@@ -175,6 +179,8 @@ model KYCDetail {
   createdAt           DateTime   @default(now())
   updatedAt           DateTime   @updatedAt
 
+  @@index([panNumber])
+  @@index([aadhaarNumber])
   @@map("kyc_details")
 }
 
@@ -479,4 +485,59 @@ model GalleryItem {
 
   @@map("gallery_items")
 }
+
+// ==========================================
+// 13. SYSTEM SETTINGS & PLAN CONFIGURATION
+// ==========================================
+model SystemSetting {
+  id                      String   @id @default("default_setting")
+
+  // MLM Plan Configuration
+  planName                String   @default("SGM Mart 16-Income Plan")
+  minActivationPV         Float    @default(100)
+  directSponsorBonus      Float    @default(50)
+  binaryMatchingPercent   Float    @default(10)
+  dailyMatchingCappingPV  Float    @default(2500)
+  adminChargePercent      Float    @default(5)
+  tdsPercent              Float    @default(5)
+  minWithdrawalAmount     Float    @default(100)
+  p2pTransferFeePercent   Float    @default(0)
+  rechargeCashbackPercent Float    @default(2.5)
+  leadershipCTOPercent    Float    @default(5)
+  companyCTOPercent       Float    @default(5)
+  autoPoolEnabled         Boolean  @default(true)
+
+  // Admin Notice & Ticker Announcement
+  noticeEnabled           Boolean  @default(true)
+  noticeType              String   @default("INFO") // INFO, WARNING, SUCCESS, DANGER
+  noticeTitle             String   @default("महत्वपूर्ण सूचना (Important Announcement)")
+  noticeText              String   @default("SGM Mart परिवार में आपका स्वागत है! सभी सदस्य अपनी KYC समय पर पूर्ण कर लें एवं वीकली पेआउट प्राप्त करें।")
+  noticeLink              String?  @default("")
+
+  // Global Popup Modal
+  popupEnabled            Boolean  @default(false)
+  popupTitle              String   @default("विशेष सूचना एवं बंपर ऑफर")
+  popupContent            String   @default("SGM Mart में बंपर ऑफर! नए सदस्यों को डायरेक्ट रेफरल पर विशेष उपहार एवं 16 प्रकार की महा इनकम का लाभ तुरंत उठाएं।")
+  popupImageUrl           String?  @default("")
+  popupButtonText         String   @default("अभी देखें (Explore Now)")
+  popupButtonLink         String   @default("/store")
+  popupTarget             String   @default("ALL") // ALL, MEMBERS, GUESTS
+
+  // General Portal & Operations
+  companyName             String   @default("SGM Mart Online Service Pvt. Ltd.")
+  supportPhone            String   @default("+91 9876543210")
+  supportEmail            String   @default("support@sgmmart.com")
+  supportWhatsApp         String   @default("+91 9876543210")
+  supportAddress          String   @default("Corporate Office, Business Park, India")
+  registrationEnabled     Boolean  @default(true)
+  withdrawalsEnabled      Boolean  @default(true)
+  maintenanceMode         Boolean  @default(false)
+  maintenanceMessage      String?  @default("पोर्टल में आवश्यक तकनीकी सुधार कार्य प्रगति पर है। कृपया कुछ समय बाद पुनः प्रयास करें।")
+
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  @@map("system_settings")
+}
+
 

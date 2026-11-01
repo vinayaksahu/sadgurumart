@@ -23,6 +23,9 @@ import {
   ArrowLeftRight
 } from 'lucide-react';
 import DashboardCopyBox from './DashboardCopyBox';
+import { getSystemSettings } from '@/lib/settings';
+import AdminNoticeBanner from '@/components/AdminNoticeBanner';
+import AdminPopupModal from '@/components/AdminPopupModal';
 
 export default async function DashboardPage() {
   const cookieStore = await cookies();
@@ -44,16 +47,19 @@ export default async function DashboardPage() {
   const decoded = verifyUserToken(token);
   if (!decoded) redirect('/login');
 
-  const user = await prisma.user.findUnique({
-    where: { id: decoded.id },
-    include: {
-      wallet: true,
-      sponsor: { select: { userCode: true, name: true } },
-      directReferrals: { select: { id: true, userCode: true, name: true, isActive: true, createdAt: true } },
-      orders: { take: 5, orderBy: { createdAt: 'desc' } },
-      kycDetail: { select: { status: true, bankName: true } },
-    },
-  });
+  const [user, settings] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: decoded.id },
+      include: {
+        wallet: true,
+        sponsor: { select: { userCode: true, name: true } },
+        directReferrals: { select: { id: true, userCode: true, name: true, isActive: true, createdAt: true } },
+        orders: { take: 5, orderBy: { createdAt: 'desc' } },
+        kycDetail: { select: { status: true, bankName: true } },
+      },
+    }),
+    getSystemSettings(),
+  ]);
 
   if (!user) redirect('/login');
 
@@ -98,6 +104,30 @@ export default async function DashboardPage() {
               <span>एडमिन पोर्टल पर वापस जाएँ (Switch to Admin)</span>
             </a>
           </div>
+        )}
+
+        {/* Admin Notice Banner (If enabled by Admin) */}
+        {settings.noticeEnabled && (
+          <AdminNoticeBanner
+            enabled={settings.noticeEnabled}
+            type={settings.noticeType}
+            title={settings.noticeTitle}
+            text={settings.noticeText}
+            link={settings.noticeLink}
+          />
+        )}
+
+        {/* Global Popup Modal for Members */}
+        {settings.popupEnabled && (settings.popupTarget === 'ALL' || settings.popupTarget === 'MEMBERS') && (
+          <AdminPopupModal
+            enabled={settings.popupEnabled}
+            title={settings.popupTitle}
+            content={settings.popupContent}
+            imageUrl={settings.popupImageUrl}
+            buttonText={settings.popupButtonText}
+            buttonLink={settings.popupButtonLink}
+            updatedAt={settings.updatedAt}
+          />
         )}
 
         {/* User Identity & Rank Header */}

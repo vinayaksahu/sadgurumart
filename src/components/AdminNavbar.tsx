@@ -16,7 +16,9 @@ import {
   Clock,
   Package,
   Image as ImageIcon,
-  ArrowLeftRight
+  ArrowLeftRight,
+  Sliders,
+  Settings
 } from 'lucide-react';
 
 interface AdminNavbarProps {
@@ -50,6 +52,7 @@ export default function AdminNavbar({
 
   const navLinks = [
     { label: 'Admin Dashboard (डैशबोर्ड)', href: isSuperAdmin ? '/superadmin/dashboard' : '/admin/dashboard', icon: Layers },
+    { label: 'System Settings (प्लान, बैकअप, नोटिस)', href: '/admin/settings', icon: Sliders },
     { label: 'Inventory Desk (इन्वेंट्री व उत्पाद)', href: '/admin/inventory', icon: Package },
     { label: 'Photo Gallery (फोटो गैलरी)', href: '/admin/gallery', icon: ImageIcon },
     { label: 'KYC Verification (केवाईसी सत्यापन)', href: '/admin/kyc', icon: FileCheck },
@@ -99,6 +102,17 @@ export default function AdminNavbar({
               className={`hover:underline transition-colors ${isSuperAdmin ? 'text-slate-200 hover:text-white' : 'text-slate-700 hover:text-[#144732]'}`}
             >
               Dashboard
+            </Link>
+            <Link 
+              href="/admin/settings" 
+              className={`flex items-center gap-1 font-black px-2.5 py-1 rounded-lg border transition-all ${
+                isSuperAdmin 
+                  ? 'bg-[#144732] border-[#d4a359] text-[#fef08a] hover:bg-[#1b5e43]' 
+                  : 'bg-[#fdfaf3] border-[#d4a359] text-[#92580a] hover:bg-[#faf4e6]'
+              }`}
+            >
+              <Sliders className="w-3.5 h-3.5" />
+              <span>Settings</span>
             </Link>
             <Link 
               href="/admin/inventory" 

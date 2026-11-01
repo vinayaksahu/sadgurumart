@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyUserToken } from '@/lib/auth/jwt';
+import { getSystemSettings } from '@/lib/settings';
 
 export async function POST(req: NextRequest) {
   try {
@@ -14,13 +15,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Session expired' }, { status: 401 });
     }
 
+    const settings = await getSystemSettings();
+
+    if (!settings.withdrawalsEnabled) {
+      return NextResponse.json(
+        { error: 'विड्रॉल सेवा वर्तमान में अस्थायी रूप से बंद है (Withdrawals currently paused by Admin).' },
+        { status: 403 }
+      );
+    }
+
     const { amount } = await req.json();
     const withdrawAmount = parseFloat(amount);
 
-    // Rule 1: Minimum Withdrawal ₹100 as per PDF
-    if (isNaN(withdrawAmount) || withdrawAmount < 100) {
+    const minAmount = settings.minWithdrawalAmount || 100;
+    if (isNaN(withdrawAmount) || withdrawAmount < minAmount) {
       return NextResponse.json(
-        { error: 'Minimum withdrawal amount is ₹100' },
+        { error: `Minimum withdrawal amount is ₹${minAmount}` },
         { status: 400 }
       );
     }
@@ -53,10 +63,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Deductions as per PDF: 5% Admin Charge + 5% TDS
-    const adminCharge = withdrawAmount * 0.05;
-    const tdsAmount = withdrawAmount * 0.05;
-    const netPayable = withdrawAmount - (adminCharge + tdsAmount); // 90%
+    // Dynamic Deductions from Plan Settings
+    const adminPct = typeof settings.adminChargePercent === 'number' ? settings.adminChargePercent : 5;
+    const tdsPct = typeof settings.tdsPercent === 'number' ? settings.tdsPercent : 5;
+
+    const adminCharge = Number((withdrawAmount * (adminPct / 100)).toFixed(2));
+    const tdsAmount = Number((withdrawAmount * (tdsPct / 100)).toFixed(2));
+    const netPayable = Number((withdrawAmount - (adminCharge + tdsAmount)).toFixed(2));
 
     // Frozen snapshot of bank at request time
     const bankSnapshot = {

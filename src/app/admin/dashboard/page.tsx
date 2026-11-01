@@ -15,7 +15,10 @@ import {
   LogOut,
   ArrowRight,
   Wallet,
-  Building
+  Building,
+  Sliders,
+  Database,
+  Megaphone
 } from 'lucide-react';
 
 export default async function AdminDashboardPage() {
@@ -107,6 +110,30 @@ export default async function AdminDashboardPage() {
               <span>बैंक ट्रांसफर हेतु लंबित</span>
               <span className="font-bold text-emerald-700">Process →</span>
             </div>
+          </Link>
+        </div>
+
+        {/* Master Settings Control Banner */}
+        <div className="bg-gradient-to-r from-[#144732] via-[#1a5b40] to-[#0b2b1e] border-2 border-[#d4a359] rounded-3xl p-6 text-white shadow-lg flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-[#fef08a] text-[10px] font-black uppercase tracking-wider border border-white/20">
+              <Sliders className="w-3.5 h-3.5 text-[#d4a359]" />
+              <span>Admin Control Center</span>
+            </div>
+            <h3 className="text-xl font-black text-white">
+              सिस्टम सेटिंग्स: प्लान संशोधन, डेटाबेस बैकअप, नोटिस व पॉपअप
+            </h3>
+            <p className="text-xs text-slate-300 max-w-2xl leading-relaxed">
+              MLM प्लान के प्रतिशत व कैपिंग बदलें, पूरा डेटाबेस 1-क्लिक में बैकअप डाउनलोड करें, और सभी मेंबर्स के डैशबोर्ड पर आधिकारिक नोटिस व स्क्रीन पॉपअप सक्रिय करें।
+            </p>
+          </div>
+
+          <Link
+            href="/admin/settings"
+            className="w-full md:w-auto flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-[#d4a359] hover:bg-[#bc853c] text-[#0b2b1e] font-black text-xs shadow-xl transition-all hover:scale-105 active:scale-95 shrink-0"
+          >
+            <Sliders className="w-4 h-4" />
+            <span>ओपन सेटिंग्स पैनल (Open Settings) →</span>
           </Link>
         </div>
 

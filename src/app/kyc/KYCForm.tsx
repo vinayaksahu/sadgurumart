@@ -87,7 +87,7 @@ export default function KYCForm({ initialData }: { initialData?: any }) {
               className="w-full bg-[#faf8f4] border border-[#d8d0bf] focus:border-[#144732] rounded-xl px-4 py-2.5 text-sm font-mono font-bold uppercase text-slate-900 focus:outline-none"
             />
             <span className="text-[10px] text-slate-500 mt-1 block">
-              * 1 पैन कार्ड पर केवल 1 मुख्य आईडी मान्य है।
+              * 1 पैन कार्ड पर अधिकतम 3 आईडी मान्य हैं (Max 3 IDs per PAN Policy).
             </span>
           </div>
 
