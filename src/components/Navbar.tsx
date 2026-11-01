@@ -20,8 +20,8 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         {/* Brand Logo */}
         <Link href="/" className="flex items-center gap-3 group">
-          <div className="w-12 h-12 rounded-full bg-[#144732] flex items-center justify-center text-white font-black text-xl border-2 border-[#d4a359] shadow-md group-hover:scale-105 transition-transform">
-            SGM
+          <div className="w-12 h-12 rounded-full overflow-hidden bg-white flex items-center justify-center border-2 border-[#d4a359] shadow-md group-hover:scale-105 transition-transform p-0.5">
+            <img src="/sgm_logo.png" alt="SGM Mart Logo" className="w-full h-full object-contain" />
           </div>
           <div>
             <div className="font-black text-2xl tracking-tight text-[#144732] leading-none">
