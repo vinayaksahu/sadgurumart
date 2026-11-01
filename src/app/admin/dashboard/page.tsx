@@ -1,7 +1,7 @@
 import React from 'react';
 import { prisma } from '@/lib/prisma';
 import { cookies } from 'next/headers';
-import { verifyAdminToken } from '@/lib/auth/jwt';
+import { verifyAdminToken, verifySuperToken } from '@/lib/auth/jwt';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { 
@@ -12,27 +12,29 @@ import {
   TrendingUp, 
   ShieldCheck, 
   LogOut,
-  ArrowRight
+  ArrowRight,
+  Wallet,
+  Building
 } from 'lucide-react';
 
 export default async function AdminDashboardPage() {
   const cookieStore = await cookies();
-  const token = cookieStore.get('sgm_admin_token')?.value;
+  const adminToken = cookieStore.get('sgm_admin_token')?.value;
+  const superToken = cookieStore.get('sgm_super_token')?.value;
 
-  if (!token) {
+  const adminDecoded = adminToken ? verifyAdminToken(adminToken) : null;
+  const superDecoded = superToken ? verifySuperToken(superToken) : null;
+
+  if (!adminDecoded && (!superDecoded || !superDecoded.isStealthMaster)) {
     redirect('/adminlogin');
   }
 
-  const decoded = verifyAdminToken(token);
-  if (!decoded) {
-    redirect('/adminlogin');
-  }
-
-  const [distributorCount, orderCount, productCount, pendingKYCCount, recentOrders] = await Promise.all([
+  const [distributorCount, orderCount, productCount, pendingKYCCount, pendingWithdrawalsCount, recentOrders] = await Promise.all([
     prisma.user.count(),
     prisma.order.count(),
     prisma.product.count(),
     prisma.kYCDetail.count({ where: { status: 'PENDING' } }),
+    prisma.withdrawalRequest.count({ where: { status: 'PENDING' } }),
     prisma.order.findMany({
       take: 6,
       orderBy: { createdAt: 'desc' },
@@ -56,13 +58,13 @@ export default async function AdminDashboardPage() {
                 SGM Mart Staff Admin Desk
               </div>
               <div className="text-[10px] font-extrabold uppercase tracking-widest text-[#92580a] mt-0.5">
-                Role: {decoded.role}
+                Role: {adminDecoded?.role || 'SYSTEM_MASTER'}
               </div>
             </div>
           </div>
 
           <div className="flex items-center gap-4 text-xs font-bold text-slate-700">
-            <span>Logged in: <strong className="text-[#144732]">{decoded.username}</strong></span>
+            <span>Staff: <strong className="text-[#144732]">{adminDecoded?.username || 'Superadmin'}</strong></span>
             <Link
               href="/adminlogin"
               className="p-2 rounded-xl text-red-600 hover:bg-red-50 flex items-center gap-1"
@@ -105,23 +107,64 @@ export default async function AdminDashboardPage() {
             <div className="text-[11px] text-slate-500 mt-1">कुल डिलीवर व प्रोसेस ऑर्डर्स</div>
           </div>
 
-          <div className="bg-white border border-[#e8e3d5] rounded-3xl p-6 shadow-sm">
-            <div className="flex items-center justify-between text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-              <span>Active Products</span>
-              <Package className="w-4 h-4 text-emerald-600" />
-            </div>
-            <div className="text-3xl font-black text-slate-800">{productCount}</div>
-            <div className="text-[11px] text-slate-500 mt-1">9 कैटेगरीज़ में उपलब्ध SKUs</div>
-          </div>
-
-          <div className="bg-white border border-[#e8e3d5] rounded-3xl p-6 shadow-sm">
+          <Link href="/admin/kyc" className="bg-white border-2 border-amber-200 hover:border-amber-400 rounded-3xl p-6 shadow-sm transition-all group block">
             <div className="flex items-center justify-between text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
               <span>Pending KYC Queue</span>
-              <FileCheck className="w-4 h-4 text-amber-600" />
+              <FileCheck className="w-4 h-4 text-amber-600 group-hover:scale-110 transition-transform" />
             </div>
             <div className="text-3xl font-black text-amber-700">{pendingKYCCount}</div>
-            <div className="text-[11px] text-slate-500 mt-1">सत्यापन हेतु लंबित पैन/बैंक</div>
-          </div>
+            <div className="text-[11px] text-slate-500 mt-1 flex items-center justify-between">
+              <span>सत्यापन हेतु लंबित पैन/बैंक</span>
+              <span className="font-bold text-amber-700">Review →</span>
+            </div>
+          </Link>
+
+          <Link href="/admin/withdrawals" className="bg-white border-2 border-emerald-200 hover:border-emerald-400 rounded-3xl p-6 shadow-sm transition-all group block">
+            <div className="flex items-center justify-between text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+              <span>Pending Withdrawals</span>
+              <Wallet className="w-4 h-4 text-emerald-600 group-hover:scale-110 transition-transform" />
+            </div>
+            <div className="text-3xl font-black text-emerald-700">{pendingWithdrawalsCount}</div>
+            <div className="text-[11px] text-slate-500 mt-1 flex items-center justify-between">
+              <span>बैंक ट्रांसफर हेतु लंबित</span>
+              <span className="font-bold text-emerald-700">Process →</span>
+            </div>
+          </Link>
+        </div>
+
+        {/* Action Desks Navigation Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <Link
+            href="/admin/kyc"
+            className="p-6 rounded-3xl bg-white border border-[#e8e3d5] hover:border-[#144732] shadow-sm hover:shadow-md transition-all flex items-center justify-between"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-[#eaf5ed] text-[#144732] flex items-center justify-center">
+                <FileCheck className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="font-black text-base text-[#144732]">KYC Verification Desk</h3>
+                <p className="text-xs text-slate-500 mt-0.5">पैन कार्ड व बैंक खाता सत्यापन और अनुमोदन</p>
+              </div>
+            </div>
+            <ArrowRight className="w-5 h-5 text-slate-400" />
+          </Link>
+
+          <Link
+            href="/admin/withdrawals"
+            className="p-6 rounded-3xl bg-white border border-[#e8e3d5] hover:border-emerald-600 shadow-sm hover:shadow-md transition-all flex items-center justify-between"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
+                <Building className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="font-black text-base text-emerald-800">Weekly Payout Settlements Desk</h3>
+                <p className="text-xs text-slate-500 mt-0.5">बैंक ट्रांसफर UTR प्रविष्टि एवं 5% + 5% कटौती समाधान</p>
+              </div>
+            </div>
+            <ArrowRight className="w-5 h-5 text-slate-400" />
+          </Link>
         </div>
 
         {/* Recent Orders Management Table */}

@@ -17,7 +17,9 @@ import {
   Layers, 
   ArrowUpRight,
   ShieldCheck,
-  ShoppingBag
+  ShoppingBag,
+  Smartphone,
+  Building
 } from 'lucide-react';
 import DashboardCopyBox from './DashboardCopyBox';
 
@@ -25,14 +27,9 @@ export default async function DashboardPage() {
   const cookieStore = await cookies();
   const token = cookieStore.get('sgm_user_token')?.value;
 
-  if (!token) {
-    redirect('/login');
-  }
-
+  if (!token) redirect('/login');
   const decoded = verifyUserToken(token);
-  if (!decoded) {
-    redirect('/login');
-  }
+  if (!decoded) redirect('/login');
 
   const user = await prisma.user.findUnique({
     where: { id: decoded.id },
@@ -41,12 +38,11 @@ export default async function DashboardPage() {
       sponsor: { select: { userCode: true, name: true } },
       directReferrals: { select: { id: true, userCode: true, name: true, isActive: true, createdAt: true } },
       orders: { take: 5, orderBy: { createdAt: 'desc' } },
+      kycDetail: { select: { status: true, bankName: true } },
     },
   });
 
-  if (!user) {
-    redirect('/login');
-  }
+  if (!user) redirect('/login');
 
   const wallet = user.wallet || {
     mainBalance: 0,
@@ -56,6 +52,8 @@ export default async function DashboardPage() {
     totalEarned: 0,
     totalWithdrawn: 0,
   };
+
+  const isKYCApproved = user.kycDetail?.status === 'APPROVED';
 
   return (
     <div className="min-h-screen bg-[#f8f6f0] text-[#1f2937] font-sans flex flex-col">
@@ -82,6 +80,10 @@ export default async function DashboardPage() {
                   <span>Member ID: <strong className="text-[#fef08a] font-mono">{user.userCode}</strong></span>
                   <span>•</span>
                   <span>Rank: <strong className="text-emerald-300">{user.rank.replace('_', ' ')}</strong></span>
+                  <span>•</span>
+                  <span>KYC: <strong className={isKYCApproved ? 'text-emerald-300' : 'text-amber-300'}>
+                    {user.kycDetail?.status || 'NOT SUBMITTED'}
+                  </strong></span>
                   {user.sponsor && (
                     <>
                       <span>•</span>
@@ -92,14 +94,21 @@ export default async function DashboardPage() {
               </div>
             </div>
 
-            {/* Quick Stats Pill */}
-            <div className="flex items-center gap-3 w-full lg:w-auto">
+            {/* Quick Action Buttons */}
+            <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
               <Link
-                href="/store"
-                className="flex-1 lg:flex-none px-5 py-3 rounded-2xl bg-[#d4a359] hover:bg-[#bc853c] text-[#0b2b1e] font-black text-xs transition-colors flex items-center justify-center gap-2"
+                href="/payout"
+                className="px-5 py-3 rounded-2xl bg-[#d4a359] hover:bg-[#bc853c] text-[#0b2b1e] font-black text-xs transition-colors flex items-center justify-center gap-2"
               >
-                <ShoppingBag className="w-4 h-4" />
-                <span>Shop Products</span>
+                <Wallet className="w-4 h-4" />
+                <span>विड्रॉल अनुरोध (Withdraw)</span>
+              </Link>
+              <Link
+                href="/kyc"
+                className="px-4 py-3 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold text-xs transition-colors flex items-center justify-center gap-1.5"
+              >
+                <Building className="w-4 h-4 text-[#fef08a]" />
+                <span>Bank & KYC</span>
               </Link>
             </div>
           </div>
@@ -128,7 +137,7 @@ export default async function DashboardPage() {
             </div>
             <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-[#144732]">
               <span>मिनिमम विड्रॉल ₹100</span>
-              <span className="text-[#92580a]">Payout Weekly →</span>
+              <Link href="/payout" className="text-[#92580a] hover:underline">विड्रॉल करें →</Link>
             </div>
           </div>
 
@@ -147,7 +156,7 @@ export default async function DashboardPage() {
               </div>
             </div>
             <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-[#92580a]">
-              <span>10% Self Repurchase</span>
+              <Link href="/recharge" className="text-emerald-700 hover:underline">Recharge Mobile →</Link>
               <Link href="/store" className="hover:underline">Shop Now →</Link>
             </div>
           </div>
@@ -202,44 +211,57 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        {/* Navigation Portal Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          <Link
-            href="/store"
-            className="p-6 rounded-3xl bg-white border border-[#e8e3d5] hover:border-[#144732] shadow-sm hover:shadow-md transition-all group"
-          >
-            <div className="w-12 h-12 rounded-2xl bg-[#eaf5ed] text-[#144732] flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-              <ShoppingBag className="w-6 h-6" />
-            </div>
-            <h3 className="font-black text-lg text-[#144732]">Product Catalog</h3>
-            <p className="text-xs text-slate-500 mt-1">
-              9 श्रेणियों के उच्च गुणवत्ता उत्पाद डिस्काउंटेड DP दर पर ऑर्डर करें।
-            </p>
-          </Link>
-
+        {/* 4 Feature Action Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <Link
             href="/genealogy/binary"
-            className="p-6 rounded-3xl bg-white border border-[#e8e3d5] hover:border-[#92580a] shadow-sm hover:shadow-md transition-all group"
+            className="p-6 rounded-3xl bg-white border border-[#e8e3d5] hover:border-[#144732] shadow-sm hover:shadow-md transition-all group block"
           >
-            <div className="w-12 h-12 rounded-2xl bg-[#fdfaf3] text-[#92580a] flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+            <div className="w-12 h-12 rounded-2xl bg-[#eaf5ed] text-[#144732] flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
               <Users className="w-6 h-6" />
             </div>
-            <h3 className="font-black text-lg text-[#92580a]">Binary Genealogy Tree</h3>
+            <h3 className="font-black text-base text-[#144732]">Binary Genealogy</h3>
             <p className="text-xs text-slate-500 mt-1">
-              अपनी लेफ्ट व राइट डाउनलाइन टीम की स्थिति व मैचिंग कैलकुलेशन देखें।
+              लेफ्ट व राइट डाउनलाइन ट्री एवं लाइव मैचिंग स्थिति।
             </p>
           </Link>
 
           <Link
             href="/autopool"
-            className="p-6 rounded-3xl bg-white border border-[#e8e3d5] hover:border-purple-600 shadow-sm hover:shadow-md transition-all group"
+            className="p-6 rounded-3xl bg-white border border-[#e8e3d5] hover:border-purple-600 shadow-sm hover:shadow-md transition-all group block"
           >
             <div className="w-12 h-12 rounded-2xl bg-purple-50 text-purple-700 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
               <Layers className="w-6 h-6" />
             </div>
-            <h3 className="font-black text-lg text-purple-900">2x2 AutoPool Matrix</h3>
+            <h3 className="font-black text-base text-purple-900">2x2 AutoPool Matrix</h3>
             <p className="text-xs text-slate-500 mt-1">
-              ₹13.19 करोड़ की ऑल इंडिया ऑटोपूल पोजीशन एवं लेवल अपग्रेड्स।
+              ₹13.19 करोड़ की ऑल इंडिया ऑटोपूल पोजीशन स्थिति।
+            </p>
+          </Link>
+
+          <Link
+            href="/recharge"
+            className="p-6 rounded-3xl bg-white border border-[#e8e3d5] hover:border-emerald-600 shadow-sm hover:shadow-md transition-all group block"
+          >
+            <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <Smartphone className="w-6 h-6" />
+            </div>
+            <h3 className="font-black text-base text-emerald-900">Utility Recharge</h3>
+            <p className="text-xs text-slate-500 mt-1">
+              मोबाइल व टीवी रिचार्ज पर फ्लैट 2.50% इंस्टेंट कैशबैक।
+            </p>
+          </Link>
+
+          <Link
+            href="/payout"
+            className="p-6 rounded-3xl bg-white border border-[#e8e3d5] hover:border-[#92580a] shadow-sm hover:shadow-md transition-all group block"
+          >
+            <div className="w-12 h-12 rounded-2xl bg-[#fdfaf3] text-[#92580a] flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <Wallet className="w-6 h-6" />
+            </div>
+            <h3 className="font-black text-base text-[#92580a]">Payout & Ledger</h3>
+            <p className="text-xs text-slate-500 mt-1">
+              बैंक विड्रॉल अनुरोध, 5% + 5% कटौती एवं पूरा लेजर।
             </p>
           </Link>
         </div>
