@@ -114,7 +114,7 @@ export default function AdminNavbar({
     },
     {
       id: 'member-panel',
-      title: 'Member Panel',
+      title: 'Members & Network (मेंबर्स डायरेक्टरी)',
       items: [
         { label: 'Search Members', href: '/admin/members' },
         { label: 'Red Members List (Inactive)', href: '/admin/members?status=inactive' },
@@ -384,8 +384,8 @@ export default function AdminNavbar({
                 onClick={() => setIsOpen(false)}
                 className="w-full flex items-center gap-3 px-3.5 py-2 text-xs font-bold text-slate-700 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
               >
-                <Home className="w-4 h-4 text-slate-500" />
-                <span>Logout</span>
+                <LogOut className="w-4 h-4 text-red-500" />
+                <span className="text-red-600 font-bold">Admin Logout (लॉगआउट)</span>
               </a>
               <div className="text-[10px] text-center text-slate-400">
                 SGM Mart Online Service • Admin Console

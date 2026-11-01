@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Navbar from '@/components/Navbar';
+import MemberNavbar from '@/components/MemberNavbar';
 import Link from 'next/link';
 import { 
   Users, 
@@ -21,13 +21,6 @@ export default function BinaryGenealogyPage() {
   const [error, setError] = useState('');
   const [searchCode, setSearchCode] = useState('');
   const [history, setHistory] = useState<string[]>([]);
-  const [isAdmin, setIsAdmin] = useState(false);
-
-  useEffect(() => {
-    if (typeof document !== 'undefined') {
-      setIsAdmin(document.cookie.includes('sgm_admin_active=true') || document.cookie.includes('sgm_admin_token'));
-    }
-  }, []);
 
   const fetchTree = async (code?: string) => {
     setLoading(true);
@@ -35,6 +28,10 @@ export default function BinaryGenealogyPage() {
     try {
       const url = code ? `/api/genealogy/binary?userCode=${code}` : '/api/genealogy/binary';
       const res = await fetch(url);
+      if (res.status === 401) {
+        window.location.href = '/login';
+        return;
+      }
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to load tree');
       setTreeData(data.tree);
@@ -150,14 +147,14 @@ export default function BinaryGenealogyPage() {
 
   return (
     <div className="min-h-screen bg-[#f8f6f0] text-[#1f2937] font-sans flex flex-col">
-      <Navbar />
+      <MemberNavbar />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full space-y-6">
         {/* Header & Controls */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white border border-[#e8e3d5] rounded-3xl p-6 shadow-sm">
           <div>
             <div className="flex items-center gap-2">
-              <Link href={isAdmin ? "/admin/dashboard" : "/dashboard"} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-600">
+              <Link href="/dashboard" className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-600">
                 <ArrowLeft className="w-4 h-4" />
               </Link>
               <h1 className="text-2xl font-black text-[#144732] tracking-tight">

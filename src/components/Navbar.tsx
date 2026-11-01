@@ -16,14 +16,11 @@ import {
   ChevronRight, 
   LogIn, 
   Image as ImageIcon,
-  ArrowLeftRight,
   Layers,
   LogOut,
-  UserCheck
+  ShieldAlert
 } from 'lucide-react';
 import { useCart } from '@/lib/cartContext';
-import MemberNavbar from './MemberNavbar';
-import AdminNavbar from './AdminNavbar';
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -43,7 +40,7 @@ export default function Navbar() {
   useEffect(() => {
     if (typeof document !== 'undefined') {
       const hasAdmin = document.cookie.includes('sgm_admin_active=true');
-      const hasUser = document.cookie.includes('sgm_user_active=true') || document.cookie.includes('sgm_admin_mode=');
+      const hasUser = document.cookie.includes('sgm_user_active=true');
       setSession((prev) => ({
         ...prev,
         isAdminActive: hasAdmin,
@@ -76,24 +73,6 @@ export default function Navbar() {
       document.body.style.overflow = 'unset';
     };
   }, [isMobileMenuOpen]);
-
-  const isPortalRoute = [
-    '/dashboard',
-    '/wallet',
-    '/orders',
-    '/kyc',
-    '/payout',
-    '/autopool',
-    '/recharge',
-    '/genealogy',
-  ].some((prefix) => pathname?.startsWith(prefix));
-
-  if (isPortalRoute) {
-    if (session.isAdminActive) {
-      return <AdminNavbar />;
-    }
-    return <MemberNavbar user={session.user} />;
-  }
 
   const mainLinks = [
     { label: 'Home (होम)', href: '/', icon: Home },
@@ -155,7 +134,7 @@ export default function Navbar() {
 
           {/* Right Action Buttons */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            {/* Shopping Cart Icon (Visible on all screens) */}
+            {/* Shopping Cart Icon */}
             <Link
               href="/cart"
               className="relative p-2 sm:p-2.5 rounded-xl border border-slate-200 text-slate-700 hover:text-[#144732] hover:border-[#144732] transition-all bg-[#faf8f4]"
@@ -181,15 +160,33 @@ export default function Navbar() {
                   <span>Dashboard</span>
                 </Link>
                 <a
-                  href="/api/auth/logout?target=all&redirect=/login"
+                  href="/api/auth/logout?target=user&redirect=/login"
                   className="p-2 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 transition-colors"
                   title="लॉगआउट करें (Logout)"
                 >
                   <LogOut className="w-4 h-4" />
                 </a>
               </div>
-            ) : !session.isAdminActive ? (
-              /* ONLY show Sign In and Join Free when NOT logged in and NOT an admin! */
+            ) : session.isAdminActive ? (
+              /* When Logged In (Admin): Show Admin Desk button & Logout */
+              <div className="flex items-center gap-1.5">
+                <Link
+                  href="/admin/dashboard"
+                  className="px-3.5 py-2 rounded-xl bg-[#18181b] text-[#fef08a] border border-white/20 font-black text-xs sm:text-sm hover:bg-black transition-all duration-200 flex items-center gap-1.5 shadow-sm"
+                >
+                  <ShieldCheck className="w-3.5 h-3.5 text-[#d4a359]" />
+                  <span>Admin Desk</span>
+                </Link>
+                <a
+                  href="/api/auth/logout?target=admin&redirect=/adminlogin"
+                  className="p-2 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 transition-colors"
+                  title="एडमिन लॉगआउट (Logout)"
+                >
+                  <LogOut className="w-4 h-4" />
+                </a>
+              </div>
+            ) : (
+              /* When Guest: Show Sign In and Join Free */
               <>
                 <Link
                   href="/login"
@@ -206,7 +203,7 @@ export default function Navbar() {
                   <span>Join Free</span>
                 </Link>
               </>
-            ) : null}
+            )}
           </div>
         </div>
       </header>
@@ -276,8 +273,32 @@ export default function Navbar() {
                     डैशबोर्ड →
                   </Link>
                 </div>
-              ) : !session.isAdminActive ? (
-                /* ONLY show Sign In and Join Free when NOT logged in */
+              ) : session.isAdminActive ? (
+                /* When Logged In as Admin: Show Admin Identity & Quick Desk Link */
+                <div className="p-4 bg-[#18181b] border-b border-white/10 flex items-center justify-between text-white">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-white/10 text-[#d4a359] font-black text-sm flex items-center justify-center border border-white/20">
+                      <ShieldCheck className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <div className="text-xs font-black text-white">
+                        Admin Desk Active
+                      </div>
+                      <div className="text-[10px] text-slate-300 font-mono">
+                        Staff Administration
+                      </div>
+                    </div>
+                  </div>
+                  <Link
+                    href="/admin/dashboard"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="px-3.5 py-1.5 rounded-xl bg-[#d4a359] text-[#0b2b1e] font-black text-xs hover:bg-[#bc853c] transition-colors shadow-sm"
+                  >
+                    एडमिन डेस्क →
+                  </Link>
+                </div>
+              ) : (
+                /* When Guest: Show Sign In and Join Free */
                 <div className="p-4 bg-[#faf8f4] border-b border-[#e8e3d5] grid grid-cols-2 gap-2">
                   <Link
                     href="/login"
@@ -296,7 +317,7 @@ export default function Navbar() {
                     <span>Join Free</span>
                   </Link>
                 </div>
-              ) : null}
+              )}
 
               {/* Main Navigation Links */}
               <div className="p-4 space-y-1">
@@ -321,7 +342,6 @@ export default function Navbar() {
                     </Link>
                   );
                 })}
-
               </div>
             </div>
 

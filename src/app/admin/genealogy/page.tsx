@@ -33,6 +33,10 @@ function AdminGenealogyContent() {
     try {
       const url = code ? `/api/genealogy/binary?userCode=${encodeURIComponent(code)}` : '/api/genealogy/binary';
       const res = await fetch(url);
+      if (res.status === 401) {
+        window.location.href = '/adminlogin';
+        return;
+      }
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to load binary tree');
       setTreeData(data.tree);

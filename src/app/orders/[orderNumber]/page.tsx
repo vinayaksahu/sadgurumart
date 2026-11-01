@@ -1,5 +1,5 @@
 import React from 'react';
-import Navbar from '@/components/Navbar';
+import MemberNavbar from '@/components/MemberNavbar';
 import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
@@ -33,7 +33,7 @@ export default async function OrderConfirmationPage({ params }: OrderPageProps) 
 
   return (
     <div className="min-h-screen bg-[#f8f6f0] text-[#1f2937] font-sans flex flex-col">
-      <Navbar />
+      <MemberNavbar user={order.user} />
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-1 w-full">
         {/* Success Header */}

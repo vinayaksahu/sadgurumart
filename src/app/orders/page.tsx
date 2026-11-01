@@ -1,5 +1,5 @@
 import React from 'react';
-import Navbar from '@/components/Navbar';
+import MemberNavbar from '@/components/MemberNavbar';
 import { prisma } from '@/lib/prisma';
 import { cookies } from 'next/headers';
 import { verifyUserToken } from '@/lib/auth/jwt';
@@ -16,7 +16,7 @@ export default async function OrdersPage() {
 
   const user = await prisma.user.findUnique({
     where: { id: decoded.id },
-    select: { id: true, userCode: true },
+    select: { id: true, userCode: true, name: true, isActive: true },
   });
 
   if (!user) redirect('/login');
@@ -79,7 +79,7 @@ export default async function OrdersPage() {
 
   return (
     <div className="min-h-screen bg-[#f8f6f0] text-[#1f2937] font-sans flex flex-col">
-      <Navbar />
+      <MemberNavbar user={user} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
         <OrdersView initialOrders={formattedOrders} currentUserCode={user.userCode} />

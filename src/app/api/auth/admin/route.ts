@@ -57,6 +57,21 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    // 1. Clear any prior member tokens to prevent session cross-switching
+    const userCookiesToPurge = ['sgm_user_token', 'sgm_user_active', 'sgm_admin_mode'];
+    for (const name of userCookiesToPurge) {
+      response.cookies.delete(name);
+      response.cookies.set(name, '', {
+        path: '/',
+        maxAge: 0,
+        expires: new Date(0),
+        httpOnly: name.includes('token'),
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+      });
+    }
+
+    // 2. Set Admin Auth Cookie
     response.cookies.set('sgm_admin_token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',

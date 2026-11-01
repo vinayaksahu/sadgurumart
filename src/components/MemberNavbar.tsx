@@ -159,7 +159,7 @@ export default function MemberNavbar({ user: initialUser }: MemberNavbarProps) {
 
             {/* Logout Button */}
             <a
-              href="/api/auth/logout?target=all&redirect=/login"
+              href="/api/auth/logout?target=user&redirect=/login"
               className="p-2 sm:px-3 sm:py-2 rounded-xl bg-red-600/90 hover:bg-red-700 text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow border border-red-500/40"
               title="लॉगआउट (Logout)"
             >
@@ -275,7 +275,7 @@ export default function MemberNavbar({ user: initialUser }: MemberNavbarProps) {
             {/* Drawer Footer with Logout */}
             <div className="p-4 border-t border-slate-100 bg-slate-50 space-y-2">
               <a
-                href="/api/auth/logout?target=all&redirect=/login"
+                href="/api/auth/logout?target=user&redirect=/login"
                 onClick={() => setIsOpen(false)}
                 className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-red-600 text-white font-black text-xs hover:bg-red-700 shadow transition-all"
               >

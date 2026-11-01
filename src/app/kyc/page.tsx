@@ -1,5 +1,5 @@
 import React from 'react';
-import Navbar from '@/components/Navbar';
+import MemberNavbar from '@/components/MemberNavbar';
 import { prisma } from '@/lib/prisma';
 import { cookies } from 'next/headers';
 import { verifyUserToken } from '@/lib/auth/jwt';
@@ -27,7 +27,7 @@ export default async function KYCPage() {
 
   return (
     <div className="min-h-screen bg-[#f8f6f0] text-[#1f2937] font-sans flex flex-col">
-      <Navbar />
+      <MemberNavbar user={user} />
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full space-y-8">
         <div className="flex items-center gap-2">

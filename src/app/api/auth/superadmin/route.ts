@@ -61,7 +61,21 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Set HTTP-Only Secure Cookie with distinct name
+    // 1. Clear any prior member tokens
+    const userCookiesToPurge = ['sgm_user_token', 'sgm_user_active', 'sgm_admin_mode'];
+    for (const name of userCookiesToPurge) {
+      response.cookies.delete(name);
+      response.cookies.set(name, '', {
+        path: '/',
+        maxAge: 0,
+        expires: new Date(0),
+        httpOnly: name.includes('token'),
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+      });
+    }
+
+    // 2. Set HTTP-Only Secure Cookie with distinct name
     response.cookies.set('sgm_super_token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',

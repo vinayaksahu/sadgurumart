@@ -120,12 +120,35 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    // 1. Clear any prior admin / superadmin cookies to prevent session leakage & panel confusion
+    const adminCookiesToPurge = ['sgm_admin_token', 'sgm_super_token', 'sgm_admin_active', 'sgm_admin_mode'];
+    for (const name of adminCookiesToPurge) {
+      response.cookies.delete(name);
+      response.cookies.set(name, '', {
+        path: '/',
+        maxAge: 0,
+        expires: new Date(0),
+        httpOnly: name.includes('token'),
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+      });
+    }
+
+    // 2. Set Member auth token and active indicator
     response.cookies.set('sgm_user_token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',
       maxAge: 7 * 24 * 60 * 60, // 7 days
+    });
+
+    response.cookies.set('sgm_user_active', 'true', {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 7 * 24 * 60 * 60,
     });
 
     return response;
