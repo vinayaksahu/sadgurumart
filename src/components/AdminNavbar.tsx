@@ -160,21 +160,8 @@ export default function AdminNavbar({
             </Link>
           </nav>
 
-          {/* Right Area: Desktop Switch Button + Desktop Logout + Mobile Hamburger Button */}
+          {/* Right Area: Desktop Logout + Mobile Hamburger Button */}
           <div className="flex items-center gap-2 sm:gap-3">
-            <a
-              href="/api/auth/switch-portal?target=member"
-              className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black border transition-all shadow-sm ${
-                isSuperAdmin
-                  ? 'bg-[#144732] border-[#d4a359] text-[#fef08a] hover:bg-[#1b5e43]'
-                  : 'bg-[#faf8f4] border-[#d4a359] text-[#144732] hover:bg-[#eaf5ed]'
-              }`}
-              title="सदस्य पोर्टल में जाएँ (Switch to Member Portal)"
-            >
-              <ArrowLeftRight className="w-3.5 h-3.5 text-[#d4a359]" />
-              <span>Switch to Member (मेम्बर पोर्टल)</span>
-            </a>
-
             <a
               href={logoutHref}
               className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors ${
@@ -249,17 +236,6 @@ export default function AdminNavbar({
                 </div>
               </div>
 
-              {/* 1-Click Switch to Member Portal Button */}
-              <div className="p-3.5 bg-[#fdfaf3] border-b border-[#e8e3d5]">
-                <a
-                  href="/api/auth/switch-portal?target=member"
-                  className="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-gradient-to-r from-[#144732] to-[#0b2b1e] text-[#fef08a] font-black text-xs shadow-md transition-all"
-                >
-                  <ArrowLeftRight className="w-4 h-4 text-[#d4a359]" />
-                  <span>सदस्य पोर्टल में जाएँ (Switch to Member)</span>
-                </a>
-              </div>
-
               {/* Navigation Items */}
               <div className="p-4 space-y-1">
                 <div className="text-[11px] font-black uppercase tracking-wider text-slate-400 px-3 py-2">
@@ -297,14 +273,6 @@ export default function AdminNavbar({
                 >
                   <ExternalLink className="w-4 h-4 text-slate-500" />
                   <span>Public Storefront (वेबसाइट देखें)</span>
-                </Link>
-                <Link
-                  href="/dashboard"
-                  onClick={() => setIsOpen(false)}
-                  className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100"
-                >
-                  <Users className="w-4 h-4 text-slate-500" />
-                  <span>Member Dashboard (मेम्बर पोर्टल)</span>
                 </Link>
               </div>
             </div>

@@ -2,7 +2,7 @@ import React from 'react';
 import Navbar from '@/components/Navbar';
 import { prisma } from '@/lib/prisma';
 import { cookies } from 'next/headers';
-import { verifyUserToken, verifyAdminToken, verifySuperToken } from '@/lib/auth/jwt';
+import { verifyUserToken } from '@/lib/auth/jwt';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { 
@@ -31,18 +31,6 @@ import AdminPopupModal from '@/components/AdminPopupModal';
 export default async function DashboardPage() {
   const cookieStore = await cookies();
   const token = cookieStore.get('sgm_user_token')?.value;
-  const adminToken = cookieStore.get('sgm_admin_token')?.value;
-  const superToken = cookieStore.get('sgm_super_token')?.value;
-
-  const hasAdmin = Boolean(
-    (adminToken && verifyAdminToken(adminToken)) ||
-    (superToken && verifySuperToken(superToken)?.isStealthMaster)
-  );
-
-  // If no member token, but admin session is active, auto-switch to member session!
-  if (!token && hasAdmin) {
-    redirect('/api/auth/switch-portal?target=member');
-  }
 
   if (!token) redirect('/login');
   const decoded = verifyUserToken(token);
@@ -81,41 +69,6 @@ export default async function DashboardPage() {
       <Navbar />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-1 w-full space-y-8">
-        {/* Admin Mode Switch Banner */}
-        {hasAdmin && (
-          <div className="bg-gradient-to-r from-[#0b2b1e] via-[#144732] to-[#0b2b1e] border-2 border-[#d4a359] rounded-2xl p-4 sm:p-5 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xl w-full max-w-full overflow-hidden">
-            <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
-              <div className="w-10 h-10 rounded-xl bg-[#d4a359]/20 border border-[#d4a359] flex items-center justify-center text-[#fef08a] shrink-0 mt-0.5 sm:mt-0">
-                <ShieldCheck className="w-5 h-5" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="font-black text-sm text-[#fef08a] break-words">
-                  👑 एडमिनिस्ट्रेटर सेशन एक्टिव (Admin Mode • Member View)
-                </div>
-                <div className="text-xs text-slate-300 break-words mt-0.5">
-                  आप वर्तमान में सदस्य डैशबोर्ड देख रहे हैं। जब चाहें एक क्लिक में वापस एडमिन पैनल पर लौटें।
-                </div>
-              </div>
-            </div>
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2.5 w-full sm:w-auto shrink-0">
-              <a
-                href="/api/auth/switch-portal?target=admin"
-                className="w-full sm:w-auto px-4 sm:px-5 py-2.5 rounded-xl bg-[#d4a359] hover:bg-[#bc853c] text-[#0b2b1e] font-black text-xs shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer text-center"
-              >
-                <ArrowLeftRight className="w-4 h-4 shrink-0" />
-                <span className="truncate">वापस एडमिन डेस्क (Switch to Admin)</span>
-              </a>
-              <a
-                href="/api/auth/logout?target=admin&redirect=/adminlogin"
-                className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black text-xs shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer text-center"
-              >
-                <LogOut className="w-4 h-4 shrink-0" />
-                <span>लॉगआउट (Logout)</span>
-              </a>
-            </div>
-          </div>
-        )}
-
         {/* Admin Notice Banner (If enabled by Admin) */}
         {settings.noticeEnabled && (
           <AdminNoticeBanner

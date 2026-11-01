@@ -85,35 +85,6 @@ export default function Navbar() {
   return (
     <>
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-[#e8e3d5]">
-        {/* Admin Masquerade Switch Bar (Shows whenever Admin session is active) */}
-        {session.isAdminActive && (
-          <div className="bg-gradient-to-r from-[#92580a] via-[#b45309] to-[#78350f] text-white px-3 sm:px-4 py-2 sm:py-1.5 text-xs font-black flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#fef08a]/30 shadow-md w-full max-w-full overflow-hidden">
-            <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 max-w-full">
-              <ShieldCheck className="w-4 h-4 text-[#fef08a] shrink-0" />
-              <span className="truncate text-[11px] sm:text-xs">
-                👑 एडमिन मोड सक्रिय <span className="hidden sm:inline">(Admin Session Active • Viewing Member Portal)</span>
-              </span>
-            </div>
-            <div className="flex items-center gap-2 w-full sm:w-auto justify-end shrink-0">
-              <a
-                href="/api/auth/switch-portal?target=admin"
-                className="flex-1 sm:flex-initial px-2.5 sm:px-3 py-1 rounded-lg bg-white text-[#92580a] hover:bg-[#fef08a] hover:text-[#0b2b1e] text-[11px] sm:text-xs font-black transition-all flex items-center justify-center gap-1 shadow cursor-pointer text-center"
-              >
-                <ArrowLeftRight className="w-3.5 h-3.5 shrink-0" />
-                <span className="truncate">एडमिन डेस्क &rarr;</span>
-              </a>
-              <a
-                href="/api/auth/logout?target=admin&redirect=/adminlogin"
-                className="px-2.5 py-1 rounded-lg bg-red-800/80 hover:bg-red-900 text-white text-[11px] sm:text-xs font-bold transition-all flex items-center gap-1 shrink-0 cursor-pointer shadow border border-red-500/40"
-                title="एडमिन सेशन समाप्त करें (End Admin Session)"
-              >
-                <LogOut className="w-3.5 h-3.5 shrink-0" />
-                <span>Logout</span>
-              </a>
-            </div>
-          </div>
-        )}
-
         {/* Top Banner Notice */}
         <div className="bg-[#0b2b1e] text-[#fef08a] px-3 sm:px-4 py-1.5 text-[11px] sm:text-xs font-bold border-b border-[#d4a359]/30 tracking-wider flex items-center justify-between max-w-7xl mx-auto w-full overflow-hidden">
           <span className="truncate min-w-0 flex-1">🇮🇳 “बेरोजगारी और रोग मुक्त हो भारत हमारा” • SGM MART</span>
@@ -165,19 +136,7 @@ export default function Navbar() {
               )}
             </Link>
 
-            {/* Admin Quick Switch (Desktop) */}
-            {session.isAdminActive && (
-              <a
-                href="/api/auth/switch-portal?target=admin"
-                className="hidden md:inline-flex px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#92580a] to-[#78350f] text-white font-black text-xs hover:opacity-95 transition-all shadow items-center gap-1.5"
-                title="Switch back to Admin Desk"
-              >
-                <ArrowLeftRight className="w-3.5 h-3.5 text-[#fef08a]" />
-                <span>Admin Desk</span>
-              </a>
-            )}
-
-            {/* When Logged In (including Switched Admin): Show Member Dashboard button & Logout */}
+            {/* When Logged In (Member): Show Member Dashboard button & Logout */}
             {session.isLoggedIn ? (
               <div className="hidden sm:flex items-center gap-1.5">
                 <Link
@@ -268,28 +227,6 @@ export default function Navbar() {
                   <X className="w-5 h-5" />
                 </button>
               </div>
-
-              {/* Admin Mode Switch inside Drawer */}
-              {session.isAdminActive && (
-                <div className="p-3.5 bg-[#fdfaf3] border-b border-[#e8e3d5] space-y-2">
-                  <a
-                    href="/api/auth/switch-portal?target=admin"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-gradient-to-r from-[#92580a] to-[#78350f] text-white font-black text-xs shadow-md transition-all"
-                  >
-                    <ArrowLeftRight className="w-4 h-4 text-[#fef08a]" />
-                    <span>वापस एडमिन डेस्क (Switch to Admin)</span>
-                  </a>
-                  <a
-                    href="/api/auth/logout?target=admin&redirect=/adminlogin"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow transition-all"
-                  >
-                    <LogOut className="w-3.5 h-3.5" />
-                    <span>एडमिन लॉगआउट (End Admin Session)</span>
-                  </a>
-                </div>
-              )}
 
               {/* If Logged In: Show Member Identity & Quick Dashboard Link */}
               {session.isLoggedIn ? (
