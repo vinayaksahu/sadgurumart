@@ -48,7 +48,7 @@ export default function KYCForm({ initialData }: { initialData?: any }) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'KYC submission failed');
 
-      setSuccess('केवाईसी व बैंक विवरण सफलतापूर्वक सबमिट हुआ। आपके दस्तावेज़ Google Drive में सुरक्षित दर्ज हो गए हैं। एडमिन वेरिफिकेशन के उपरांत विड्रॉल एक्टिवेट हो जाएगा।');
+      setSuccess('केवाईसी व बैंक विवरण सफलतापूर्वक सबमिट हुआ। एडमिन वेरिफिकेशन के उपरांत विड्रॉल एक्टिवेट हो जाएगा।');
       router.refresh();
     } catch (err: any) {
       setError(err.message || 'Error submitting KYC');
@@ -193,19 +193,10 @@ export default function KYCForm({ initialData }: { initialData?: any }) {
 
       {/* 3. Document Photos (PAN, Aadhaar, Bank Cheque/Passbook) */}
       <div className="space-y-4 pt-4">
-        <h3 className="text-sm font-black text-[#144732] uppercase tracking-wider pb-2 border-b border-slate-100 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Camera className="w-4 h-4 text-[#92580a]" />
-            <span>3. केवाईसी दस्तावेज़ फोटो (Google Drive ऑटो-अपलोड)</span>
-          </div>
-          <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-            📁 Drive Folder Auto-Sync
-          </span>
+        <h3 className="text-sm font-black text-[#144732] uppercase tracking-wider pb-2 border-b border-slate-100 flex items-center gap-2">
+          <Camera className="w-4 h-4 text-[#92580a]" />
+          <span>3. केवाईसी दस्तावेज़ फोटो (Upload Documents)</span>
         </h3>
-
-        <p className="text-xs text-slate-500">
-          अपने फ़ोन के कैमरे या गैलरी से साफ़ फोटो अपलोड करें। सिस्टम फोटो को ऑटो-कंप्रेस करके सीधे कंपनी के सुरक्षित Google Drive फोल्डर में दर्ज करेगा।
-        </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <ImageUploader
@@ -248,7 +239,7 @@ export default function KYCForm({ initialData }: { initialData?: any }) {
             <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
           ) : (
             <>
-              <span>विवरण व फोटो सुरक्षित सबमिट करें (Save & Submit KYC to Drive)</span>
+              <span>विवरण व फोटो सबमिट करें (Save & Submit KYC)</span>
               <ArrowRight className="w-4 h-4" />
             </>
           )}

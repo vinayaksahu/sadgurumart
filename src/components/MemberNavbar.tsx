@@ -88,6 +88,7 @@ export default function MemberNavbar({ user: initialUser }: MemberNavbarProps) {
     { label: 'Genealogy (बाइनरी ट्री)', href: '/genealogy/binary', icon: Users },
     { label: 'AutoPool (2x2 ऑटोपूल)', href: '/autopool', icon: Layers },
     { label: 'My Orders (मेरे ऑर्डर्स)', href: '/orders', icon: ShoppingBag },
+    { label: 'Complaint (शिकायत / सहायता)', href: 'https://wa.me/916267392508?text=Support%20Ticket', icon: HelpCircle },
     { label: 'Utility Recharge (रिचार्ज)', href: '/recharge', icon: Smartphone },
     { label: 'Shopping Store (स्टोर)', href: '/store', icon: ShoppingBag },
     { label: 'Main Website (वेबसाइट होम)', href: '/', icon: ExternalLink },

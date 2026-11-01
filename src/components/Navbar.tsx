@@ -76,7 +76,6 @@ export default function Navbar() {
     };
   }, [isMobileMenuOpen]);
 
-  // If in Member Portal (Dashboard, Wallet, Orders, KYC, Payout, etc.), show dedicated MemberNavbar
   const isPortalRoute = [
     '/dashboard',
     '/wallet',
@@ -147,7 +146,6 @@ export default function Navbar() {
             <Link href="/#products" className="hover:text-[#144732] transition-colors">Products (उत्पाद)</Link>
             <Link href="/#gallery" className="hover:text-[#144732] transition-colors">Gallery (गैलरी)</Link>
             <Link href="/#incomes" className="hover:text-[#144732] transition-colors">16 Income Plan</Link>
-            <Link href="/dashboard" className="hover:text-[#144732] transition-colors text-[#92580a]">Member Portal</Link>
             <Link href="/#compliance" className="hover:text-[#144732] transition-colors">Rules & Legal</Link>
           </nav>
 
@@ -320,17 +318,6 @@ export default function Navbar() {
                   );
                 })}
 
-                <Link
-                  href="/dashboard"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-black text-[#92580a] bg-amber-50 hover:bg-amber-100 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <UserCheck className="w-4 h-4 text-[#92580a]" />
-                    <span>Member Portal (सदस्य लॉगिन)</span>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-[#92580a]" />
-                </Link>
               </div>
             </div>
 

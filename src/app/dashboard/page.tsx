@@ -22,7 +22,9 @@ import {
   Building,
   ArrowLeftRight,
   LogOut,
-  Home
+  Home,
+  IndianRupee,
+  User
 } from 'lucide-react';
 import DashboardCopyBox from './DashboardCopyBox';
 import { getSystemSettings } from '@/lib/settings';
@@ -54,6 +56,7 @@ export default async function DashboardPage() {
   if (!user) redirect('/login');
 
   const wallet = user.wallet || {
+    id: '',
     mainBalance: 0,
     p2pBalance: 0,
     shoppingBalance: 0,
@@ -64,6 +67,48 @@ export default async function DashboardPage() {
   };
 
   const isKYCApproved = user.kycDetail?.status === 'APPROVED';
+
+  // Live Incomes & Team Analytics matching Member Portal Mobile View
+  const [walletTransactions, placementCount] = await Promise.all([
+    user.wallet?.id
+      ? prisma.walletTransaction.findMany({
+          where: { walletId: user.wallet.id },
+          select: { type: true, amount: true },
+        })
+      : Promise.resolve([]),
+    prisma.user.count({
+      where: {
+        OR: [{ sponsorId: user.id }, { placementParentId: user.id }],
+      },
+    }),
+  ]);
+
+  const getSum = (typeList: string[]) => {
+    return walletTransactions
+      .filter((t) => typeList.includes(t.type) && t.amount > 0)
+      .reduce((sum, t) => sum + t.amount, 0);
+  };
+
+  const directTeamCount = user.directReferrals.length;
+  const totalTeamCount = Math.max(placementCount, directTeamCount);
+
+  const performanceCards = [
+    { label: 'Total Team', value: String(totalTeamCount), gradient: 'from-[#06b6d4] to-[#2563eb]', icon: Users },
+    { label: 'Total Direct Team', value: String(directTeamCount), gradient: 'from-[#f43f5e] to-[#e11d48]', icon: User },
+    { label: 'Total Direct Income', value: `₹${getSum(['DIRECT_REFERRAL']).toFixed(2)}`, gradient: 'from-[#3b82f6] to-[#4f46e5]', icon: User },
+    { label: 'Matching Income', value: `₹${getSum(['BINARY_MATCHING']).toFixed(2)}`, gradient: 'from-[#6366f1] to-[#7c3aed]', icon: User },
+    { label: 'Direct Sponsor Income', value: `₹${getSum(['SPONSOR_ROYALTY']).toFixed(2)}`, gradient: 'from-[#f43f5e] to-[#ea580c]', icon: TrendingUp },
+    { label: 'Autopool Income', value: `₹${getSum(['AUTOPOOL_INCOME']).toFixed(2)}`, gradient: 'from-[#f43f5e] to-[#ec4899]', icon: TrendingUp },
+    { label: 'Leadership Income', value: `₹${getSum(['LEADERSHIP_CTO']).toFixed(2)}`, gradient: 'from-[#6366f1] to-[#7c3aed]', icon: IndianRupee },
+    { label: 'Repurchase Income', value: `₹${getSum(['PURCHASE_CASHBACK', 'REPURCHASE_TEAM']).toFixed(2)}`, gradient: 'from-[#6366f1] to-[#7c3aed]', icon: IndianRupee },
+    { label: 'Repurchase Matching Income', value: '₹0.00', gradient: 'from-[#6366f1] to-[#7c3aed]', icon: IndianRupee },
+    { label: 'CTO Income', value: `₹${getSum(['COMPANY_CTO']).toFixed(2)}`, gradient: 'from-[#6366f1] to-[#7c3aed]', icon: IndianRupee },
+    { label: 'Bike Fund', value: `₹${getSum(['BIKE_FUND']).toFixed(2)}`, gradient: 'from-[#6366f1] to-[#7c3aed]', icon: IndianRupee },
+    { label: 'Car Fund', value: `₹${getSum(['CAR_FUND']).toFixed(2)}`, gradient: 'from-[#6366f1] to-[#7c3aed]', icon: IndianRupee },
+    { label: 'House Fund', value: `₹${getSum(['HOUSE_FUND']).toFixed(2)}`, gradient: 'from-[#6366f1] to-[#7c3aed]', icon: IndianRupee },
+    { label: 'Total Income', value: `₹${wallet.totalEarned.toFixed(2)}`, gradient: 'from-[#4f46e5] to-[#7c3aed]', icon: IndianRupee },
+    { label: 'Cash Wallet Balance', value: `₹${wallet.mainBalance.toFixed(2)}`, gradient: 'from-[#06b6d4] to-[#0284c7]', icon: IndianRupee },
+  ];
 
   return (
     <div className="min-h-screen bg-[#f8f6f0] text-[#1f2937] font-sans flex flex-col">
@@ -168,6 +213,44 @@ export default async function DashboardPage() {
           {/* Referral Link Copy Bar */}
           <div className="mt-5 pt-4 sm:mt-6 sm:pt-5 border-t border-white/10 w-full min-w-0">
             <DashboardCopyBox userCode={user.userCode} />
+          </div>
+        </div>
+
+        {/* Performance & Live Incomes Section (1-Column on Mobile, responsive grid on desktop) */}
+        <div>
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <h2 className="text-base sm:text-lg font-black text-slate-800 flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-[#144732]" />
+              <span>लाइव इनकम व टीम परफॉरमेंस (Live Incomes & Team)</span>
+            </h2>
+            <Link href="/payout" className="text-xs font-bold text-[#144732] hover:underline">
+              विस्तृत लेजर देखें →
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4">
+            {performanceCards.map((card) => {
+              const Icon = card.icon;
+              return (
+                <div
+                  key={card.label}
+                  className="bg-white rounded-2xl p-4 sm:p-5 shadow-xs border border-slate-100 flex items-center gap-4 hover:shadow-md transition-all group"
+                >
+                  <div
+                    className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${card.gradient} flex items-center justify-center text-white shadow-sm shrink-0 group-hover:scale-105 transition-transform`}
+                  >
+                    <Icon className="w-6 h-6" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-lg sm:text-xl font-black text-slate-800 tracking-tight truncate">
+                      {card.value}
+                    </div>
+                    <div className="text-xs font-semibold text-slate-500 mt-0.5 truncate">
+                      {card.label}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
 

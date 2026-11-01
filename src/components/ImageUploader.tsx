@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
   Camera, 
   UploadCloud, 
@@ -8,9 +8,7 @@ import {
   CheckCircle2, 
   X, 
   RefreshCw, 
-  Smartphone,
-  ExternalLink,
-  FolderCheck
+  Smartphone
 } from 'lucide-react';
 import { formatGoogleDriveUrl, compressImageFile } from '@/lib/imageUtils';
 
@@ -30,15 +28,12 @@ export default function ImageUploader({
   folder = 'general',
 }: ImageUploaderProps) {
   const isBase64 = value?.startsWith('data:image/');
-  const isGoogleDrive = value?.includes('googleusercontent.com') || value?.includes('drive.google.com');
+  const isWebUrl = value && !isBase64;
 
-  const [activeTab, setActiveTab] = useState<'upload' | 'link'>(isBase64 || isGoogleDrive || !value ? 'upload' : 'link');
+  const [activeTab, setActiveTab] = useState<'upload' | 'link'>(isBase64 || !value ? 'upload' : 'upload');
   const [compressing, setCompressing] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
-  const [driveInfo, setDriveInfo] = useState<{ isDrive: boolean; driveUrl?: string } | null>(
-    isGoogleDrive ? { isDrive: true } : null
-  );
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -50,17 +45,16 @@ export default function ImageUploader({
 
     setError(null);
     setCompressing(true);
-    setStatusMessage('फोटो कंप्रेस व ऑप्टिमाइज़ हो रही है...');
+    setStatusMessage('फोटो प्रोसेस हो रही है...');
 
     try {
-      const originalSizeKb = Math.round(file.size / 1024);
       const { dataUrl, sizeKb } = await compressImageFile(file, 1000, 0.75);
       
       setCompressing(false);
       setUploading(true);
-      setStatusMessage('Google Drive फोल्डर में ऑटो-अपलोड हो रहा है...');
+      setStatusMessage('फोटो अपलोड हो रही है...');
 
-      // Call central upload API which forwards to Google Drive folder
+      // Call central upload API (automatically saves to target folder)
       const res = await fetch('/api/upload', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -76,21 +70,10 @@ export default function ImageUploader({
 
       if (uploadResult?.url) {
         onChange(uploadResult.url);
-
-        if (uploadResult.provider === 'google_drive') {
-          setDriveInfo({
-            isDrive: true,
-            driveUrl: uploadResult.driveUrl,
-          });
-          setStatusMessage(`Google Drive में सुरक्षित सेव! (${sizeKb} KB)`);
-        } else {
-          setDriveInfo(null);
-          setStatusMessage(`फोटो तैयार! (${sizeKb} KB, ओरिजिनल ${originalSizeKb} KB)`);
-        }
+        setStatusMessage(`फोटो अपलोड सफल (${sizeKb} KB)`);
       } else {
-        // Fallback to local dataUrl
         onChange(dataUrl);
-        setStatusMessage(`फोटो कंप्रेस की गई (${sizeKb} KB)`);
+        setStatusMessage(`फोटो तैयार (${sizeKb} KB)`);
       }
     } catch (err: any) {
       setError(err.message || 'फोटो प्रोसेस करने में समस्या आई।');
@@ -106,7 +89,6 @@ export default function ImageUploader({
   const handleClear = () => {
     onChange('');
     setStatusMessage(null);
-    setDriveInfo(null);
     setError(null);
   };
 
@@ -130,7 +112,7 @@ export default function ImageUploader({
             }`}
           >
             <Smartphone className="w-3.5 h-3.5" />
-            <span>फ़ोन / गैलरी से ऑटो-अपलोड</span>
+            <span>फ़ोन / गैलरी से चुनें</span>
           </button>
 
           <button
@@ -143,7 +125,7 @@ export default function ImageUploader({
             }`}
           >
             <LinkIcon className="w-3.5 h-3.5" />
-            <span>Drive लिंक पेस्ट करें</span>
+            <span>वेब लिंक पेस्ट करें</span>
           </button>
         </div>
       </div>
@@ -154,7 +136,7 @@ export default function ImageUploader({
         </div>
       )}
 
-      {/* TAB 1: Mobile / Device Gallery Upload with Auto Drive Sync */}
+      {/* TAB 1: Mobile / Device Gallery Upload */}
       {activeTab === 'upload' && (
         <div className="space-y-3">
           <input
@@ -179,7 +161,7 @@ export default function ImageUploader({
                 <div className="space-y-2 py-2">
                   <RefreshCw className="w-8 h-8 text-[#144732] animate-spin mx-auto" />
                   <div className="text-xs font-black text-[#144732]">
-                    {statusMessage || 'फ़ोटो प्रोसेस व ड्राइव पर अपलोड हो रही है...'}
+                    {statusMessage || 'फ़ोटो प्रोसेस हो रही है...'}
                   </div>
                   <p className="text-[10px] text-slate-400">कृपया प्रतीक्षा करें...</p>
                 </div>
@@ -189,10 +171,10 @@ export default function ImageUploader({
                     <Camera className="w-6 h-6" />
                   </div>
                   <div className="text-xs font-black text-[#144732]">
-                    📱 मोबाइल गैलरी से फोटो चुनें (या कैमरा से खींचें)
+                    📱 फोटो चुनें या कैमरा से खींचें
                   </div>
                   <p className="text-[11px] text-slate-500">
-                    JPG, PNG, WebP — सिस्टम ऑटो-कंप्रेस करके सीधे Google Drive में अपलोड कर देगा
+                    JPG, PNG, WebP — सिस्टम आपकी फोटो तुरंत अपलोड कर देगा
                   </p>
                 </div>
               )}
@@ -213,26 +195,12 @@ export default function ImageUploader({
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5 text-xs font-black text-emerald-800">
                     <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <span className="truncate">
-                      {driveInfo?.isDrive || isGoogleDrive ? 'Google Drive में सुरक्षित' : 'फोटो तैयार'}
-                    </span>
+                    <span className="truncate">फोटो अपलोड सफल</span>
                   </div>
                   {statusMessage && (
                     <div className="text-[10px] text-slate-500 font-mono mt-0.5 truncate">
                       {statusMessage}
                     </div>
-                  )}
-                  {driveInfo?.driveUrl && (
-                    <a
-                      href={driveInfo.driveUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-[10px] text-blue-600 hover:underline font-bold mt-0.5"
-                    >
-                      <FolderCheck className="w-3 h-3 text-blue-500" />
-                      <span>Google Drive में देखें</span>
-                      <ExternalLink className="w-2.5 h-2.5" />
-                    </a>
                   )}
                 </div>
               </div>
@@ -260,20 +228,17 @@ export default function ImageUploader({
         </div>
       )}
 
-      {/* TAB 2: Google Drive / Web Link */}
+      {/* TAB 2: Web Link */}
       {activeTab === 'link' && (
         <div className="space-y-3">
           <div>
             <input
               type="url"
-              placeholder="https://drive.google.com/file/d/1A2B3C.../view?usp=sharing"
+              placeholder="फोटो का लिंक (Image URL) यहाँ पेस्ट करें"
               value={isBase64 ? '' : value}
               onChange={(e) => onChange(e.target.value)}
               className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-xs font-mono focus:outline-none focus:border-[#144732]"
             />
-            <p className="text-[11px] text-slate-500 mt-1.5">
-              💡 <strong>Google Drive टिप:</strong> फोटो पर Right-Click करके <em>"Anyone with link can view"</em> सेट करें और लिंक यहाँ पेस्ट करें।
-            </p>
           </div>
 
           {previewUrl && !isBase64 && (
@@ -292,7 +257,7 @@ export default function ImageUploader({
                 <div>
                   <div className="text-xs font-black text-emerald-700 flex items-center gap-1.5">
                     <CheckCircle2 className="w-3.5 h-3.5" />
-                    <span>Google Drive लिंक पहचानी गई</span>
+                    <span>फोटो लिंक पहचानी गई</span>
                   </div>
                   <div className="text-[10px] text-slate-500">
                     लाइव प्रिव्यू तैयार

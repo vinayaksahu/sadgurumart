@@ -199,7 +199,7 @@ export default function InventoryManager({ initialProducts, categories }: Invent
             इन्वेंट्री व प्रोडक्ट मैनेजमेंट (Inventory Desk)
           </h1>
           <p className="text-xs text-slate-500 mt-1">
-            मोबाइल गैलरी से फोटो अपलोड करें या Google Drive लिंक, DP प्राइस, PV/BV व स्टॉक अपडेट करें — यह मेम्बर व होमपेज पर तुरंत लाइव होगा।
+            प्रोडक्ट्स, DP प्राइस, PV/BV व स्टॉक अपडेट करें — यह मेम्बर व होमपेज पर तुरंत लाइव होगा।
           </p>
         </div>
 
@@ -460,7 +460,7 @@ export default function InventoryManager({ initialProducts, categories }: Invent
               <ImageUploader
                 value={imageUrl}
                 onChange={setImageUrl}
-                label="प्रोडक्ट फोटो (Phone Gallery / Google Drive)"
+                label="प्रोडक्ट फोटो (Product Photo)"
                 folder="products"
               />
 

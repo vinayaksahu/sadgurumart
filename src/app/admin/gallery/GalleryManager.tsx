@@ -104,7 +104,7 @@ export default function GalleryManager({ initialItems }: GalleryManagerProps) {
             कंपनी फोटो गैलरी (Gallery Desk)
           </h1>
           <p className="text-xs text-slate-500 mt-1">
-            मोबाइल गैलरी से फोटो अपलोड करें या Google Drive लिंक डालकर सेमिनार, लीडरशिप अवार्ड्स व प्रोडक्ट्स की फोटो जोड़ें — यह सीधे होमपेज गैलरी में दिखेगी।
+            सेमिनार, लीडरशिप अवार्ड्स व प्रोडक्ट्स की फोटो जोड़ें — यह सीधे होमपेज गैलरी में दिखेगी।
           </p>
         </div>
 
@@ -210,7 +210,7 @@ export default function GalleryManager({ initialItems }: GalleryManagerProps) {
                   गैलरी में फोटो जोड़ें
                 </h3>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  मोबाइल गैलरी से फोटो चुनें या Google Drive शेयर लिंक पेस्ट करें।
+                  फोटो अपलोड करें या लिंक दर्ज करें।
                 </p>
               </div>
               <button
@@ -270,7 +270,7 @@ export default function GalleryManager({ initialItems }: GalleryManagerProps) {
               <ImageUploader
                 value={imageUrl}
                 onChange={setImageUrl}
-                label="गैलरी फोटो (Phone Gallery / Google Drive)"
+                label="गैलरी फोटो (Photo)"
                 required
                 folder="gallery"
               />
