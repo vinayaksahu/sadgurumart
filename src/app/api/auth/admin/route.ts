@@ -65,6 +65,14 @@ export async function POST(req: NextRequest) {
       maxAge: 12 * 60 * 60, // 12 hours
     });
 
+    response.cookies.set('sgm_admin_active', 'true', {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 12 * 60 * 60,
+    });
+
     return response;
   } catch (error) {
     console.error('Admin auth failure:', error);

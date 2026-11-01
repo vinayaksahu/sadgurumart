@@ -14,13 +14,22 @@ import {
   Award, 
   ChevronRight, 
   LogIn, 
-  Image as ImageIcon 
+  Image as ImageIcon,
+  ArrowLeftRight
 } from 'lucide-react';
 import { useCart } from '@/lib/cartContext';
 
 export default function Navbar() {
   const { itemCount } = useCart();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isAdminActive, setIsAdminActive] = useState(false);
+
+  // Check if admin session cookie exists
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      setIsAdminActive(document.cookie.includes('sgm_admin_active=true'));
+    }
+  }, []);
 
   // Lock body scroll when side panel is open
   useEffect(() => {
@@ -46,6 +55,23 @@ export default function Navbar() {
   return (
     <>
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-[#e8e3d5]">
+        {/* Admin Masquerade Switch Bar (Shows whenever Admin is logged in) */}
+        {isAdminActive && (
+          <div className="bg-gradient-to-r from-[#92580a] via-[#b45309] to-[#78350f] text-white px-3 sm:px-4 py-1.5 text-xs font-black flex items-center justify-between border-b border-[#fef08a]/30 shadow-md">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <ShieldCheck className="w-4 h-4 text-[#fef08a] shrink-0" />
+              <span className="truncate">👑 एडमिन मोड सक्रिय (Admin Session Active • Viewing Member Portal)</span>
+            </div>
+            <a
+              href="/api/auth/switch-portal?target=admin"
+              className="px-2.5 sm:px-3 py-1 rounded-lg bg-white text-[#92580a] hover:bg-[#fef08a] hover:text-[#0b2b1e] text-[11px] sm:text-xs font-black transition-all flex items-center gap-1.5 shrink-0 shadow"
+            >
+              <ArrowLeftRight className="w-3.5 h-3.5" />
+              <span>वापस एडमिन डेस्क (Switch to Admin) &rarr;</span>
+            </a>
+          </div>
+        )}
+
         {/* Top Banner Notice */}
         <div className="bg-[#0b2b1e] text-[#fef08a] px-3 sm:px-4 py-1.5 text-[11px] sm:text-xs font-bold border-b border-[#d4a359]/30 tracking-wider flex items-center justify-between max-w-7xl mx-auto">
           <span className="truncate">🇮🇳 “बेरोजगारी और रोग मुक्त हो भारत हमारा” • SGM MART</span>
@@ -96,6 +122,18 @@ export default function Navbar() {
                 </span>
               )}
             </Link>
+
+            {/* Admin Quick Switch (Desktop) */}
+            {isAdminActive && (
+              <a
+                href="/api/auth/switch-portal?target=admin"
+                className="hidden md:inline-flex px-3 py-2 rounded-xl bg-[#92580a] text-white font-black text-xs hover:bg-[#78350f] transition-all shadow items-center gap-1.5"
+                title="Switch back to Admin Desk"
+              >
+                <ArrowLeftRight className="w-3.5 h-3.5" />
+                <span>Admin Desk</span>
+              </a>
+            )}
 
             {/* Desktop Sign In / Join Buttons */}
             <Link
@@ -166,6 +204,20 @@ export default function Navbar() {
                   <X className="w-5 h-5" />
                 </button>
               </div>
+
+              {/* Admin Mode Switch inside Drawer */}
+              {isAdminActive && (
+                <div className="p-3 bg-[#fdfaf3] border-b border-[#e8e3d5]">
+                  <a
+                    href="/api/auth/switch-portal?target=admin"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-gradient-to-r from-[#92580a] to-[#78350f] text-white font-black text-xs shadow-md transition-all"
+                  >
+                    <ArrowLeftRight className="w-4 h-4 text-[#fef08a]" />
+                    <span>वापस एडमिन डेस्क (Switch to Admin)</span>
+                  </a>
+                </div>
+              )}
 
               {/* Quick Auth Actions inside Drawer */}
               <div className="p-4 bg-[#faf8f4] border-b border-[#e8e3d5] grid grid-cols-2 gap-2">

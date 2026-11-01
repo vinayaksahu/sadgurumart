@@ -70,6 +70,14 @@ export async function POST(req: NextRequest) {
       maxAge: 4 * 60 * 60, // 4 hours
     });
 
+    response.cookies.set('sgm_admin_active', 'true', {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 4 * 60 * 60,
+    });
+
     return response;
   } catch (error) {
     console.error('Superadmin auth failure:', error);
