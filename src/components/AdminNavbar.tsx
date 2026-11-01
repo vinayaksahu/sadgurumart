@@ -132,7 +132,7 @@ export default function AdminNavbar({
       items: [
         { label: 'Pending Withdrawals', href: '/admin/withdrawals?status=pending' },
         { label: 'Approved Withdrawals', href: '/admin/withdrawals?status=approved' },
-        { label: 'Daily Closing & Payout', href: '/api/cron/daily-closing', external: true },
+        { label: 'Daily Closing & Payout', href: '/admin/withdrawals?view=closing' },
         { label: 'TDS Deductions Report', href: '/admin/withdrawals?view=tds' },
       ],
     },
