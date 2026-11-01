@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { CartProvider } from '@/lib/cartContext';
 
@@ -15,14 +15,21 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: '#0b2b1e',
+};
+
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <html lang="hi" suppressHydrationWarning>
-      <body className="min-h-screen flex flex-col antialiased selection:bg-gold-500 selection:text-forest-900">
+    <html lang="hi" suppressHydrationWarning className="overflow-x-hidden max-w-full">
+      <body className="min-h-screen flex flex-col antialiased selection:bg-[#d4a359] selection:text-[#0b2b1e] overflow-x-hidden w-full max-w-full">
         <CartProvider>
           {children}
         </CartProvider>

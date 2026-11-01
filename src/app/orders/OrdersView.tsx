@@ -118,7 +118,7 @@ export default function OrdersView({ initialOrders, currentUserCode }: Props) {
       {/* Filter and Search Bar */}
       <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 bg-white border border-[#e8e3d5] rounded-2xl p-4 shadow-sm">
         {/* Filter Tabs */}
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {[
             { id: 'ALL', label: `All Orders (${orders.length})` },
             { id: 'STORE', label: 'E-Commerce Store' },

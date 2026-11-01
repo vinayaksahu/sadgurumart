@@ -272,6 +272,7 @@ export default function GalleryManager({ initialItems }: GalleryManagerProps) {
                 onChange={setImageUrl}
                 label="गैलरी फोटो (Phone Gallery / Google Drive)"
                 required
+                folder="gallery"
               />
 
               <div>

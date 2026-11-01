@@ -88,7 +88,7 @@ export default async function AdminKYCPage() {
                         </span>
                       </td>
                       <td className="py-3 px-3 text-right">
-                        <AdminKYCActions kycId={kyc.id} currentStatus={kyc.status} />
+                        <AdminKYCActions kyc={kyc as any} currentStatus={kyc.status} />
                       </td>
                     </tr>
                   ))}

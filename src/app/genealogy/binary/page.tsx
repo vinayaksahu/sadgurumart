@@ -208,8 +208,8 @@ export default function BinaryGenealogyPage() {
           </div>
         ) : treeData ? (
           /* Tree Visual Canvas */
-          <div className="bg-white border-2 border-[#144732]/15 rounded-3xl p-8 sm:p-12 shadow-sm overflow-x-auto min-w-[750px]">
-            <div className="flex flex-col items-center">
+          <div className="bg-white border-2 border-[#144732]/15 rounded-3xl p-4 sm:p-12 shadow-sm overflow-x-auto w-full max-w-full">
+            <div className="min-w-[750px] flex flex-col items-center">
               {/* Level 0: Root Node */}
               <div className="mb-8">
                 {renderNode(treeData, 'ROOT')}

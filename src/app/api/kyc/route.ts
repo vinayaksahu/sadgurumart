@@ -39,7 +39,18 @@ export async function POST(req: NextRequest) {
     if (!decoded) return NextResponse.json({ error: 'Session expired' }, { status: 401 });
 
     const body = await req.json();
-    const { panNumber, aadhaarNumber, bankName, bankAccountNumber, ifscCode, accountHolderName } = body;
+    const { 
+      panNumber, 
+      aadhaarNumber, 
+      bankName, 
+      bankAccountNumber, 
+      ifscCode, 
+      accountHolderName,
+      panPhotoUrl,
+      aadhaarFrontUrl,
+      aadhaarBackUrl,
+      passbookChequeUrl
+    } = body;
 
     if (!panNumber || !aadhaarNumber || !bankName || !bankAccountNumber || !ifscCode || !accountHolderName) {
       return NextResponse.json(
@@ -100,6 +111,10 @@ export async function POST(req: NextRequest) {
           bankAccountNumber: bankAccountNumber.trim(),
           ifscCode: ifscCode.trim().toUpperCase(),
           accountHolderName: accountHolderName.trim(),
+          panPhotoUrl: panPhotoUrl || undefined,
+          aadhaarFrontUrl: aadhaarFrontUrl || undefined,
+          aadhaarBackUrl: aadhaarBackUrl || undefined,
+          passbookChequeUrl: passbookChequeUrl || undefined,
           status: 'PENDING', // Awaiting admin review
           rejectionReason: null,
         },
@@ -111,6 +126,10 @@ export async function POST(req: NextRequest) {
           bankAccountNumber: bankAccountNumber.trim(),
           ifscCode: ifscCode.trim().toUpperCase(),
           accountHolderName: accountHolderName.trim(),
+          panPhotoUrl: panPhotoUrl || null,
+          aadhaarFrontUrl: aadhaarFrontUrl || null,
+          aadhaarBackUrl: aadhaarBackUrl || null,
+          passbookChequeUrl: passbookChequeUrl || null,
           status: 'PENDING',
         },
       }),

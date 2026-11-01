@@ -461,6 +461,7 @@ export default function InventoryManager({ initialProducts, categories }: Invent
                 value={imageUrl}
                 onChange={setImageUrl}
                 label="प्रोडक्ट फोटो (Phone Gallery / Google Drive)"
+                folder="products"
               />
 
               {/* Pricing, PV & BV */}

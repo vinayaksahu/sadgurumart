@@ -62,26 +62,26 @@ export default function AdminNoticeBanner({
   const Icon = styleConfig.icon;
 
   return (
-    <div className={`w-full border-2 rounded-2xl p-4 sm:p-5 shadow-sm transition-all ${styleConfig.bg} relative`}>
-      <div className="flex items-start justify-between gap-3 sm:gap-4">
-        <div className="flex items-start gap-3 sm:gap-4">
+    <div className={`w-full max-w-full border-2 rounded-2xl p-4 sm:p-5 shadow-sm transition-all ${styleConfig.bg} relative overflow-hidden`}>
+      <div className="flex items-start justify-between gap-3 sm:gap-4 w-full min-w-0">
+        <div className="flex items-start gap-3 sm:gap-4 min-w-0 flex-1">
           <div className="p-2 sm:p-2.5 rounded-xl bg-white/80 shadow-xs border border-black/5 shrink-0 mt-0.5">
             <Icon className={`w-5 h-5 ${styleConfig.iconColor}`} />
           </div>
 
-          <div className="space-y-1">
+          <div className="space-y-1 min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full ${styleConfig.badgeBg}`}>
                 एडमिन सूचना (Admin Notice)
               </span>
               {title && (
-                <h4 className="font-black text-sm sm:text-base leading-tight">
+                <h4 className="font-black text-sm sm:text-base leading-tight break-words">
                   {title}
                 </h4>
               )}
             </div>
 
-            <p className="text-xs sm:text-sm font-medium leading-relaxed opacity-95">
+            <p className="text-xs sm:text-sm font-medium leading-relaxed opacity-95 break-words">
               {text}
             </p>
 

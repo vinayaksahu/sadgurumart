@@ -118,19 +118,19 @@ export default async function HomePage() {
                 किचन, पर्सनल केयर, और स्वास्थ्यवर्धक आयुर्वेदिक उत्पादों की सीधी खरीदारी करें और भारत के सबसे पारदर्शी डायरेक्ट सेलिंग एवं 2x2 ऑटोपूल नेटवर्क का हिस्सा बनें।
               </p>
 
-              <div className="flex flex-wrap items-center gap-4 pt-2">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 pt-2 w-full sm:w-auto">
                 <Link
                   href="/register"
-                  className="px-8 py-4 rounded-2xl bg-gradient-to-r from-[#d4a359] via-[#fef08a] to-[#bc853c] text-[#0b2b1e] font-black text-base shadow-xl shadow-[#d4a359]/25 hover:opacity-95 transition-all flex items-center gap-3 cursor-pointer"
+                  className="w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl bg-gradient-to-r from-[#d4a359] via-[#fef08a] to-[#bc853c] text-[#0b2b1e] font-black text-sm sm:text-base shadow-xl shadow-[#d4a359]/25 hover:opacity-95 transition-all flex items-center justify-center gap-3 cursor-pointer text-center"
                 >
                   <span>आज ही मेंबर बनें (Start Now)</span>
-                  <ArrowRight className="w-5 h-5" />
+                  <ArrowRight className="w-5 h-5 shrink-0" />
                 </Link>
                 <Link
                   href="/login"
-                  className="px-8 py-4 rounded-2xl bg-white border-2 border-[#144732]/20 text-[#144732] font-bold text-base hover:bg-slate-50 transition-all flex items-center gap-2 shadow-sm"
+                  className="w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl bg-white border-2 border-[#144732]/20 text-[#144732] font-bold text-sm sm:text-base hover:bg-slate-50 transition-all flex items-center justify-center gap-2 shadow-sm text-center"
                 >
-                  <Users className="w-5 h-5 text-[#144732]" />
+                  <Users className="w-5 h-5 text-[#144732] shrink-0" />
                   <span>डिस्ट्रीब्यूटर लॉगिन</span>
                 </Link>
               </div>

@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ShieldCheck, Building, CheckCircle2, AlertCircle, ArrowRight } from 'lucide-react';
+import { ShieldCheck, Building, CheckCircle2, AlertCircle, ArrowRight, FileText, Camera } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import ImageUploader from '@/components/ImageUploader';
 
 export default function KYCForm({ initialData }: { initialData?: any }) {
   const [formData, setFormData] = useState({
@@ -12,6 +13,10 @@ export default function KYCForm({ initialData }: { initialData?: any }) {
     bankAccountNumber: initialData?.bankAccountNumber || '',
     ifscCode: initialData?.ifscCode || '',
     accountHolderName: initialData?.accountHolderName || '',
+    panPhotoUrl: initialData?.panPhotoUrl || '',
+    aadhaarFrontUrl: initialData?.aadhaarFrontUrl || '',
+    aadhaarBackUrl: initialData?.aadhaarBackUrl || '',
+    passbookChequeUrl: initialData?.passbookChequeUrl || '',
   });
 
   const [loading, setLoading] = useState(false);
@@ -21,6 +26,10 @@ export default function KYCForm({ initialData }: { initialData?: any }) {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleImageChange = (field: string, url: string) => {
+    setFormData((prev) => ({ ...prev, [field]: url }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -39,7 +48,7 @@ export default function KYCForm({ initialData }: { initialData?: any }) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'KYC submission failed');
 
-      setSuccess('केवाईसी व बैंक विवरण सफलतापूर्वक सबमिट हुआ। एडमिन वेरिफिकेशन के उपरांत विड्रॉल एक्टिवेट हो जाएगा।');
+      setSuccess('केवाईसी व बैंक विवरण सफलतापूर्वक सबमिट हुआ। आपके दस्तावेज़ Google Drive में सुरक्षित दर्ज हो गए हैं। एडमिन वेरिफिकेशन के उपरांत विड्रॉल एक्टिवेट हो जाएगा।');
       router.refresh();
     } catch (err: any) {
       setError(err.message || 'Error submitting KYC');
@@ -64,7 +73,7 @@ export default function KYCForm({ initialData }: { initialData?: any }) {
         </div>
       )}
 
-      {/* PAN & Aadhaar */}
+      {/* PAN & Aadhaar Details */}
       <div className="space-y-4">
         <h3 className="text-sm font-black text-[#144732] uppercase tracking-wider pb-2 border-b border-slate-100 flex items-center gap-2">
           <ShieldCheck className="w-4 h-4 text-[#92580a]" />
@@ -182,6 +191,53 @@ export default function KYCForm({ initialData }: { initialData?: any }) {
         </div>
       </div>
 
+      {/* 3. Document Photos (PAN, Aadhaar, Bank Cheque/Passbook) */}
+      <div className="space-y-4 pt-4">
+        <h3 className="text-sm font-black text-[#144732] uppercase tracking-wider pb-2 border-b border-slate-100 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Camera className="w-4 h-4 text-[#92580a]" />
+            <span>3. केवाईसी दस्तावेज़ फोटो (Google Drive ऑटो-अपलोड)</span>
+          </div>
+          <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+            📁 Drive Folder Auto-Sync
+          </span>
+        </h3>
+
+        <p className="text-xs text-slate-500">
+          अपने फ़ोन के कैमरे या गैलरी से साफ़ फोटो अपलोड करें। सिस्टम फोटो को ऑटो-कंप्रेस करके सीधे कंपनी के सुरक्षित Google Drive फोल्डर में दर्ज करेगा।
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <ImageUploader
+            label="पैन कार्ड की फोटो (PAN Card Photo)"
+            value={formData.panPhotoUrl}
+            onChange={(url) => handleImageChange('panPhotoUrl', url)}
+            folder="kyc"
+          />
+
+          <ImageUploader
+            label="बैंक पासबुक / कैंसिल्ड चेक (Passbook / Cheque)"
+            value={formData.passbookChequeUrl}
+            onChange={(url) => handleImageChange('passbookChequeUrl', url)}
+            folder="kyc"
+          />
+
+          <ImageUploader
+            label="आधार कार्ड - सामने की फोटो (Aadhaar Front)"
+            value={formData.aadhaarFrontUrl}
+            onChange={(url) => handleImageChange('aadhaarFrontUrl', url)}
+            folder="kyc"
+          />
+
+          <ImageUploader
+            label="आधार कार्ड - पीछे की फोटो (Aadhaar Back)"
+            value={formData.aadhaarBackUrl}
+            onChange={(url) => handleImageChange('aadhaarBackUrl', url)}
+            folder="kyc"
+          />
+        </div>
+      </div>
+
       <div className="pt-4 border-t border-slate-100">
         <button
           type="submit"
@@ -192,7 +248,7 @@ export default function KYCForm({ initialData }: { initialData?: any }) {
             <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
           ) : (
             <>
-              <span>विवरण सुरक्षित एवं सबमिट करें (Save & Submit KYC)</span>
+              <span>विवरण व फोटो सुरक्षित सबमिट करें (Save & Submit KYC to Drive)</span>
               <ArrowRight className="w-4 h-4" />
             </>
           )}

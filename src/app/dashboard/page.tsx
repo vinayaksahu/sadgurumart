@@ -20,7 +20,8 @@ import {
   ShoppingBag,
   Smartphone,
   Building,
-  ArrowLeftRight
+  ArrowLeftRight,
+  LogOut
 } from 'lucide-react';
 import DashboardCopyBox from './DashboardCopyBox';
 import { getSystemSettings } from '@/lib/settings';
@@ -82,27 +83,36 @@ export default async function DashboardPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-1 w-full space-y-8">
         {/* Admin Mode Switch Banner */}
         {hasAdmin && (
-          <div className="bg-gradient-to-r from-[#0b2b1e] via-[#144732] to-[#0b2b1e] border-2 border-[#d4a359] rounded-2xl p-4 sm:p-5 text-white flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#d4a359]/20 border border-[#d4a359] flex items-center justify-center text-[#fef08a] shrink-0">
+          <div className="bg-gradient-to-r from-[#0b2b1e] via-[#144732] to-[#0b2b1e] border-2 border-[#d4a359] rounded-2xl p-4 sm:p-5 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xl w-full max-w-full overflow-hidden">
+            <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
+              <div className="w-10 h-10 rounded-xl bg-[#d4a359]/20 border border-[#d4a359] flex items-center justify-center text-[#fef08a] shrink-0 mt-0.5 sm:mt-0">
                 <ShieldCheck className="w-5 h-5" />
               </div>
-              <div>
-                <div className="font-black text-sm text-[#fef08a]">
+              <div className="min-w-0 flex-1">
+                <div className="font-black text-sm text-[#fef08a] break-words">
                   👑 एडमिनिस्ट्रेटर सेशन एक्टिव (Admin Mode • Member View)
                 </div>
-                <div className="text-xs text-slate-300">
+                <div className="text-xs text-slate-300 break-words mt-0.5">
                   आप वर्तमान में सदस्य डैशबोर्ड देख रहे हैं। जब चाहें एक क्लिक में वापस एडमिन पैनल पर लौटें।
                 </div>
               </div>
             </div>
-            <a
-              href="/api/auth/switch-portal?target=admin"
-              className="px-5 py-2.5 rounded-xl bg-[#d4a359] hover:bg-[#bc853c] text-[#0b2b1e] font-black text-xs shadow-md flex items-center gap-2 shrink-0 transition-all cursor-pointer"
-            >
-              <ArrowLeftRight className="w-4 h-4" />
-              <span>एडमिन पोर्टल पर वापस जाएँ (Switch to Admin)</span>
-            </a>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2.5 w-full sm:w-auto shrink-0">
+              <a
+                href="/api/auth/switch-portal?target=admin"
+                className="w-full sm:w-auto px-4 sm:px-5 py-2.5 rounded-xl bg-[#d4a359] hover:bg-[#bc853c] text-[#0b2b1e] font-black text-xs shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer text-center"
+              >
+                <ArrowLeftRight className="w-4 h-4 shrink-0" />
+                <span className="truncate">वापस एडमिन डेस्क (Switch to Admin)</span>
+              </a>
+              <a
+                href="/api/auth/logout?target=admin&redirect=/adminlogin"
+                className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black text-xs shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer text-center"
+              >
+                <LogOut className="w-4 h-4 shrink-0" />
+                <span>लॉगआउट (Logout)</span>
+              </a>
+            </div>
           </div>
         )}
 
@@ -131,22 +141,22 @@ export default async function DashboardPage() {
         )}
 
         {/* User Identity & Rank Header */}
-        <div className="bg-gradient-to-r from-[#144732] to-[#0b2b1e] border-2 border-[#d4a359] rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
-          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 relative z-10">
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-2xl bg-white/10 border-2 border-[#d4a359] flex items-center justify-center font-black text-2xl text-[#fef08a] shadow-md">
+        <div className="bg-gradient-to-r from-[#144732] to-[#0b2b1e] border-2 border-[#d4a359] rounded-3xl p-5 sm:p-8 text-white shadow-xl relative overflow-hidden w-full max-w-full">
+          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 relative z-10 w-full min-w-0">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full min-w-0">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white/10 border-2 border-[#d4a359] flex items-center justify-center font-black text-2xl text-[#fef08a] shadow-md shrink-0">
                 {user.name.charAt(0).toUpperCase()}
               </div>
-              <div>
-                <div className="flex items-center gap-3">
-                  <h1 className="text-2xl sm:text-3xl font-black tracking-tight">{user.name}</h1>
-                  <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider ${
+              <div className="min-w-0 flex-1 w-full">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                  <h1 className="text-xl sm:text-3xl font-black tracking-tight break-words">{user.name}</h1>
+                  <span className={`px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-wider ${
                     user.isActive ? 'bg-emerald-500 text-white' : 'bg-amber-500 text-slate-900'
                   }`}>
                     {user.isActive ? 'Active Member' : 'Pending Activation'}
                   </span>
                 </div>
-                <div className="text-xs text-slate-300 font-semibold mt-1 flex flex-wrap items-center gap-3">
+                <div className="text-xs text-slate-300 font-semibold mt-1.5 flex flex-wrap items-center gap-2 sm:gap-3">
                   <span>Member ID: <strong className="text-[#fef08a] font-mono">{user.userCode}</strong></span>
                   <span>•</span>
                   <span>Rank: <strong className="text-emerald-300">{user.rank.replace('_', ' ')}</strong></span>
@@ -165,33 +175,33 @@ export default async function DashboardPage() {
             </div>
 
             {/* Quick Action Buttons */}
-            <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-3 lg:flex lg:flex-wrap items-center gap-2.5 sm:gap-3 w-full lg:w-auto">
               <Link
                 href="/wallet"
-                className="px-5 py-3 rounded-2xl bg-[#d4a359] hover:bg-[#bc853c] text-[#0b2b1e] font-black text-xs transition-colors flex items-center justify-center gap-2 shadow-md"
+                className="w-full lg:w-auto px-4 py-2.5 sm:px-5 sm:py-3 rounded-2xl bg-[#d4a359] hover:bg-[#bc853c] text-[#0b2b1e] font-black text-xs transition-colors flex items-center justify-center gap-2 shadow-md text-center"
               >
-                <Wallet className="w-4 h-4 text-[#0b2b1e]" />
+                <Wallet className="w-4 h-4 text-[#0b2b1e] shrink-0" />
                 <span>वॉलेट हब व P2P (Wallet Hub)</span>
               </Link>
               <Link
                 href="/orders"
-                className="px-4 py-3 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold text-xs transition-colors flex items-center justify-center gap-1.5"
+                className="w-full lg:w-auto px-4 py-2.5 sm:px-4 sm:py-3 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold text-xs transition-colors flex items-center justify-center gap-1.5 text-center"
               >
-                <ShoppingBag className="w-4 h-4 text-[#fef08a]" />
+                <ShoppingBag className="w-4 h-4 text-[#fef08a] shrink-0" />
                 <span>My Orders</span>
               </Link>
               <Link
                 href="/kyc"
-                className="px-4 py-3 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold text-xs transition-colors flex items-center justify-center gap-1.5"
+                className="w-full lg:w-auto px-4 py-2.5 sm:px-4 sm:py-3 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold text-xs transition-colors flex items-center justify-center gap-1.5 text-center"
               >
-                <Building className="w-4 h-4 text-[#fef08a]" />
+                <Building className="w-4 h-4 text-[#fef08a] shrink-0" />
                 <span>Bank & KYC</span>
               </Link>
             </div>
           </div>
 
           {/* Referral Link Copy Bar */}
-          <div className="mt-6 pt-5 border-t border-white/10">
+          <div className="mt-5 pt-4 sm:mt-6 sm:pt-5 border-t border-white/10 w-full min-w-0">
             <DashboardCopyBox userCode={user.userCode} />
           </div>
         </div>
@@ -381,16 +391,16 @@ export default async function DashboardPage() {
           ) : (
             <div className="divide-y divide-slate-100">
               {user.orders.map((ord) => (
-                <div key={ord.id} className="py-3 flex items-center justify-between text-xs">
-                  <div>
-                    <Link href={`/orders/${ord.orderNumber}`} className="font-bold text-[#144732] hover:underline">
+                <div key={ord.id} className="py-3 flex items-center justify-between gap-3 text-xs">
+                  <div className="min-w-0 flex-1">
+                    <Link href={`/orders/${ord.orderNumber}`} className="font-bold text-[#144732] hover:underline truncate block">
                       {ord.orderNumber}
                     </Link>
-                    <div className="text-[11px] text-slate-400">
+                    <div className="text-[11px] text-slate-400 truncate">
                       {new Date(ord.createdAt).toLocaleDateString('hi-IN')} • {ord.paymentMethod}
                     </div>
                   </div>
-                  <div className="text-right">
+                  <div className="text-right shrink-0">
                     <div className="font-black text-slate-900">₹{ord.totalDp}</div>
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
                       {ord.orderStatus}

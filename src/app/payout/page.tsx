@@ -171,8 +171,8 @@ export default async function PayoutPage() {
               अभी तक कोई विड्रॉल अनुरोध नहीं किया गया है।
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+            <div className="overflow-x-auto w-full max-w-full">
+              <table className="w-full min-w-[620px] text-left text-xs">
                 <thead>
                   <tr className="bg-[#faf8f4] text-slate-600 uppercase tracking-wider">
                     <th className="py-2.5 px-3">दिनांक</th>
@@ -225,8 +225,8 @@ export default async function PayoutPage() {
               कोई ट्रांजेक्शन रिकॉर्ड उपलब्ध नहीं है।
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+            <div className="overflow-x-auto w-full max-w-full">
+              <table className="w-full min-w-[620px] text-left text-xs">
                 <thead>
                   <tr className="bg-[#faf8f4] text-slate-600 uppercase tracking-wider">
                     <th className="py-2.5 px-3">दिनांक</th>

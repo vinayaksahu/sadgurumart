@@ -478,7 +478,7 @@ export default function WalletView({
           </div>
 
           <div className="space-y-3 pt-4 border-t border-white/15">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
               {/* Button 1: Withdraw to Bank */}
               <button
                 onClick={() => {
@@ -553,7 +553,7 @@ export default function WalletView({
           </div>
 
           <div className="space-y-3 pt-4 border-t border-white/15">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
               {/* Button 1: P2P Fund Transfer */}
               <button
                 onClick={() => {
@@ -679,8 +679,8 @@ export default function WalletView({
             <div>कोई ट्रांजेक्शन रिकॉर्ड नहीं मिला।</div>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+          <div className="overflow-x-auto w-full max-w-full">
+            <table className="w-full min-w-[650px] text-left text-xs">
               <thead>
                 <tr className="bg-[#faf8f4] text-slate-600 uppercase tracking-wider font-bold">
                   <th className="py-3 px-3">दिनांक व समय</th>

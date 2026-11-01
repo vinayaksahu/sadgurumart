@@ -92,6 +92,10 @@ export async function POST(req: NextRequest) {
         withdrawalsEnabled: Boolean(body.withdrawalsEnabled),
         maintenanceMode: Boolean(body.maintenanceMode),
         maintenanceMessage: body.maintenanceMessage ?? current.maintenanceMessage,
+
+        // Google Drive Settings
+        googleDriveUploadUrl: body.googleDriveUploadUrl !== undefined ? body.googleDriveUploadUrl?.trim() : current.googleDriveUploadUrl,
+        googleDriveFolderId: body.googleDriveFolderId !== undefined ? body.googleDriveFolderId?.trim() : current.googleDriveFolderId,
       },
     });
 

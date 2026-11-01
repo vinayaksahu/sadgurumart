@@ -43,6 +43,10 @@ export const DEFAULT_SYSTEM_SETTINGS = {
   withdrawalsEnabled: true,
   maintenanceMode: false,
   maintenanceMessage: 'पोर्टल में आवश्यक तकनीकी सुधार कार्य प्रगति पर है। कृपया कुछ समय बाद पुनः प्रयास करें।',
+
+  // Google Drive Integration
+  googleDriveUploadUrl: '',
+  googleDriveFolderId: '1m48lvsU628rR8nhL4i-24GWdJe_4w5Hn',
 };
 
 export async function getSystemSettings() {

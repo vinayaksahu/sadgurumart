@@ -64,7 +64,7 @@ export default function AdminNavbar({
     { label: 'Trigger Daily Closing (दैनिक क्लोजिंग)', href: '/api/cron/daily-closing', icon: Clock, external: true },
   ];
 
-  const logoutHref = isSuperAdmin ? '/superadminlogin' : '/adminlogin';
+  const logoutHref = `/api/auth/logout?target=${isSuperAdmin ? 'superadmin' : 'admin'}`;
 
   return (
     <>
@@ -73,23 +73,23 @@ export default function AdminNavbar({
           ? 'bg-[#0b2b1e] border-[#d4a359]/30 text-white' 
           : 'bg-white border-[#e8e3d5] text-[#2d3748]'
       }`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between w-full min-w-0">
           {/* Brand Logo & Title */}
-          <Link href={isSuperAdmin ? '/superadmin/dashboard' : '/admin/dashboard'} className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center p-0.5 border shadow-sm ${
+          <Link href={isSuperAdmin ? '/superadmin/dashboard' : '/admin/dashboard'} className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <div className={`w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center p-0.5 border shadow-sm shrink-0 ${
               isSuperAdmin 
                 ? 'bg-[#051810] border-[#d4a359]' 
                 : 'bg-white border-[#d4a359]'
             }`}>
               <img src="/sgm_logo.png" alt="SGM Logo" className="w-full h-full object-contain" />
             </div>
-            <div>
-              <div className={`font-black text-base sm:text-lg leading-none ${
+            <div className="min-w-0">
+              <div className={`font-black text-sm sm:text-base leading-none truncate ${
                 isSuperAdmin ? 'text-[#fef08a]' : 'text-[#144732]'
               }`}>
                 {title}
               </div>
-              <div className={`text-[10px] font-extrabold uppercase tracking-widest mt-0.5 ${
+              <div className={`text-[9px] sm:text-[10px] font-extrabold uppercase tracking-widest mt-0.5 truncate ${
                 isSuperAdmin ? 'text-[#d4a359]' : 'text-[#92580a]'
               }`}>
                 {role} • {username}
@@ -175,7 +175,7 @@ export default function AdminNavbar({
               <span>Switch to Member (मेम्बर पोर्टल)</span>
             </a>
 
-            <Link
+            <a
               href={logoutHref}
               className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors ${
                 isSuperAdmin 
@@ -185,7 +185,7 @@ export default function AdminNavbar({
             >
               <LogOut className="w-3.5 h-3.5" />
               <span>Logout</span>
-            </Link>
+            </a>
 
             {/* Mobile Hamburger (3 parallel lines) Button */}
             <button
@@ -311,14 +311,14 @@ export default function AdminNavbar({
 
             {/* Drawer Footer with Logout */}
             <div className="p-4 border-t border-slate-100 bg-slate-50 space-y-3">
-              <Link
+              <a
                 href={logoutHref}
                 onClick={() => setIsOpen(false)}
                 className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-red-600 text-white font-black text-sm hover:bg-red-700 shadow-md transition-all"
               >
                 <LogOut className="w-4 h-4" />
                 <span>Admin Logout (लॉगआउट)</span>
-              </Link>
+              </a>
               <div className="text-[10px] text-center text-slate-400">
                 SGM Mart Online Service Pvt. Ltd. • Secure Admin Session
               </div>

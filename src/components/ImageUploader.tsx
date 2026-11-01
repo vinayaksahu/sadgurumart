@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   Camera, 
   UploadCloud, 
@@ -9,7 +9,8 @@ import {
   X, 
   RefreshCw, 
   Smartphone,
-  Eye
+  ExternalLink,
+  FolderCheck
 } from 'lucide-react';
 import { formatGoogleDriveUrl, compressImageFile } from '@/lib/imageUtils';
 
@@ -18,6 +19,7 @@ interface ImageUploaderProps {
   onChange: (url: string) => void;
   label?: string;
   required?: boolean;
+  folder?: 'products' | 'kyc' | 'gallery' | 'general';
 }
 
 export default function ImageUploader({
@@ -25,11 +27,18 @@ export default function ImageUploader({
   onChange,
   label = 'फोटो (Photo / Image)',
   required = false,
+  folder = 'general',
 }: ImageUploaderProps) {
   const isBase64 = value?.startsWith('data:image/');
-  const [activeTab, setActiveTab] = useState<'upload' | 'link'>(isBase64 ? 'upload' : 'upload');
+  const isGoogleDrive = value?.includes('googleusercontent.com') || value?.includes('drive.google.com');
+
+  const [activeTab, setActiveTab] = useState<'upload' | 'link'>(isBase64 || isGoogleDrive || !value ? 'upload' : 'link');
   const [compressing, setCompressing] = useState(false);
-  const [sizeInfo, setSizeInfo] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [driveInfo, setDriveInfo] = useState<{ isDrive: boolean; driveUrl?: string } | null>(
+    isGoogleDrive ? { isDrive: true } : null
+  );
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -41,16 +50,53 @@ export default function ImageUploader({
 
     setError(null);
     setCompressing(true);
+    setStatusMessage('फोटो कंप्रेस व ऑप्टिमाइज़ हो रही है...');
 
     try {
       const originalSizeKb = Math.round(file.size / 1024);
       const { dataUrl, sizeKb } = await compressImageFile(file, 1000, 0.75);
-      onChange(dataUrl);
-      setSizeInfo(`${sizeKb} KB (ओरिजिनल ${originalSizeKb} KB से कंप्रेस किया गया)`);
+      
+      setCompressing(false);
+      setUploading(true);
+      setStatusMessage('Google Drive फोल्डर में ऑटो-अपलोड हो रहा है...');
+
+      // Call central upload API which forwards to Google Drive folder
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          file: dataUrl,
+          filename: `${folder}_${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`,
+          mimeType: 'image/jpeg',
+          folder,
+        }),
+      });
+
+      const uploadResult = await res.json();
+
+      if (uploadResult?.url) {
+        onChange(uploadResult.url);
+
+        if (uploadResult.provider === 'google_drive') {
+          setDriveInfo({
+            isDrive: true,
+            driveUrl: uploadResult.driveUrl,
+          });
+          setStatusMessage(`Google Drive में सुरक्षित सेव! (${sizeKb} KB)`);
+        } else {
+          setDriveInfo(null);
+          setStatusMessage(`फोटो तैयार! (${sizeKb} KB, ओरिजिनल ${originalSizeKb} KB)`);
+        }
+      } else {
+        // Fallback to local dataUrl
+        onChange(dataUrl);
+        setStatusMessage(`फोटो कंप्रेस की गई (${sizeKb} KB)`);
+      }
     } catch (err: any) {
       setError(err.message || 'फोटो प्रोसेस करने में समस्या आई।');
     } finally {
       setCompressing(false);
+      setUploading(false);
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -59,7 +105,8 @@ export default function ImageUploader({
 
   const handleClear = () => {
     onChange('');
-    setSizeInfo(null);
+    setStatusMessage(null);
+    setDriveInfo(null);
     setError(null);
   };
 
@@ -83,7 +130,7 @@ export default function ImageUploader({
             }`}
           >
             <Smartphone className="w-3.5 h-3.5" />
-            <span>फ़ोन / गैलरी से चुनें</span>
+            <span>फ़ोन / गैलरी से ऑटो-अपलोड</span>
           </button>
 
           <button
@@ -96,7 +143,7 @@ export default function ImageUploader({
             }`}
           >
             <LinkIcon className="w-3.5 h-3.5" />
-            <span>Google Drive लिंक</span>
+            <span>Drive लिंक पेस्ट करें</span>
           </button>
         </div>
       </div>
@@ -107,7 +154,7 @@ export default function ImageUploader({
         </div>
       )}
 
-      {/* TAB 1: Mobile / Device Gallery Upload */}
+      {/* TAB 1: Mobile / Device Gallery Upload with Auto Drive Sync */}
       {activeTab === 'upload' && (
         <div className="space-y-3">
           <input
@@ -116,20 +163,25 @@ export default function ImageUploader({
             onChange={handleFileChange}
             accept="image/*"
             className="hidden"
-            id="mobile-gallery-upload-input"
+            id={`uploader-${label.replace(/[^a-zA-Z0-9]/g, '-')}`}
           />
 
           {!value ? (
             <div
-              onClick={() => fileInputRef.current?.click()}
+              onClick={() => {
+                if (!compressing && !uploading) {
+                  fileInputRef.current?.click();
+                }
+              }}
               className="border-2 border-dashed border-[#144732]/30 hover:border-[#144732] bg-white rounded-2xl p-6 text-center cursor-pointer transition-all hover:bg-[#144732]/5 group"
             >
-              {compressing ? (
+              {compressing || uploading ? (
                 <div className="space-y-2 py-2">
                   <RefreshCw className="w-8 h-8 text-[#144732] animate-spin mx-auto" />
                   <div className="text-xs font-black text-[#144732]">
-                    फ़ोटो प्रोसेस व ऑप्टिमाइज़ हो रही है...
+                    {statusMessage || 'फ़ोटो प्रोसेस व ड्राइव पर अपलोड हो रही है...'}
                   </div>
+                  <p className="text-[10px] text-slate-400">कृपया प्रतीक्षा करें...</p>
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -137,10 +189,10 @@ export default function ImageUploader({
                     <Camera className="w-6 h-6" />
                   </div>
                   <div className="text-xs font-black text-[#144732]">
-                    📱 मोबाइल गैलरी से फोटो चुनें (या कैमरा खोलें)
+                    📱 मोबाइल गैलरी से फोटो चुनें (या कैमरा से खींचें)
                   </div>
                   <p className="text-[11px] text-slate-500">
-                    JPG, PNG, WebP — सिस्टम आपकी फोटो को ऑटो-कंप्रेस करके लोड कर देगा
+                    JPG, PNG, WebP — सिस्टम ऑटो-कंप्रेस करके सीधे Google Drive में अपलोड कर देगा
                   </p>
                 </div>
               )}
@@ -161,16 +213,27 @@ export default function ImageUploader({
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5 text-xs font-black text-emerald-800">
                     <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <span className="truncate">फ़ोन गैलरी से फोटो तैयार है</span>
+                    <span className="truncate">
+                      {driveInfo?.isDrive || isGoogleDrive ? 'Google Drive में सुरक्षित' : 'फोटो तैयार'}
+                    </span>
                   </div>
-                  {sizeInfo && (
-                    <div className="text-[10px] text-slate-500 font-mono mt-0.5">
-                      साइज़: {sizeInfo}
+                  {statusMessage && (
+                    <div className="text-[10px] text-slate-500 font-mono mt-0.5 truncate">
+                      {statusMessage}
                     </div>
                   )}
-                  <div className="text-[10px] text-[#92580a] font-bold mt-0.5">
-                    ✓ लाइव होमपेज व मेंबर्स को दिखेगी
-                  </div>
+                  {driveInfo?.driveUrl && (
+                    <a
+                      href={driveInfo.driveUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-[10px] text-blue-600 hover:underline font-bold mt-0.5"
+                    >
+                      <FolderCheck className="w-3 h-3 text-blue-500" />
+                      <span>Google Drive में देखें</span>
+                      <ExternalLink className="w-2.5 h-2.5" />
+                    </a>
+                  )}
                 </div>
               </div>
 

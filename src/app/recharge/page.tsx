@@ -99,8 +99,8 @@ export default async function RechargePage() {
               अभी तक कोई रिचार्ज नहीं किया गया है।
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+            <div className="overflow-x-auto w-full max-w-full">
+              <table className="w-full min-w-[580px] text-left text-xs">
                 <thead>
                   <tr className="bg-[#faf8f4] text-slate-600 uppercase tracking-wider">
                     <th className="py-2.5 px-3">दिनांक</th>

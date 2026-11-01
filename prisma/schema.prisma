@@ -534,6 +534,10 @@ model SystemSetting {
   maintenanceMode         Boolean  @default(false)
   maintenanceMessage      String?  @default("पोर्टल में आवश्यक तकनीकी सुधार कार्य प्रगति पर है। कृपया कुछ समय बाद पुनः प्रयास करें।")
 
+  // Google Drive Auto-Upload Configuration
+  googleDriveUploadUrl    String?  @default("")
+  googleDriveFolderId     String?  @default("1m48lvsU628rR8nhL4i-24GWdJe_4w5Hn")
+
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt
 

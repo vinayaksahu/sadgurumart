@@ -89,8 +89,8 @@ export default async function AutoPoolPage() {
             </span>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+          <div className="overflow-x-auto w-full max-w-full">
+            <table className="w-full min-w-[620px] text-left text-xs">
               <thead>
                 <tr className="bg-[#144732] text-white uppercase tracking-wider">
                   <th className="py-3 px-4 rounded-l-xl">लेवल (Level)</th>

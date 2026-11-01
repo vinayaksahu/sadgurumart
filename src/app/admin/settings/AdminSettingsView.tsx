@@ -22,7 +22,11 @@ import {
   DollarSign,
   Percent,
   ToggleLeft,
-  ToggleRight
+  ToggleRight,
+  FolderCheck,
+  Copy,
+  Check,
+  UploadCloud
 } from 'lucide-react';
 import AdminNoticeBanner from '@/components/AdminNoticeBanner';
 import AdminPopupModal from '@/components/AdminPopupModal';
@@ -33,13 +37,18 @@ interface Props {
 }
 
 export default function AdminSettingsView({ initialSettings, isSuperAdmin }: Props) {
-  const [activeTab, setActiveTab] = useState<'plan' | 'backup' | 'notice' | 'popup' | 'general'>('plan');
+  const [activeTab, setActiveTab] = useState<'plan' | 'backup' | 'notice' | 'popup' | 'general' | 'drive'>('plan');
   const [formData, setFormData] = useState(initialSettings || {});
   const [saving, setSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<{ type: 'success' | 'error' | null; message: string }>({
     type: null,
     message: '',
   });
+
+  // Google Drive Tab State
+  const [testingDrive, setTestingDrive] = useState(false);
+  const [testResult, setTestResult] = useState<any>(null);
+  const [copiedScript, setCopiedScript] = useState(false);
 
   // Backup Tab Stats
   const [backupStats, setBackupStats] = useState<any>(null);
@@ -111,10 +120,11 @@ export default function AdminSettingsView({ initialSettings, isSuperAdmin }: Pro
   };
 
   const tabs = [
-    { id: 'plan', label: '🎯 Plan Modify (प्लान संशोधन)', desc: 'PV, Matching %, Deductions & Limits' },
-    { id: 'backup', label: '💾 Data Backup (डेटा बैकअप)', desc: '1-Click JSON & CSV Database Exports' },
-    { id: 'notice', label: '📢 Admin Notice (सूचना व टिकर)', desc: 'Dashboard Announcement & Marquee' },
-    { id: 'popup', label: '🖼️ Popup Modal (पॉपअप बैनर)', desc: 'Greeting Dialog & Special Offers' },
+    { id: 'plan', label: '🎯 Plan Modify (प्लान)', desc: 'PV, Matching %, Deductions' },
+    { id: 'drive', label: '📁 Google Drive (ऑटो-अपलोड)', desc: 'Product & Member KYC Drive Sync' },
+    { id: 'backup', label: '💾 Data Backup (डेटा बैकअप)', desc: '1-Click JSON & CSV Exports' },
+    { id: 'notice', label: '📢 Admin Notice (सूचना)', desc: 'Dashboard Announcement & Marquee' },
+    { id: 'popup', label: '🖼️ Popup Modal (पॉपअप)', desc: 'Greeting Dialog & Offers' },
     { id: 'general', label: '⚙️ General Controls (सामान्य)', desc: 'Contact Info & System Toggles' },
   ];
 
@@ -178,7 +188,7 @@ export default function AdminSettingsView({ initialSettings, isSuperAdmin }: Pro
       )}
 
       {/* Tab Navigation Pill Bar */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 bg-white/70 p-2 rounded-2xl border border-black/10 shadow-xs">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 bg-white/70 p-2 rounded-2xl border border-black/10 shadow-xs">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
           return (
@@ -482,6 +492,337 @@ export default function AdminSettingsView({ initialSettings, isSuperAdmin }: Pro
             </div>
           </div>
         </form>
+      )}
+
+      {/* ======================================================== */}
+      {/* TAB: GOOGLE DRIVE AUTO-UPLOAD (ड्राइव ऑटो-अपलोड) */}
+      {/* ======================================================== */}
+      {activeTab === 'drive' && (
+        <div className="space-y-6">
+          {/* Target Folder Header Card */}
+          <div className="bg-gradient-to-br from-[#144732] to-[#0b2b1e] text-white rounded-3xl p-6 sm:p-8 shadow-xl border border-[#d4a359]/40 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-80 h-80 bg-[#d4a359]/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="relative z-10 space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#d4a359]/20 text-[#fef08a] border border-[#d4a359]/30">
+                    Google Drive Cloud Storage Sync
+                  </span>
+                  <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight mt-2 flex items-center gap-2">
+                    <span>📁 गूगल ड्राइव ऑटो-अपलोड व्यवस्था</span>
+                  </h2>
+                  <p className="text-xs text-slate-300 mt-1 max-w-2xl">
+                    जब भी एडमिन इन्वेंटरी में प्रोडक्ट की फोटो जोड़ेगा या मेंबर KYC में दस्तावेज अपलोड करेगा, वे सभी मीडिया सीधे आपके इस गूगल ड्राइव फोल्डर में सुरक्षित रूप से ऑटो-अपलोड हो जाएंगे।
+                  </p>
+                </div>
+
+                <a
+                  href={`https://drive.google.com/drive/folders/${formData.googleDriveFolderId || '1m48lvsU628rR8nhL4i-24GWdJe_4w5Hn'}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold border border-white/20 backdrop-blur-sm transition-all hover:scale-105 shrink-0"
+                >
+                  <FolderCheck className="w-4 h-4 text-[#fef08a]" />
+                  <span>Google Drive फोल्डर खोलें</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+              </div>
+
+              {/* Folder Details Box */}
+              <div className="bg-black/30 rounded-2xl p-4 border border-white/10 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono">
+                <div>
+                  <span className="text-slate-400 block text-[10px] uppercase font-sans font-bold">Target Drive Folder ID:</span>
+                  <strong className="text-[#fef08a] text-sm break-all">{formData.googleDriveFolderId || '1m48lvsU628rR8nhL4i-24GWdJe_4w5Hn'}</strong>
+                </div>
+                <div>
+                  <span className="text-slate-400 block text-[10px] uppercase font-sans font-bold">Integration Status:</span>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    {formData.googleDriveUploadUrl ? (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-sans font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span>ऑटो-अपलोड सक्रिय (Active)</span>
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-sans font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                        <AlertCircle className="w-3.5 h-3.5" />
+                        <span>वेबहुक URL सेटअप शेष (Pending Webhook URL)</span>
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Form Card for Webhook Configuration */}
+          <form onSubmit={handleSaveSettings} className="bg-white border-2 border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+            <div className="border-b border-slate-100 pb-4">
+              <h3 className="text-base font-black text-[#144732] flex items-center gap-2">
+                <UploadCloud className="w-5 h-5 text-[#92580a]" />
+                <span>1. Google Apps Script Webhook URL कॉन्फ़िगर करें</span>
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Google Apps Script का Web App URL यहाँ पेस्ट करें। यह बिना किसी अतिरिक्त खर्च के आपके ड्राइव खाते से डायरेक्ट कनेक्ट रहता है।
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Google Apps Script Web App URL *
+                </label>
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <input
+                    type="url"
+                    value={formData.googleDriveUploadUrl || ''}
+                    onChange={(e) => handleInputChange('googleDriveUploadUrl', e.target.value)}
+                    placeholder="https://script.google.com/macros/s/AKfycb.../exec"
+                    className="flex-1 px-4 py-2.5 rounded-xl border border-slate-300 font-mono text-xs focus:border-[#144732] focus:outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      setTestingDrive(true);
+                      setTestResult(null);
+                      try {
+                        const testBase64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+                        const res = await fetch('/api/upload', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                            file: testBase64,
+                            filename: `test_connection_${Date.now()}.png`,
+                            mimeType: 'image/png',
+                            folder: 'test',
+                          }),
+                        });
+                        const data = await res.json();
+                        setTestResult(data);
+                      } catch (err: any) {
+                        setTestResult({ success: false, error: err.message || 'Connection failed' });
+                      } finally {
+                        setTestingDrive(false);
+                      }
+                    }}
+                    disabled={testingDrive}
+                    className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50 shrink-0"
+                  >
+                    {testingDrive ? (
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <UploadCloud className="w-4 h-4" />
+                    )}
+                    <span>{testingDrive ? 'टेस्टिंग...' : 'ड्राइव कनेक्शन टेस्ट करें'}</span>
+                  </button>
+                </div>
+                <p className="text-[11px] text-slate-500 mt-1">
+                  URL पेस्ट करने के बाद <strong>"ड्राइव सेटिंग्स सुरक्षित करें"</strong> पर क्लिक करें।
+                </p>
+              </div>
+
+              {/* Test Result Feedback */}
+              {testResult && (
+                <div className={`p-4 rounded-2xl border text-xs font-bold flex items-start gap-3 ${
+                  testResult.provider === 'google_drive'
+                    ? 'bg-emerald-50 border-emerald-300 text-emerald-800'
+                    : 'bg-amber-50 border-amber-300 text-amber-800'
+                }`}>
+                  {testResult.provider === 'google_drive' ? (
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+                  ) : (
+                    <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                  )}
+                  <div className="space-y-1">
+                    <div className="font-black text-sm">
+                      {testResult.provider === 'google_drive'
+                        ? '🎉 बधाई! Google Drive कनेक्शन 100% सफल!'
+                        : '⚠️ अभी ड्राइव वेबहुक कनेक्ट नहीं हुआ है'}
+                    </div>
+                    <div className="font-normal">{testResult.message || testResult.error}</div>
+                    {testResult.driveUrl && (
+                      <a
+                        href={testResult.driveUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-blue-600 hover:underline font-mono text-[11px] mt-1"
+                      >
+                        <span>अपलोड की गई टेस्ट फाइल देखें</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Google Drive फोल्डर ID (Target Folder ID)
+                </label>
+                <input
+                  type="text"
+                  value={formData.googleDriveFolderId || '1m48lvsU628rR8nhL4i-24GWdJe_4w5Hn'}
+                  onChange={(e) => handleInputChange('googleDriveFolderId', e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-300 font-mono text-xs focus:border-[#144732] focus:outline-none"
+                />
+              </div>
+
+              <div className="pt-2 flex justify-end">
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="flex items-center gap-2 px-8 py-3 rounded-2xl bg-gradient-to-r from-[#144732] to-[#0b2b1e] text-[#fef08a] font-black text-sm shadow-md border border-[#d4a359] hover:scale-[1.02] active:scale-95 transition-all cursor-pointer"
+                >
+                  <Save className="w-4 h-4 text-[#d4a359]" />
+                  <span>{saving ? 'सुरक्षित हो रहा है...' : 'ड्राइव सेटिंग्स सुरक्षित करें (Save Drive Settings)'}</span>
+                </button>
+              </div>
+            </div>
+          </form>
+
+          {/* Setup Instructions & Copyable Script Box */}
+          <div className="bg-[#faf8f4] border-2 border-[#d4a359]/30 rounded-3xl p-6 sm:p-8 space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#e8e3d5] pb-4">
+              <div>
+                <h3 className="text-base font-black text-[#144732] flex items-center gap-2">
+                  <span>📋 1-मिनट Google Apps Script कोड (तैयार स्क्रिप्ट)</span>
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  यह कोड आपके गूगल ड्राइव फोल्डर (ID: <strong className="font-mono text-slate-700">{formData.googleDriveFolderId || '1m48lvsU628rR8nhL4i-24GWdJe_4w5Hn'}</strong>) के लिए पहले से कॉन्फ़िगर है।
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const code = `function doPost(e) {
+  try {
+    var data = JSON.parse(e.postData.contents);
+    var targetFolderId = data.folderId || "${formData.googleDriveFolderId || '1m48lvsU628rR8nhL4i-24GWdJe_4w5Hn'}";
+    var folder = DriveApp.getFolderById(targetFolderId);
+
+    var base64Data = data.base64;
+    if (base64Data.indexOf('base64,') > -1) {
+      base64Data = base64Data.split('base64,')[1];
+    }
+
+    var decoded = Utilities.base64Decode(base64Data);
+    var blob = Utilities.newBlob(
+      decoded, 
+      data.mimeType || 'image/jpeg', 
+      data.filename || ('sgm_upload_' + new Date().getTime() + '.jpg')
+    );
+
+    var file = folder.createFile(blob);
+    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+
+    var fileId = file.getId();
+    var viewUrl = "https://lh3.googleusercontent.com/d/" + fileId;
+    var driveUrl = file.getUrl();
+
+    return ContentService.createTextOutput(JSON.stringify({
+      success: true,
+      fileId: fileId,
+      url: viewUrl,
+      driveUrl: driveUrl,
+      filename: file.getName()
+    })).setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({
+      success: false,
+      error: err.toString()
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}`;
+                  navigator.clipboard.writeText(code);
+                  setCopiedScript(true);
+                  setTimeout(() => setCopiedScript(false), 3000);
+                }}
+                className="px-4 py-2 rounded-xl bg-[#144732] hover:bg-[#0b2b1e] text-[#fef08a] text-xs font-black flex items-center gap-1.5 transition-all shadow cursor-pointer shrink-0"
+              >
+                {copiedScript ? <Check className="w-4 h-4 text-emerald-300" /> : <Copy className="w-4 h-4" />}
+                <span>{copiedScript ? '✓ कोड कॉपी हो गया!' : 'स्क्रिप्ट कोड कॉपी करें (Copy Code)'}</span>
+              </button>
+            </div>
+
+            {/* Step-by-Step Hindi Guide */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
+              <div className="bg-white p-4 rounded-2xl border border-slate-200 space-y-1.5">
+                <div className="w-6 h-6 rounded-full bg-[#144732] text-white flex items-center justify-center font-black text-xs">1</div>
+                <div className="font-bold text-slate-800">script.google.com खोलें</div>
+                <p className="text-slate-500 text-[11px]">
+                  उसी गूगल अकाउंट से लॉग इन करें जिसके पास ड्राइव फोल्डर का मालिकाना हक है।
+                </p>
+              </div>
+
+              <div className="bg-white p-4 rounded-2xl border border-slate-200 space-y-1.5">
+                <div className="w-6 h-6 rounded-full bg-[#144732] text-white flex items-center justify-center font-black text-xs">2</div>
+                <div className="font-bold text-slate-800">New Project & कोड पेस्ट</div>
+                <p className="text-slate-500 text-[11px]">
+                  <strong>New project</strong> बनाएं, पुराना कोड हटाएं और ऊपर से कॉपी किया गया कोड पेस्ट करें।
+                </p>
+              </div>
+
+              <div className="bg-white p-4 rounded-2xl border border-slate-200 space-y-1.5">
+                <div className="w-6 h-6 rounded-full bg-[#144732] text-white flex items-center justify-center font-black text-xs">3</div>
+                <div className="font-bold text-slate-800">Deploy as Web App</div>
+                <p className="text-slate-500 text-[11px]">
+                  <strong>Deploy</strong> -&gt; <strong>New deployment</strong> -&gt; <strong>Web app</strong> चुनें। <em>Who has access</em> को <strong>Anyone</strong> रखें।
+                </p>
+              </div>
+
+              <div className="bg-white p-4 rounded-2xl border border-slate-200 space-y-1.5">
+                <div className="w-6 h-6 rounded-full bg-[#144732] text-white flex items-center justify-center font-black text-xs">4</div>
+                <div className="font-bold text-slate-800">URL यहाँ सेव करें</div>
+                <p className="text-slate-500 text-[11px]">
+                  Deploy के बाद मिलने वाला Web App URL ऊपर बॉक्स में पेस्ट करके <strong>"ड्राइव सेटिंग्स सुरक्षित करें"</strong> दबाएं।
+                </p>
+              </div>
+            </div>
+
+            {/* Code Snippet Box */}
+            <div className="rounded-2xl bg-slate-900 text-slate-200 p-4 font-mono text-[11px] overflow-x-auto border border-slate-800 max-h-60">
+              <pre>{`function doPost(e) {
+  try {
+    var data = JSON.parse(e.postData.contents);
+    var targetFolderId = data.folderId || "${formData.googleDriveFolderId || '1m48lvsU628rR8nhL4i-24GWdJe_4w5Hn'}";
+    var folder = DriveApp.getFolderById(targetFolderId);
+
+    var base64Data = data.base64;
+    if (base64Data.indexOf('base64,') > -1) {
+      base64Data = base64Data.split('base64,')[1];
+    }
+
+    var decoded = Utilities.base64Decode(base64Data);
+    var blob = Utilities.newBlob(
+      decoded, 
+      data.mimeType || 'image/jpeg', 
+      data.filename || ('sgm_upload_' + new Date().getTime() + '.jpg')
+    );
+
+    var file = folder.createFile(blob);
+    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+
+    var fileId = file.getId();
+    var viewUrl = "https://lh3.googleusercontent.com/d/" + fileId;
+    var driveUrl = file.getUrl();
+
+    return ContentService.createTextOutput(JSON.stringify({
+      success: true,
+      fileId: fileId,
+      url: viewUrl,
+      driveUrl: driveUrl,
+      filename: file.getName()
+    })).setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({
+      success: false,
+      error: err.toString()
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}`}</pre>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* ======================================================== */}
