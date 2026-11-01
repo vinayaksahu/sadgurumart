@@ -27,11 +27,13 @@ interface MenuItem {
   label: string;
   href: string;
   external?: boolean;
+  badge?: string | number;
 }
 
 interface MenuGroup {
   id: string;
   title: string;
+  badge?: string | number;
   items: MenuItem[];
 }
 
@@ -45,6 +47,29 @@ export default function AdminNavbar({
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [expandedGroup, setExpandedGroup] = useState<string | null>(null);
+  const [pendingFundCount, setPendingFundCount] = useState<number>(0);
+
+  // Fetch pending fund requests notification count
+  useEffect(() => {
+    let isMounted = true;
+    const fetchPendingFunds = async () => {
+      try {
+        const res = await fetch('/api/admin/funds?countOnly=true');
+        const data = await res.json();
+        if (isMounted && data.success && typeof data.pendingCount === 'number') {
+          setPendingFundCount(data.pendingCount);
+        }
+      } catch (err) {
+        // Silently catch in navbar
+      }
+    };
+    fetchPendingFunds();
+    const interval = setInterval(fetchPendingFunds, 30000); // Poll every 30 seconds
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, []);
 
   // Lock body scroll when side panel is open
   useEffect(() => {
@@ -128,9 +153,14 @@ export default function AdminNavbar({
     {
       id: 'activation-fund',
       title: 'Activation Fund',
+      badge: pendingFundCount > 0 ? pendingFundCount : undefined,
       items: [
-        { label: 'Issue Fund', href: '/admin/members' },
-        { label: 'Manage Fund', href: '/admin/members' },
+        {
+          label: 'Issue Fund',
+          href: '/admin/funds',
+          badge: pendingFundCount > 0 ? `${pendingFundCount} New` : undefined,
+        },
+        { label: 'Manage Fund', href: '/admin/funds?tab=all' },
       ],
     },
     {
@@ -163,11 +193,17 @@ export default function AdminNavbar({
           <div className="flex items-center gap-3 min-w-0">
             <button
               onClick={() => setIsOpen(true)}
-              className="p-2 rounded-xl text-white hover:bg-white/10 transition-colors flex items-center justify-center cursor-pointer shrink-0"
+              className="relative p-2 rounded-xl text-white hover:bg-white/10 transition-colors flex items-center justify-center cursor-pointer shrink-0"
               aria-label="Open Admin Menu"
               title="Admin Navigation"
             >
               <Menu className="w-6 h-6" />
+              {pendingFundCount > 0 && (
+                <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-[#18181b] animate-ping" />
+              )}
+              {pendingFundCount > 0 && (
+                <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-[#18181b]" />
+              )}
             </button>
 
             {/* Desktop Brand Details */}
@@ -285,6 +321,11 @@ export default function AdminNavbar({
                         <div className="flex items-center gap-3">
                           <LayoutGrid className={`w-4 h-4 ${isExpanded ? 'text-white' : 'text-slate-500'}`} />
                           <span>{group.title}</span>
+                          {group.badge && (
+                            <span className="px-2 py-0.5 rounded-full bg-red-500 text-white text-[10px] font-black animate-pulse">
+                              {group.badge}
+                            </span>
+                          )}
                         </div>
                         <span className={`text-sm font-bold ${isExpanded ? 'text-white' : 'text-slate-400'}`}>
                           {isExpanded ? '—' : '+'}
@@ -303,19 +344,28 @@ export default function AdminNavbar({
                                 href={subItem.href}
                                 target={subItem.external ? '_blank' : undefined}
                                 onClick={() => setIsOpen(false)}
-                                className={`flex items-center gap-2 text-xs font-semibold py-1 transition-colors ${
+                                className={`flex items-center justify-between text-xs font-semibold py-1 pr-2 transition-colors ${
                                   isCurrent
                                     ? 'text-[#2563eb] font-bold'
                                     : 'text-slate-600 hover:text-[#2563eb]'
                                 }`}
                               >
-                                {isCurrent && (
-                                  <span className="w-1.5 h-1.5 rounded-full bg-[#06b6d4] shrink-0" />
-                                )}
-                                <span>{subItem.label}</span>
-                                {subItem.external && (
-                                  <ExternalLink className="w-3 h-3 text-slate-400 shrink-0 ml-auto" />
-                                )}
+                                <span className="flex items-center gap-2">
+                                  {isCurrent && (
+                                    <span className="w-1.5 h-1.5 rounded-full bg-[#06b6d4] shrink-0" />
+                                  )}
+                                  <span>{subItem.label}</span>
+                                </span>
+                                <div className="flex items-center gap-1.5">
+                                  {subItem.badge && (
+                                    <span className="px-1.5 py-0.5 rounded-full bg-amber-500 text-white text-[9px] font-black">
+                                      {subItem.badge}
+                                    </span>
+                                  )}
+                                  {subItem.external && (
+                                    <ExternalLink className="w-3 h-3 text-slate-400 shrink-0" />
+                                  )}
+                                </div>
                               </Link>
                             );
                           })}

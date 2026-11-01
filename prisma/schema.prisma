@@ -136,6 +136,7 @@ model User {
   autoPoolMemberships AutoPoolEntry[]
   utilityRecharges    UtilityRecharge[]
   withdrawalRequests  WithdrawalRequest[]
+  fundRequests        FundRequest[]
 
   createdAt           DateTime         @default(now())
   updatedAt           DateTime         @updatedAt
@@ -538,10 +539,51 @@ model SystemSetting {
   googleDriveUploadUrl    String?  @default("")
   googleDriveFolderId     String?  @default("1m48lvsU628rR8nhL4i-24GWdJe_4w5Hn")
 
+  // Company Official Bank & UPI Details for Fund Requests
+  companyBankName         String?  @default("State Bank of India (SBI)")
+  companyAccountName      String?  @default("SADGURU MART ONLINE SERVICE PRIVATE LIMITED")
+  companyAccountNumber    String?  @default("41589632145")
+  companyIfscCode         String?  @default("SBIN0001234")
+  companyBranch           String?  @default("Bilaspur Main Branch")
+  companyUpiId            String?  @default("6267392508@upi")
+  companyQrImageUrl       String?  @default("")
+
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt
 
   @@map("system_settings")
+}
+
+// ==========================================
+// 14. FUND REQUESTS (P2P Wallet Add Funds)
+// ==========================================
+enum FundRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model FundRequest {
+  id              String            @id @default(uuid())
+  userId          String
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  amount          Float             // Requested amount in INR
+  paymentMode     String            @default("UPI") // UPI, BANK_TRANSFER, QR, IMPS, NEFT
+  utrNumber       String            // UTR / Transaction reference number
+  screenshotUrl   String?           // Payment proof image URL
+  remarks         String?           // Note from member
+  adminNote       String?           // Reason/note from admin on review
+  status          FundRequestStatus @default(PENDING)
+  reviewedBy      String?           // Admin username
+  reviewedAt      DateTime?
+
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@index([userId, status])
+  @@index([status])
+  @@map("fund_requests")
 }
 
 

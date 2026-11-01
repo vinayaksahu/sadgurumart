@@ -31,24 +31,32 @@ export default async function WalletPage() {
 
   if (!user) redirect('/login');
 
-  // Fetch all activation packages
-  const packages = await prisma.product.findMany({
-    where: {
-      isActive: true,
-      isActivation: true,
-    },
-    select: {
-      id: true,
-      title: true,
-      mrp: true,
-      dpPrice: true,
-      pv: true,
-      bv: true,
-      description: true,
-      images: true,
-    },
-    orderBy: { pv: 'asc' },
-  });
+  // Fetch all activation packages, user fund requests, and company payment details
+  const [packages, fundRequests, systemSettings] = await Promise.all([
+    prisma.product.findMany({
+      where: {
+        isActive: true,
+        isActivation: true,
+      },
+      select: {
+        id: true,
+        title: true,
+        mrp: true,
+        dpPrice: true,
+        pv: true,
+        bv: true,
+        description: true,
+        images: true,
+      },
+      orderBy: { pv: 'asc' },
+    }),
+    prisma.fundRequest.findMany({
+      where: { userId: user.id },
+      orderBy: { createdAt: 'desc' },
+      take: 30,
+    }),
+    prisma.systemSetting.findFirst(),
+  ]);
 
   const wallet = user.wallet || {
     id: '',
@@ -91,6 +99,30 @@ export default async function WalletPage() {
     createdAt: tx.createdAt.toISOString(),
   }));
 
+  const initialFundRequests = (fundRequests || []).map((fr) => ({
+    id: fr.id,
+    amount: fr.amount,
+    paymentMode: fr.paymentMode,
+    utrNumber: fr.utrNumber,
+    screenshotUrl: fr.screenshotUrl,
+    remarks: fr.remarks,
+    adminNote: fr.adminNote,
+    status: fr.status,
+    reviewedBy: fr.reviewedBy,
+    reviewedAt: fr.reviewedAt ? fr.reviewedAt.toISOString() : null,
+    createdAt: fr.createdAt.toISOString(),
+  }));
+
+  const companyPaymentDetails = {
+    companyBankName: systemSettings?.companyBankName || 'State Bank of India (SBI)',
+    companyAccountName: systemSettings?.companyAccountName || 'SADGURU MART ONLINE SERVICE PRIVATE LIMITED',
+    companyAccountNumber: systemSettings?.companyAccountNumber || '41589632145',
+    companyIfscCode: systemSettings?.companyIfscCode || 'SBIN0001234',
+    companyBranch: systemSettings?.companyBranch || 'Bilaspur Main Branch',
+    companyUpiId: systemSettings?.companyUpiId || '6267392508@upi',
+    companyQrImageUrl: systemSettings?.companyQrImageUrl || '',
+  };
+
   return (
     <div className="min-h-screen bg-[#f8f6f0] text-[#1f2937] font-sans flex flex-col">
       <Navbar />
@@ -107,6 +139,8 @@ export default async function WalletPage() {
             totalWithdrawn: wallet.totalWithdrawn,
           }}
           initialTransactions={initialTransactions}
+          initialFundRequests={initialFundRequests}
+          companyPaymentDetails={companyPaymentDetails}
           packages={packages}
         />
       </main>

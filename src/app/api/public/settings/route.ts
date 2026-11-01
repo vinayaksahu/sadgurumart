@@ -35,6 +35,15 @@ export async function GET() {
         popupButtonLink: settings.popupButtonLink,
         popupTarget: settings.popupTarget,
 
+        // Company Bank & UPI for Fund Deposits
+        companyBankName: (settings as any).companyBankName || 'State Bank of India (SBI)',
+        companyAccountName: (settings as any).companyAccountName || 'SADGURU MART ONLINE SERVICE PRIVATE LIMITED',
+        companyAccountNumber: (settings as any).companyAccountNumber || '41589632145',
+        companyIfscCode: (settings as any).companyIfscCode || 'SBIN0001234',
+        companyBranch: (settings as any).companyBranch || 'Bilaspur Main Branch',
+        companyUpiId: (settings as any).companyUpiId || '6267392508@upi',
+        companyQrImageUrl: (settings as any).companyQrImageUrl || '',
+
         updatedAt: settings.updatedAt,
       },
     });

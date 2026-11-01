@@ -96,6 +96,15 @@ export async function POST(req: NextRequest) {
         // Google Drive Settings
         googleDriveUploadUrl: body.googleDriveUploadUrl !== undefined ? body.googleDriveUploadUrl?.trim() : current.googleDriveUploadUrl,
         googleDriveFolderId: body.googleDriveFolderId !== undefined ? body.googleDriveFolderId?.trim() : current.googleDriveFolderId,
+
+        // Company Bank & UPI Settings for Fund Requests
+        companyBankName: body.companyBankName !== undefined ? body.companyBankName : (current as any).companyBankName,
+        companyAccountName: body.companyAccountName !== undefined ? body.companyAccountName : (current as any).companyAccountName,
+        companyAccountNumber: body.companyAccountNumber !== undefined ? body.companyAccountNumber : (current as any).companyAccountNumber,
+        companyIfscCode: body.companyIfscCode !== undefined ? body.companyIfscCode : (current as any).companyIfscCode,
+        companyBranch: body.companyBranch !== undefined ? body.companyBranch : (current as any).companyBranch,
+        companyUpiId: body.companyUpiId !== undefined ? body.companyUpiId : (current as any).companyUpiId,
+        companyQrImageUrl: body.companyQrImageUrl !== undefined ? body.companyQrImageUrl : (current as any).companyQrImageUrl,
       },
     });
 

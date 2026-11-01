@@ -47,6 +47,15 @@ export const DEFAULT_SYSTEM_SETTINGS = {
   // Google Drive Integration
   googleDriveUploadUrl: '',
   googleDriveFolderId: '1m48lvsU628rR8nhL4i-24GWdJe_4w5Hn',
+
+  // Company Official Bank & UPI Details for Fund Requests
+  companyBankName: 'State Bank of India (SBI)',
+  companyAccountName: 'SADGURU MART ONLINE SERVICE PRIVATE LIMITED',
+  companyAccountNumber: '41589632145',
+  companyIfscCode: 'SBIN0001234',
+  companyBranch: 'Bilaspur Main Branch',
+  companyUpiId: '6267392508@upi',
+  companyQrImageUrl: '',
 };
 
 export async function getSystemSettings() {

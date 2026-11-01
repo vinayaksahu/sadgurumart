@@ -26,8 +26,37 @@ import {
   Sparkles,
   Lock,
   Layers,
-  ArrowLeftRight
+  ArrowLeftRight,
+  QrCode,
+  PlusCircle,
+  Eye,
+  Check
 } from 'lucide-react';
+import ImageUploader from '@/components/ImageUploader';
+
+export interface FundRequestItem {
+  id: string;
+  amount: number;
+  paymentMode: string;
+  utrNumber: string;
+  screenshotUrl?: string | null;
+  remarks?: string | null;
+  adminNote?: string | null;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  reviewedBy?: string | null;
+  reviewedAt?: string | null;
+  createdAt: string;
+}
+
+export interface CompanyPaymentInfo {
+  companyBankName: string;
+  companyAccountName: string;
+  companyAccountNumber: string;
+  companyIfscCode: string;
+  companyBranch: string;
+  companyUpiId: string;
+  companyQrImageUrl?: string | null;
+}
 
 interface WalletData {
   id: string;
@@ -82,6 +111,8 @@ interface Props {
   initialUser: UserData;
   initialWallet: WalletData;
   initialTransactions: Transaction[];
+  initialFundRequests?: FundRequestItem[];
+  companyPaymentDetails?: CompanyPaymentInfo;
   packages: PackageItem[];
 }
 
@@ -89,14 +120,25 @@ export default function WalletView({
   initialUser,
   initialWallet,
   initialTransactions,
+  initialFundRequests = [],
+  companyPaymentDetails = {
+    companyBankName: 'State Bank of India (SBI)',
+    companyAccountName: 'SADGURU MART ONLINE SERVICE PRIVATE LIMITED',
+    companyAccountNumber: '41589632145',
+    companyIfscCode: 'SBIN0001234',
+    companyBranch: 'Bilaspur Main Branch',
+    companyUpiId: '6267392508@upi',
+    companyQrImageUrl: '',
+  },
   packages,
 }: Props) {
   const [wallet, setWallet] = useState<WalletData>(initialWallet);
   const [user, setUser] = useState<UserData>(initialUser);
   const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions);
+  const [fundRequests, setFundRequests] = useState<FundRequestItem[]>(initialFundRequests);
 
   // Active Filter & Search
-  const [activeTab, setActiveTab] = useState<'ALL' | 'MAIN' | 'P2P' | 'TRANSFERS' | 'ACTIVATIONS'>('ALL');
+  const [activeTab, setActiveTab] = useState<'ALL' | 'MAIN' | 'P2P' | 'TRANSFERS' | 'ACTIVATIONS' | 'FUND_REQUESTS'>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -105,7 +147,18 @@ export default function WalletView({
   const [showP2pTransferModal, setShowP2pTransferModal] = useState(false);
   const [showActivateIdModal, setShowActivateIdModal] = useState(false);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+  const [showAddFundModal, setShowAddFundModal] = useState(false);
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
+
+  // Add Fund (Deposit Request) Form State
+  const [depositAmount, setDepositAmount] = useState('');
+  const [depositPaymentMode, setDepositPaymentMode] = useState('UPI');
+  const [depositUtr, setDepositUtr] = useState('');
+  const [depositScreenshot, setDepositScreenshot] = useState('');
+  const [depositRemarks, setDepositRemarks] = useState('');
+  const [depositLoading, setDepositLoading] = useState(false);
+  const [depositMsg, setDepositMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [copiedBankKey, setCopiedBankKey] = useState<string | null>(null);
 
   // Main to P2P Form
   const [mainToP2pAmount, setMainToP2pAmount] = useState('');
@@ -374,6 +427,72 @@ export default function WalletView({
     }
   };
 
+  // Copy Company Bank / UPI Field
+  const handleCopyBankField = (text: string, key: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedBankKey(key);
+    setTimeout(() => setCopiedBankKey(null), 2000);
+  };
+
+  // Submit Fund Deposit Request
+  const handleDepositSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setDepositMsg(null);
+    setDepositLoading(true);
+
+    try {
+      const parsed = parseFloat(depositAmount);
+      if (!parsed || parsed <= 0) {
+        setDepositMsg({ type: 'error', text: 'कृपया सही राशि दर्ज करें।' });
+        setDepositLoading(false);
+        return;
+      }
+
+      if (!depositUtr.trim() || depositUtr.trim().length < 6) {
+        setDepositMsg({ type: 'error', text: 'मान्य UTR / ट्रांजेक्शन नंबर (कम से कम 6 अक्षर/अंक) दर्ज करना अनिवार्य है।' });
+        setDepositLoading(false);
+        return;
+      }
+
+      const res = await fetch('/api/wallet/fund-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount: parsed,
+          paymentMode: depositPaymentMode,
+          utrNumber: depositUtr.trim(),
+          screenshotUrl: depositScreenshot.trim() || null,
+          remarks: depositRemarks.trim() || null,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setDepositMsg({ type: 'error', text: data.error || 'फंड रिक्वेस्ट सबमिट करने में विफल' });
+      } else {
+        setDepositMsg({
+          type: 'success',
+          text: data.message || 'फंड रिक्वेस्ट सफलतापूर्वक सबमिट हो गया है! एडमिन द्वारा सत्यापन के बाद राशि क्रेडिट हो जाएगी।',
+        });
+        if (data.request) {
+          setFundRequests((prev) => [data.request, ...prev]);
+        }
+        setDepositAmount('');
+        setDepositUtr('');
+        setDepositScreenshot('');
+        setDepositRemarks('');
+        setTimeout(() => {
+          setShowAddFundModal(false);
+          setActiveTab('FUND_REQUESTS');
+        }, 2500);
+      }
+    } catch (err: any) {
+      setDepositMsg({ type: 'error', text: err.message || 'नेटवर्क त्रुटि' });
+    } finally {
+      setDepositLoading(false);
+    }
+  };
+
   // Filter transactions
   const filteredTransactions = transactions.filter((tx) => {
     // Tab filter
@@ -553,6 +672,18 @@ export default function WalletView({
           </div>
 
           <div className="space-y-3 pt-4 border-t border-white/15">
+            {/* Primary Action Button: Add Fund (Deposit via UPI/Bank) */}
+            <button
+              onClick={() => {
+                setDepositMsg(null);
+                setShowAddFundModal(true);
+              }}
+              className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black text-xs flex items-center justify-center gap-2 shadow-xl border border-emerald-300 transition-transform hover:scale-[1.02] cursor-pointer"
+            >
+              <PlusCircle className="w-4 h-4 text-emerald-100" />
+              <span>फ़ंड जोड़ें (Add Fund via UPI / Bank)</span>
+            </button>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
               {/* Button 1: P2P Fund Transfer */}
               <button
@@ -657,6 +788,7 @@ export default function WalletView({
             { id: 'P2P', label: 'P2P Wallet (P2P वॉलेट)' },
             { id: 'TRANSFERS', label: 'P2P Transfers (ट्रांसफर)' },
             { id: 'ACTIVATIONS', label: 'ID Activations (एक्टिवेशन)' },
+            { id: 'FUND_REQUESTS', label: `फंड रिक्वेस्ट इतिहास (${fundRequests.length})` },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -672,8 +804,118 @@ export default function WalletView({
           ))}
         </div>
 
-        {/* Transactions Table */}
-        {filteredTransactions.length === 0 ? (
+        {/* SPECIAL VIEW: FUND REQUESTS TABLE */}
+        {activeTab === 'FUND_REQUESTS' ? (
+          fundRequests.length === 0 ? (
+            <div className="py-12 text-center text-slate-400 text-xs space-y-2">
+              <Receipt className="w-8 h-8 mx-auto text-slate-300" />
+              <div>आपने अभी तक कोई फंड रिक्वेस्ट सबमिट नहीं किया है।</div>
+              <button
+                type="button"
+                onClick={() => setShowAddFundModal(true)}
+                className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#144732] text-white font-bold text-xs shadow hover:bg-[#0b2b1e] cursor-pointer"
+              >
+                <PlusCircle className="w-3.5 h-3.5" />
+                <span>नया फंड जोड़ें</span>
+              </button>
+            </div>
+          ) : (
+            <div className="overflow-x-auto w-full max-w-full">
+              <table className="w-full min-w-[650px] text-left text-xs">
+                <thead>
+                  <tr className="bg-[#faf8f4] text-slate-600 uppercase tracking-wider font-bold">
+                    <th className="py-3 px-3">दिनांक व समय</th>
+                    <th className="py-3 px-3">अनुरोध राशि</th>
+                    <th className="py-3 px-3">माध्यम व UTR</th>
+                    <th className="py-3 px-3">रसीद</th>
+                    <th className="py-3 px-3">स्थिति (Status)</th>
+                    <th className="py-3 px-3">एडमिन रिमार्क</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {fundRequests.map((fr) => (
+                    <tr key={fr.id} className="hover:bg-slate-50/80 transition-colors">
+                      <td className="py-3.5 px-3 text-slate-500 whitespace-nowrap">
+                        {new Date(fr.createdAt).toLocaleDateString('hi-IN', {
+                          day: '2-digit',
+                          month: 'short',
+                          year: 'numeric',
+                        })}
+                        <div className="text-[10px] text-slate-400">
+                          {new Date(fr.createdAt).toLocaleTimeString('hi-IN', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </div>
+                      </td>
+
+                      <td className="py-3.5 px-3 font-black text-emerald-700 whitespace-nowrap text-sm">
+                        ₹{fr.amount.toLocaleString('en-IN')}
+                      </td>
+
+                      <td className="py-3.5 px-3">
+                        <span className="inline-block px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-[10px] font-bold mb-1">
+                          {fr.paymentMode}
+                        </span>
+                        <div className="font-mono text-xs font-bold text-slate-800">{fr.utrNumber}</div>
+                        {fr.remarks && (
+                          <div className="text-[10px] text-slate-400 italic truncate max-w-xs">&quot;{fr.remarks}&quot;</div>
+                        )}
+                      </td>
+
+                      <td className="py-3.5 px-3">
+                        {fr.screenshotUrl ? (
+                          <a
+                            href={fr.screenshotUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1 text-[11px] text-blue-600 hover:underline font-bold"
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                            <span>देखें</span>
+                          </a>
+                        ) : (
+                          <span className="text-[10px] text-slate-400">-</span>
+                        )}
+                      </td>
+
+                      <td className="py-3.5 px-3 whitespace-nowrap">
+                        {fr.status === 'PENDING' && (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 text-[10px] font-black">
+                            <Clock className="w-3 h-3" />
+                            <span>सत्यापन प्रतीक्षित (Pending)</span>
+                          </span>
+                        )}
+                        {fr.status === 'APPROVED' && (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-black">
+                            <CheckCircle2 className="w-3 h-3" />
+                            <span>स्वीकृत (Credited)</span>
+                          </span>
+                        )}
+                        {fr.status === 'REJECTED' && (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-red-100 text-red-800 text-[10px] font-black">
+                            <X className="w-3 h-3" />
+                            <span>अस्वीकृत (Rejected)</span>
+                          </span>
+                        )}
+                      </td>
+
+                      <td className="py-3.5 px-3 text-xs">
+                        {fr.adminNote ? (
+                          <span className={fr.status === 'REJECTED' ? 'text-red-600 font-bold' : 'text-slate-600'}>
+                            {fr.adminNote}
+                          </span>
+                        ) : (
+                          <span className="text-slate-400 text-[10px]">-</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )
+        ) : filteredTransactions.length === 0 ? (
           <div className="py-12 text-center text-slate-400 text-xs space-y-2">
             <Receipt className="w-8 h-8 mx-auto text-slate-300" />
             <div>कोई ट्रांजेक्शन रिकॉर्ड नहीं मिला।</div>
@@ -783,6 +1025,277 @@ export default function WalletView({
       </div>
 
       {/* ================= MODALS ================= */}
+
+      {/* MODAL 0: ADD FUND TO P2P WALLET (DEPOSIT VIA UPI / BANK) */}
+      {showAddFundModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 relative animate-in fade-in zoom-in-95 my-8 max-h-[92vh] overflow-y-auto">
+            <button
+              onClick={() => setShowAddFundModal(false)}
+              className="absolute top-5 right-5 p-1.5 rounded-full hover:bg-slate-100 text-slate-400 cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="flex items-center gap-3 mb-4 pb-3 border-b border-slate-100">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center border border-emerald-200">
+                <PlusCircle className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-[#144732]">
+                  P2P वॉलेट में फंड जोड़ें (Add Fund via UPI / Bank)
+                </h3>
+                <p className="text-xs text-slate-500">
+                  कंपनी के आधिकारिक खाते या UPI QR पर पेमेंट कर रसीद व UTR सबमिट करें
+                </p>
+              </div>
+            </div>
+
+            {/* STEP 1: COMPANY PAYMENT DETAILS */}
+            <div className="space-y-4 mb-6">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-black uppercase tracking-wider text-[#92580a] flex items-center gap-1.5">
+                  <Building className="w-4 h-4" />
+                  <span>1. कंपनी आधिकारिक भुगतान विवरण (Payment Info)</span>
+                </span>
+                <span className="text-[10px] bg-amber-50 text-amber-800 px-2.5 py-0.5 rounded-full font-bold border border-amber-200">
+                  सत्यापित आधिकारिक खाता
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* UPI & QR Card */}
+                <div className="p-4 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50/50 border border-emerald-200 text-center space-y-3">
+                  <div className="text-xs font-black text-emerald-900 flex items-center justify-center gap-1.5">
+                    <QrCode className="w-4 h-4 text-emerald-700" />
+                    <span>UPI QR कोड स्कैन करें</span>
+                  </div>
+
+                  <div className="bg-white p-2 rounded-xl inline-block shadow-sm border border-emerald-200">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={
+                        companyPaymentDetails.companyQrImageUrl ||
+                        `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(
+                          `upi://pay?pa=${companyPaymentDetails.companyUpiId}&pn=${encodeURIComponent(
+                            companyPaymentDetails.companyAccountName
+                          )}&cu=INR${depositAmount ? `&am=${depositAmount}` : ''}`
+                        )}`
+                      }
+                      alt="UPI QR Code"
+                      className="w-36 h-36 mx-auto object-contain"
+                    />
+                  </div>
+
+                  <div className="text-[10px] text-slate-500 font-medium">
+                    Google Pay • PhonePe • Paytm • BHIM
+                  </div>
+
+                  {/* UPI ID Field with Copy */}
+                  <div className="pt-2 border-t border-emerald-200/60">
+                    <span className="text-[10px] font-bold text-slate-500 block mb-0.5">कंपनी UPI ID (VPA):</span>
+                    <div className="flex items-center justify-between px-3 py-1.5 bg-white rounded-xl border border-emerald-200 text-xs font-mono font-bold text-slate-800">
+                      <span className="truncate">{companyPaymentDetails.companyUpiId}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleCopyBankField(companyPaymentDetails.companyUpiId, 'upi')}
+                        className="p-1 hover:bg-emerald-50 rounded text-emerald-700 cursor-pointer shrink-0 ml-1"
+                        title="Copy UPI ID"
+                      >
+                        {copiedBankKey === 'upi' ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bank Account Details Card */}
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5 text-xs">
+                  <div className="text-xs font-black text-slate-800 flex items-center gap-1.5 pb-1 border-b border-slate-200">
+                    <Building className="w-4 h-4 text-[#144732]" />
+                    <span>बैंक खाता विवरण (NEFT / IMPS)</span>
+                  </div>
+
+                  <div>
+                    <span className="text-[10px] text-slate-400 block font-bold">बैंक का नाम:</span>
+                    <div className="font-bold text-slate-800">{companyPaymentDetails.companyBankName}</div>
+                  </div>
+
+                  <div>
+                    <span className="text-[10px] text-slate-400 block font-bold">खाता धारक (A/C Name):</span>
+                    <div className="font-bold text-slate-800 text-[11px] leading-snug">{companyPaymentDetails.companyAccountName}</div>
+                  </div>
+
+                  <div>
+                    <span className="text-[10px] text-slate-400 block font-bold">खाता संख्या (A/C Number):</span>
+                    <div className="flex items-center justify-between font-mono font-bold text-slate-800 bg-white px-2 py-1 rounded-lg border border-slate-200">
+                      <span>{companyPaymentDetails.companyAccountNumber}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleCopyBankField(companyPaymentDetails.companyAccountNumber, 'acc')}
+                        className="p-1 hover:bg-slate-100 rounded text-slate-500 cursor-pointer"
+                        title="Copy Account Number"
+                      >
+                        {copiedBankKey === 'acc' ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <span className="text-[10px] text-slate-400 block font-bold">IFSC कोड:</span>
+                    <div className="flex items-center justify-between font-mono font-bold text-slate-800 bg-white px-2 py-1 rounded-lg border border-slate-200">
+                      <span>{companyPaymentDetails.companyIfscCode}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleCopyBankField(companyPaymentDetails.companyIfscCode, 'ifsc')}
+                        className="p-1 hover:bg-slate-100 rounded text-slate-500 cursor-pointer"
+                        title="Copy IFSC"
+                      >
+                        {copiedBankKey === 'ifsc' ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  {companyPaymentDetails.companyBranch && (
+                    <div>
+                      <span className="text-[10px] text-slate-400 block font-bold">शाखा (Branch):</span>
+                      <div className="text-slate-700">{companyPaymentDetails.companyBranch}</div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* STEP 2: SUBMIT PAYMENT PROOF */}
+            <div className="pt-4 border-t border-slate-100">
+              <div className="flex items-center gap-1.5 mb-3">
+                <span className="text-xs font-black uppercase tracking-wider text-[#144732] flex items-center gap-1.5">
+                  <Receipt className="w-4 h-4" />
+                  <span>2. भुगतान रसीद व UTR सबमिट करें (Submit Payment Proof)</span>
+                </span>
+              </div>
+
+              {depositMsg && (
+                <div
+                  className={`p-3.5 rounded-2xl text-xs font-bold mb-4 flex items-center gap-2 ${
+                    depositMsg.type === 'success'
+                      ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                      : 'bg-red-50 text-red-800 border border-red-200'
+                  }`}
+                >
+                  {depositMsg.type === 'success' ? (
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  ) : (
+                    <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+                  )}
+                  <span>{depositMsg.text}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleDepositSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-black text-slate-700 mb-1">
+                      भुगतान की गई राशि (Amount ₹) *
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      step="any"
+                      placeholder="उदा. 1000"
+                      value={depositAmount}
+                      onChange={(e) => setDepositAmount(e.target.value)}
+                      required
+                      className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold focus:outline-none focus:border-[#144732] bg-[#faf8f4]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-black text-slate-700 mb-1">
+                      भुगतान माध्यम (Payment Mode) *
+                    </label>
+                    <select
+                      value={depositPaymentMode}
+                      onChange={(e) => setDepositPaymentMode(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold focus:outline-none focus:border-[#144732] bg-[#faf8f4]"
+                    >
+                      <option value="UPI">UPI App (Google Pay / PhonePe / Paytm)</option>
+                      <option value="QR_SCAN">UPI QR Code Scan</option>
+                      <option value="IMPS">IMPS / Net Banking</option>
+                      <option value="NEFT_RTGS">NEFT / RTGS Transfer</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-black text-slate-700 mb-1">
+                    UTR नंबर / UPI रेफरेंस नंबर (12-Digit UTR / Txn ID) *
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="उदा. 412356789012 या ट्रांजेक्शन आईडी"
+                    value={depositUtr}
+                    onChange={(e) => setDepositUtr(e.target.value)}
+                    required
+                    className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold focus:outline-none focus:border-[#144732] bg-[#faf8f4] uppercase font-mono"
+                  />
+                  <p className="text-[10px] text-slate-400 mt-1">
+                    पेमेंट करने के बाद आपके बैंक/UPI ऐप में प्रदर्शित 12 अंकों का UTR / RRN नंबर दर्ज करें।
+                  </p>
+                </div>
+
+                <div>
+                  <ImageUploader
+                    label="पेमेंट रसीद का स्क्रीनशॉट (Payment Screenshot / Slip)"
+                    value={depositScreenshot}
+                    onChange={(url) => setDepositScreenshot(url)}
+                    folder="general"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-black text-slate-700 mb-1">
+                    रिमार्क / टिप्पणी (Optional Remarks)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="उदा. P2P वॉलेट टॉप-अप के लिए"
+                    value={depositRemarks}
+                    onChange={(e) => setDepositRemarks(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs font-bold focus:outline-none focus:border-[#144732] bg-[#faf8f4]"
+                  />
+                </div>
+
+                <div className="pt-2 flex items-center justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setShowAddFundModal(false)}
+                    className="px-4 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors cursor-pointer"
+                  >
+                    बंद करें
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={depositLoading}
+                    className="px-6 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-black text-xs shadow-md transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                  >
+                    {depositLoading ? (
+                      <>
+                        <RefreshCw className="w-4 h-4 animate-spin" />
+                        <span>सबमिट हो रहा है...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Send className="w-4 h-4" />
+                        <span>फंड रिक्वेस्ट सबमिट करें</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* MODAL 1: MAIN TO P2P CONVERSION */}
       {showMainToP2pModal && (
