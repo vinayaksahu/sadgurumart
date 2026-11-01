@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { useCart } from '@/lib/cartContext';
 import MemberNavbar from './MemberNavbar';
+import AdminNavbar from './AdminNavbar';
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -88,6 +89,9 @@ export default function Navbar() {
   ].some((prefix) => pathname?.startsWith(prefix));
 
   if (isPortalRoute) {
+    if (session.isAdminActive) {
+      return <AdminNavbar />;
+    }
     return <MemberNavbar user={session.user} />;
   }
 

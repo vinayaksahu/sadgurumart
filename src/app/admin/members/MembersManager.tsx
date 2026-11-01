@@ -706,8 +706,7 @@ export default function MembersManager() {
                       </div>
 
                       <Link
-                        href={`/genealogy/binary?root=${memberDetail.userCode}`}
-                        target="_blank"
+                        href={`/admin/genealogy?userCode=${memberDetail.userCode}`}
                         className="px-4 py-2 rounded-xl bg-[#144732] hover:bg-[#0b2b1e] text-[#fef08a] text-xs font-black flex items-center gap-1.5 shadow-sm transition-all shrink-0"
                       >
                         <Users className="w-3.5 h-3.5" />

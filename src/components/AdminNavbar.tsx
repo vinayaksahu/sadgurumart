@@ -71,7 +71,7 @@ export default function AdminNavbar({
       id: 'geneology',
       title: 'Geneology',
       items: [
-        { label: 'Binary Tree', href: '/genealogy/binary' },
+        { label: 'Binary Tree', href: '/admin/genealogy' },
         { label: 'Downline Tree', href: '/admin/members?view=downline' },
         { label: 'Direct Referral List', href: '/admin/members?view=directs' },
       ],
