@@ -7,12 +7,19 @@ import {
   Menu, 
   X, 
   Home, 
-  LayoutGrid, 
   LogOut, 
   MoreHorizontal,
   ExternalLink,
   User,
-  ShieldCheck
+  ShieldCheck,
+  GitFork,
+  Database,
+  Users,
+  CreditCard,
+  Landmark,
+  Sparkles,
+  Megaphone,
+  ChevronDown
 } from 'lucide-react';
 
 interface AdminNavbarProps {
@@ -33,6 +40,7 @@ interface MenuItem {
 interface MenuGroup {
   id: string;
   title: string;
+  icon: React.ComponentType<{ className?: string }>;
   badge?: string | number;
   items: MenuItem[];
 }
@@ -94,7 +102,8 @@ export default function AdminNavbar({
   const menuGroups: MenuGroup[] = [
     {
       id: 'geneology',
-      title: 'Geneology',
+      title: 'Genealogy',
+      icon: GitFork,
       items: [
         { label: 'Binary Tree', href: '/admin/genealogy' },
         { label: 'Downline Tree', href: '/admin/members?view=downline' },
@@ -104,6 +113,7 @@ export default function AdminNavbar({
     {
       id: 'master',
       title: 'Master',
+      icon: Database,
       items: [
         { label: 'Add Package', href: '/admin/settings?tab=plan' },
         { label: 'Package List', href: '/admin/settings?tab=plan' },
@@ -114,7 +124,8 @@ export default function AdminNavbar({
     },
     {
       id: 'member-panel',
-      title: 'Members & Network (मेंबर्स डायरेक्टरी)',
+      title: 'Members & Network',
+      icon: Users,
       items: [
         { label: 'Search Members', href: '/admin/members' },
         { label: 'Red Members List (Inactive)', href: '/admin/members?status=inactive' },
@@ -129,6 +140,7 @@ export default function AdminNavbar({
     {
       id: 'payouts',
       title: 'Payouts',
+      icon: CreditCard,
       items: [
         { label: 'Pending Withdrawals', href: '/admin/withdrawals?status=pending' },
         { label: 'Approved Withdrawals', href: '/admin/withdrawals?status=approved' },
@@ -139,11 +151,12 @@ export default function AdminNavbar({
     {
       id: 'banking',
       title: 'Banking',
+      icon: Landmark,
       items: [
         { label: 'Bank Details (KYC)', href: '/admin/kyc' },
         { label: 'TDS Reports', href: '/admin/withdrawals?view=tds' },
-        { label: 'Add Expancess', href: '/admin/withdrawals?view=tds' },
-        { label: 'Expancess List', href: '/admin/withdrawals?view=tds' },
+        { label: 'Add Expenses', href: '/admin/withdrawals?view=tds' },
+        { label: 'Expenses List', href: '/admin/withdrawals?view=tds' },
         { label: 'Add Income', href: '/admin/withdrawals' },
         { label: 'Income List', href: '/admin/withdrawals' },
         { label: 'Add Advance', href: '/admin/withdrawals' },
@@ -153,6 +166,7 @@ export default function AdminNavbar({
     {
       id: 'activation-fund',
       title: 'Activation Fund',
+      icon: Sparkles,
       badge: pendingFundCount > 0 ? pendingFundCount : undefined,
       items: [
         {
@@ -166,6 +180,7 @@ export default function AdminNavbar({
     {
       id: 'news-events',
       title: 'News & Events',
+      icon: Megaphone,
       items: [
         { label: 'News & Events (Notice)', href: '/admin/settings?tab=notice' },
         { label: 'Add Meeting & Seminars', href: '/admin/gallery?category=SEMINAR&action=add' },
@@ -257,7 +272,7 @@ export default function AdminNavbar({
           />
 
           {/* Side Drawer Body */}
-          <div className="relative w-[85%] sm:w-80 max-w-full bg-white text-slate-800 shadow-2xl z-[100000] flex flex-col justify-between overflow-y-auto animate-in slide-in-from-left duration-300">
+          <div className="relative w-[85%] sm:w-80 max-w-full bg-white text-slate-800 shadow-2xl z-[100000] flex flex-col justify-between overflow-y-auto custom-scrollbar animate-in slide-in-from-left duration-300">
             <div>
               {/* Header with Blue Mountain Gradient and Avatar Silhouette */}
               <div className="p-6 relative bg-gradient-to-b from-[#1e40af] via-[#2563eb] to-[#3b82f6] text-white">
@@ -277,7 +292,7 @@ export default function AdminNavbar({
                   <div className="font-black text-base tracking-tight leading-tight">
                     {username}
                   </div>
-                  <div className="text-[10px] font-mono font-bold text-white/80 mt-0.5">
+                  <div className="text-[10px] font-mono font-bold text-white/80 mt-0.5 uppercase tracking-wider">
                     {role} Console
                   </div>
                 </div>
@@ -295,9 +310,9 @@ export default function AdminNavbar({
                 <Link
                   href={homeHref}
                   onClick={() => setIsOpen(false)}
-                  className="w-full flex items-center gap-3 px-4 py-2.5 rounded-md font-bold text-sm text-white bg-[#2563eb] hover:bg-[#1d4ed8] shadow transition-all"
+                  className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg font-bold text-sm text-white bg-[#2563eb] hover:bg-[#1d4ed8] shadow transition-all"
                 >
-                  <Home className="w-4 h-4 text-white" />
+                  <Home className="w-4 h-4 text-white shrink-0" />
                   <span>Home</span>
                 </Link>
               </div>
@@ -312,29 +327,27 @@ export default function AdminNavbar({
                       {/* Group Header Button */}
                       <button
                         onClick={() => toggleGroup(group.id)}
-                        className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-md text-sm font-bold transition-all cursor-pointer ${
+                        className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-semibold transition-all cursor-pointer ${
                           isExpanded
-                            ? 'bg-[#3b82f6] text-white shadow-sm'
+                            ? 'bg-[#2563eb] text-white shadow-sm'
                             : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
                         }`}
                       >
-                        <div className="flex items-center gap-3">
-                          <LayoutGrid className={`w-4 h-4 ${isExpanded ? 'text-white' : 'text-slate-500'}`} />
-                          <span>{group.title}</span>
+                        <div className="flex items-center gap-3 min-w-0 flex-1 text-left">
+                          <group.icon className={`w-4 h-4 shrink-0 ${isExpanded ? 'text-white' : 'text-[#2563eb]'}`} />
+                          <span className="truncate">{group.title}</span>
                           {group.badge && (
-                            <span className="px-2 py-0.5 rounded-full bg-red-500 text-white text-[10px] font-black animate-pulse">
+                            <span className="px-2 py-0.5 rounded-full bg-red-500 text-white text-[10px] font-black shrink-0 animate-pulse">
                               {group.badge}
                             </span>
                           )}
                         </div>
-                        <span className={`text-sm font-bold ${isExpanded ? 'text-white' : 'text-slate-400'}`}>
-                          {isExpanded ? '—' : '+'}
-                        </span>
+                        <ChevronDown className={`w-4 h-4 shrink-0 transition-transform duration-200 ${isExpanded ? 'text-white rotate-180' : 'text-slate-400'}`} />
                       </button>
 
                       {/* Sub-menu items when expanded */}
                       {isExpanded && (
-                        <div className="border-l-2 border-slate-200 ml-6 pl-3 py-2 space-y-2 animate-in fade-in-50 duration-200">
+                        <div className="border-l-2 border-blue-100 ml-5 pl-2.5 py-1.5 space-y-1 animate-in fade-in-50 duration-200">
                           {group.items.map((subItem) => {
                             const isCurrent = pathname === subItem.href;
 
@@ -344,19 +357,19 @@ export default function AdminNavbar({
                                 href={subItem.href}
                                 target={subItem.external ? '_blank' : undefined}
                                 onClick={() => setIsOpen(false)}
-                                className={`flex items-center justify-between text-xs font-semibold py-1 pr-2 transition-colors ${
+                                className={`flex items-center justify-between text-xs py-1.5 px-2 rounded-md transition-colors ${
                                   isCurrent
-                                    ? 'text-[#2563eb] font-bold'
-                                    : 'text-slate-600 hover:text-[#2563eb]'
+                                    ? 'bg-blue-50 text-[#2563eb] font-bold'
+                                    : 'text-slate-600 hover:text-[#2563eb] hover:bg-slate-50 font-medium'
                                 }`}
                               >
-                                <span className="flex items-center gap-2">
+                                <span className="flex items-center gap-2 truncate">
                                   {isCurrent && (
-                                    <span className="w-1.5 h-1.5 rounded-full bg-[#06b6d4] shrink-0" />
+                                    <span className="w-1.5 h-1.5 rounded-full bg-[#2563eb] shrink-0" />
                                   )}
-                                  <span>{subItem.label}</span>
+                                  <span className="truncate">{subItem.label}</span>
                                 </span>
-                                <div className="flex items-center gap-1.5">
+                                <div className="flex items-center gap-1.5 shrink-0">
                                   {subItem.badge && (
                                     <span className="px-1.5 py-0.5 rounded-full bg-amber-500 text-white text-[9px] font-black">
                                       {subItem.badge}
@@ -378,14 +391,14 @@ export default function AdminNavbar({
             </div>
 
             {/* Drawer Footer with Logout */}
-            <div className="p-4 border-t border-slate-100 bg-slate-50 space-y-2 mt-4">
+            <div className="p-4 border-t border-slate-100 bg-slate-50 space-y-2 mt-auto shrink-0">
               <a
                 href={logoutHref}
                 onClick={() => setIsOpen(false)}
-                className="w-full flex items-center gap-3 px-3.5 py-2 text-xs font-bold text-slate-700 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-xs font-bold text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-red-100 shadow-2xs"
               >
-                <LogOut className="w-4 h-4 text-red-500" />
-                <span className="text-red-600 font-bold">Admin Logout (लॉगआउट)</span>
+                <LogOut className="w-4 h-4 text-red-500 shrink-0" />
+                <span>Admin Logout</span>
               </a>
               <div className="text-[10px] text-center text-slate-400">
                 SGM Mart Online Service • Admin Console
