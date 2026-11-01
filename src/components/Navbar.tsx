@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { 
   ShoppingBag, 
   Sparkles, 
@@ -21,8 +22,10 @@ import {
   UserCheck
 } from 'lucide-react';
 import { useCart } from '@/lib/cartContext';
+import MemberNavbar from './MemberNavbar';
 
 export default function Navbar() {
+  const pathname = usePathname();
   const { itemCount } = useCart();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [session, setSession] = useState<{
@@ -73,6 +76,22 @@ export default function Navbar() {
     };
   }, [isMobileMenuOpen]);
 
+  // If in Member Portal (Dashboard, Wallet, Orders, KYC, Payout, etc.), show dedicated MemberNavbar
+  const isPortalRoute = [
+    '/dashboard',
+    '/wallet',
+    '/orders',
+    '/kyc',
+    '/payout',
+    '/autopool',
+    '/recharge',
+    '/genealogy',
+  ].some((prefix) => pathname?.startsWith(prefix));
+
+  if (isPortalRoute) {
+    return <MemberNavbar user={session.user} />;
+  }
+
   const mainLinks = [
     { label: 'Home (होम)', href: '/', icon: Home },
     { label: 'Products (उत्पाद)', href: '/#products', icon: ShoppingBag },
@@ -94,20 +113,33 @@ export default function Navbar() {
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between w-full min-w-0">
-          {/* Brand Logo */}
-          <Link href="/" className="flex items-center gap-2.5 sm:gap-3 group shrink-0">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden bg-white flex items-center justify-center border-2 border-[#d4a359] shadow-md group-hover:scale-105 transition-transform p-0.5">
-              <img src="/sgm_logo.png" alt="SGM Mart Logo" className="w-full h-full object-contain" />
-            </div>
-            <div>
-              <div className="font-black text-xl sm:text-2xl tracking-tight text-[#144732] leading-none">
-                SGM MART
+          {/* LEFT: Hamburger Button on Mobile + Brand Logo */}
+          <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
+            {/* Mobile Hamburger on LEFT */}
+            <button
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="lg:hidden p-2 rounded-xl border border-slate-200 text-[#144732] bg-[#faf8f4] hover:bg-slate-100 transition-colors flex items-center justify-center cursor-pointer"
+              aria-label="Open Mobile Menu"
+              title="Menu (मेनू)"
+            >
+              <Menu className="w-6 h-6" />
+            </button>
+
+            {/* Brand Logo */}
+            <Link href="/" className="flex items-center gap-2.5 sm:gap-3 group shrink-0">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden bg-white flex items-center justify-center border-2 border-[#d4a359] shadow-md group-hover:scale-105 transition-transform p-0.5">
+                <img src="/sgm_logo.png" alt="SGM Mart Logo" className="w-full h-full object-contain" />
               </div>
-              <div className="text-[9px] sm:text-[10px] font-extrabold uppercase tracking-[0.25em] text-[#d4a359] mt-0.5">
-                Online Service
+              <div>
+                <div className="font-black text-xl sm:text-2xl tracking-tight text-[#144732] leading-none">
+                  SGM MART
+                </div>
+                <div className="text-[9px] sm:text-[10px] font-extrabold uppercase tracking-[0.25em] text-[#d4a359] mt-0.5">
+                  Online Service
+                </div>
               </div>
-            </div>
-          </Link>
+            </Link>
+          </div>
 
           {/* Desktop Navigation Links */}
           <nav className="hidden lg:flex items-center gap-6 xl:gap-7 text-sm font-bold text-slate-700">
@@ -120,7 +152,7 @@ export default function Navbar() {
           </nav>
 
           {/* Right Action Buttons */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             {/* Shopping Cart Icon (Visible on all screens) */}
             <Link
               href="/cart"
@@ -138,13 +170,13 @@ export default function Navbar() {
 
             {/* When Logged In (Member): Show Member Dashboard button & Logout */}
             {session.isLoggedIn ? (
-              <div className="hidden sm:flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5">
                 <Link
                   href="/dashboard"
                   className="px-3.5 py-2 rounded-xl bg-[#144732] text-[#fef08a] font-black text-xs sm:text-sm hover:bg-[#0b2b1e] transition-all duration-200 flex items-center gap-1.5 shadow-sm"
                 >
                   <Layers className="w-3.5 h-3.5" />
-                  <span>Dashboard ({session.user?.userCode || 'Member'})</span>
+                  <span>Dashboard</span>
                 </Link>
                 <a
                   href="/api/auth/logout?target=all&redirect=/login"
@@ -173,21 +205,11 @@ export default function Navbar() {
                 </Link>
               </>
             ) : null}
-
-            {/* Mobile & Tablet Hamburger Button (3 Parallel Lines) */}
-            <button
-              onClick={() => setIsMobileMenuOpen(true)}
-              className="p-2 sm:p-2.5 rounded-xl border border-slate-200 text-[#144732] bg-[#faf8f4] hover:bg-slate-100 transition-colors flex items-center justify-center cursor-pointer"
-              aria-label="Open Mobile Menu"
-              title="Menu (मेनू)"
-            >
-              <Menu className="w-6 h-6" />
-            </button>
           </div>
         </div>
       </header>
 
-      {/* Slide-out Mobile Side Panel Drawer - Rendered outside header with z-[99999] */}
+      {/* Slide-out Mobile Side Panel Drawer from LEFT - Rendered outside header with z-[99999] */}
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-[99999]">
           {/* Backdrop Blur Overlay */}
@@ -196,8 +218,8 @@ export default function Navbar() {
             onClick={() => setIsMobileMenuOpen(false)}
           />
 
-          {/* Side Panel Drawer (Slide from Right, strictly in front of all page elements) */}
-          <div className="fixed top-0 right-0 bottom-0 w-[85%] sm:w-96 max-w-full bg-white text-slate-800 shadow-2xl z-[100000] flex flex-col justify-between overflow-y-auto animate-in slide-in-from-right duration-300">
+          {/* Side Panel Drawer (Slide from LEFT) */}
+          <div className="fixed top-0 left-0 bottom-0 w-[85%] sm:w-80 max-w-full bg-white text-slate-800 shadow-2xl z-[100000] flex flex-col justify-between overflow-y-auto animate-in slide-in-from-left duration-300">
             <div>
               {/* Drawer Header */}
               <div className="p-4 sm:p-5 border-b border-[#e8e3d5] flex items-center justify-between bg-gradient-to-r from-[#144732] to-[#0b2b1e] text-white">
@@ -240,7 +262,7 @@ export default function Navbar() {
                         {session.user?.name || 'Member Active'}
                       </div>
                       <div className="text-[10px] text-slate-500 font-mono">
-                        ID: {session.user?.userCode || 'SGM10001'}
+                        ID: {session.user?.userCode || 'SGM Member'}
                       </div>
                     </div>
                   </div>
@@ -280,47 +302,49 @@ export default function Navbar() {
                   मुख्य पृष्ठ (Main Menu)
                 </div>
 
-                {mainLinks.map((item) => {
-                  const Icon = item.icon;
+                {mainLinks.map((link) => {
+                  const Icon = link.icon;
                   return (
                     <Link
-                      key={item.href}
-                      href={item.href}
+                      key={link.href}
+                      href={link.href}
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-bold text-slate-700 hover:text-[#144732] hover:bg-[#144732]/10 transition-colors group"
+                      className="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-bold text-slate-700 hover:text-[#144732] hover:bg-[#144732]/10 transition-colors"
                     >
                       <div className="flex items-center gap-3">
-                        <Icon className="w-4 h-4 text-[#144732] group-hover:scale-110 transition-transform" />
-                        <span>{item.label}</span>
+                        <Icon className="w-4 h-4 text-[#144732]" />
+                        <span>{link.label}</span>
                       </div>
-                      <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-[#144732] group-hover:translate-x-0.5 transition-all" />
+                      <ChevronRight className="w-4 h-4 text-slate-400" />
                     </Link>
                   );
                 })}
+
+                <Link
+                  href="/dashboard"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-black text-[#92580a] bg-amber-50 hover:bg-amber-100 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <UserCheck className="w-4 h-4 text-[#92580a]" />
+                    <span>Member Portal (सदस्य लॉगिन)</span>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-[#92580a]" />
+                </Link>
               </div>
             </div>
 
-            {/* Drawer Footer with Helpline & Logout */}
-            <div className="p-4 border-t border-slate-100 bg-[#faf8f4] space-y-2">
-              {(session.isLoggedIn || session.isAdminActive) && (
-                <a
-                  href="/api/auth/logout?target=all&redirect=/login"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow-sm transition-all"
-                >
-                  <LogOut className="w-4 h-4" />
-                  <span>लॉगआउट करें (Logout All Sessions)</span>
+            {/* Drawer Footer with Support */}
+            <div className="p-4 border-t border-[#e8e3d5] bg-[#fdfaf3] space-y-2">
+              <div className="text-xs text-slate-600 flex items-center justify-between">
+                <span>हेल्पलाइन:</span>
+                <a href="tel:6267392508" className="font-black text-[#144732] hover:underline flex items-center gap-1">
+                  <PhoneCall className="w-3.5 h-3.5 text-[#d4a359]" />
+                  <span>6267392508</span>
                 </a>
-              )}
-              <a
-                href="tel:6267392508"
-                className="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-white border border-[#d4a359] text-[#144732] font-black text-xs shadow-sm hover:bg-slate-50 transition-all"
-              >
-                <PhoneCall className="w-4 h-4 text-[#92580a]" />
-                <span>कस्टमर केयर: 6267392508</span>
-              </a>
-              <div className="text-[9px] text-center text-slate-400">
-                SGM Mart Online Service Pvt. Ltd. • “बेरोजगारी और रोग मुक्त हो भारत हमारा”
+              </div>
+              <div className="text-[10px] text-center text-slate-400">
+                SGM Mart Online Service Pvt. Ltd.
               </div>
             </div>
           </div>

@@ -1,5 +1,5 @@
 import React from 'react';
-import Navbar from '@/components/Navbar';
+import MemberNavbar from '@/components/MemberNavbar';
 import { prisma } from '@/lib/prisma';
 import { cookies } from 'next/headers';
 import { verifyUserToken } from '@/lib/auth/jwt';
@@ -21,7 +21,8 @@ import {
   Smartphone,
   Building,
   ArrowLeftRight,
-  LogOut
+  LogOut,
+  Home
 } from 'lucide-react';
 import DashboardCopyBox from './DashboardCopyBox';
 import { getSystemSettings } from '@/lib/settings';
@@ -66,9 +67,20 @@ export default async function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-[#f8f6f0] text-[#1f2937] font-sans flex flex-col">
-      <Navbar />
+      <MemberNavbar user={user} />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-1 w-full space-y-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex-1 w-full space-y-6 sm:space-y-8">
+        {/* Dashboard Top Greeting Banner (Matches Member Portal Mobile UI) */}
+        <div className="bg-gradient-to-r from-[#d9381e] via-[#e25822] to-[#ea580c] rounded-3xl p-5 sm:p-6 text-white shadow-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight">Dashboard</h1>
+            <p className="text-xs sm:text-sm text-white/95 font-medium mt-0.5">Welcome, {user.name} ({user.userCode})</p>
+          </div>
+          <div className="text-xs font-bold bg-white/20 px-3 py-1.5 rounded-xl text-white flex items-center gap-1.5 shadow-xs">
+            <Home className="w-4 h-4" />
+            <span>&gt; Dashboard</span>
+          </div>
+        </div>
         {/* Admin Notice Banner (If enabled by Admin) */}
         {settings.noticeEnabled && (
           <AdminNoticeBanner

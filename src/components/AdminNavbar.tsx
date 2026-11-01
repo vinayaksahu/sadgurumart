@@ -74,97 +74,58 @@ export default function AdminNavbar({
           : 'bg-white border-[#e8e3d5] text-[#2d3748]'
       }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between w-full min-w-0">
-          {/* Brand Logo & Title */}
-          <Link href={isSuperAdmin ? '/superadmin/dashboard' : '/admin/dashboard'} className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-            <div className={`w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center p-0.5 border shadow-sm shrink-0 ${
-              isSuperAdmin 
-                ? 'bg-[#051810] border-[#d4a359]' 
-                : 'bg-white border-[#d4a359]'
-            }`}>
-              <img src="/sgm_logo.png" alt="SGM Logo" className="w-full h-full object-contain" />
-            </div>
-            <div className="min-w-0">
-              <div className={`font-black text-sm sm:text-base leading-none truncate ${
-                isSuperAdmin ? 'text-[#fef08a]' : 'text-[#144732]'
-              }`}>
-                {title}
-              </div>
-              <div className={`text-[9px] sm:text-[10px] font-extrabold uppercase tracking-widest mt-0.5 truncate ${
-                isSuperAdmin ? 'text-[#d4a359]' : 'text-[#92580a]'
-              }`}>
-                {role} • {username}
-              </div>
-            </div>
-          </Link>
-
-          {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-4 xl:gap-5 text-xs font-bold">
-            <Link 
-              href={isSuperAdmin ? '/superadmin/dashboard' : '/admin/dashboard'} 
-              className={`hover:underline transition-colors ${isSuperAdmin ? 'text-slate-200 hover:text-white' : 'text-slate-700 hover:text-[#144732]'}`}
-            >
-              Dashboard
-            </Link>
-            <Link 
-              href="/admin/members" 
-              className={`hover:underline transition-colors font-black ${isSuperAdmin ? 'text-[#fef08a] hover:text-white' : 'text-[#144732] hover:text-[#0b2b1e]'}`}
-            >
-              👥 Members & Team
-            </Link>
-            <Link 
-              href="/admin/orders" 
-              className={`hover:underline transition-colors font-black ${isSuperAdmin ? 'text-slate-200 hover:text-white' : 'text-slate-700 hover:text-[#144732]'}`}
-            >
-              📦 Orders
-            </Link>
-            <Link 
-              href="/admin/settings" 
-              className={`flex items-center gap-1 font-black px-2.5 py-1 rounded-lg border transition-all ${
-                isSuperAdmin 
-                  ? 'bg-[#144732] border-[#d4a359] text-[#fef08a] hover:bg-[#1b5e43]' 
-                  : 'bg-[#fdfaf3] border-[#d4a359] text-[#92580a] hover:bg-[#faf4e6]'
+          {/* Left Side: Hamburger Menu Button + Brand Logo & Title */}
+          <div className="flex items-center gap-3 min-w-0">
+            {/* Hamburger Button on LEFT */}
+            <button
+              onClick={() => setIsOpen(true)}
+              className={`p-2 rounded-xl border transition-colors flex items-center justify-center cursor-pointer shrink-0 ${
+                isSuperAdmin
+                  ? 'border-[#d4a359]/40 text-[#fef08a] hover:bg-[#144732]'
+                  : 'border-slate-200 text-[#144732] hover:bg-slate-100'
               }`}
+              aria-label="Open Admin Menu"
+              title="Admin Menu"
             >
-              <Sliders className="w-3.5 h-3.5" />
-              <span>Settings</span>
-            </Link>
-            <Link 
-              href="/admin/inventory" 
-              className={`hover:underline transition-colors ${isSuperAdmin ? 'text-slate-200 hover:text-white' : 'text-slate-700 hover:text-[#144732]'}`}
-            >
-              Inventory
-            </Link>
-            <Link 
-              href="/admin/gallery" 
-              className={`hover:underline transition-colors ${isSuperAdmin ? 'text-slate-200 hover:text-white' : 'text-slate-700 hover:text-[#144732]'}`}
-            >
-              Gallery
-            </Link>
-            <Link 
-              href="/admin/kyc" 
-              className={`hover:underline transition-colors ${isSuperAdmin ? 'text-slate-200 hover:text-white' : 'text-slate-700 hover:text-[#144732]'}`}
-            >
-              KYC Desk
-            </Link>
-            <Link 
-              href="/admin/withdrawals" 
-              className={`hover:underline transition-colors ${isSuperAdmin ? 'text-slate-200 hover:text-white' : 'text-slate-700 hover:text-[#144732]'}`}
-            >
-              Withdrawals
-            </Link>
-            <Link 
-              href="/genealogy/binary" 
-              className={`hover:underline transition-colors ${isSuperAdmin ? 'text-slate-200 hover:text-white' : 'text-slate-700 hover:text-[#144732]'}`}
-            >
-              Genealogy
-            </Link>
-          </nav>
+              <Menu className="w-6 h-6" />
+            </button>
 
-          {/* Right Area: Desktop Logout + Mobile Hamburger Button */}
-          <div className="flex items-center gap-2 sm:gap-3">
+            {/* Brand Logo & Title */}
+            <Link href={isSuperAdmin ? '/superadmin/dashboard' : '/admin/dashboard'} className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+              <div className={`w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center p-0.5 border shadow-sm shrink-0 ${
+                isSuperAdmin 
+                  ? 'bg-[#051810] border-[#d4a359]' 
+                  : 'bg-white border-[#d4a359]'
+              }`}>
+                <img src="/sgm_logo.png" alt="SGM Logo" className="w-full h-full object-contain" />
+              </div>
+              <div className="min-w-0">
+                <div className={`font-black text-sm sm:text-base leading-none truncate ${
+                  isSuperAdmin ? 'text-[#fef08a]' : 'text-[#144732]'
+                }`}>
+                  {title}
+                </div>
+                <div className={`text-[9px] sm:text-[10px] font-extrabold uppercase tracking-widest mt-0.5 truncate ${
+                  isSuperAdmin ? 'text-[#d4a359]' : 'text-[#92580a]'
+                }`}>
+                  {role} • {username}
+                </div>
+              </div>
+            </Link>
+          </div>
+
+          {/* Right Area: Status Indicator & Logout Button */}
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <span className={`hidden sm:inline-flex px-3 py-1 rounded-full text-[10px] font-mono font-bold border ${
+              isSuperAdmin 
+                ? 'bg-[#144732] text-[#fef08a] border-[#d4a359]/30' 
+                : 'bg-[#eaf5ed] text-[#144732] border-[#144732]/20'
+            }`}>
+              ADMIN ACTIVE
+            </span>
             <a
               href={logoutHref}
-              className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors ${
                 isSuperAdmin 
                   ? 'border-red-500/50 text-red-400 hover:bg-red-950/40' 
                   : 'border-red-200 text-red-600 hover:bg-red-50'
@@ -173,25 +134,11 @@ export default function AdminNavbar({
               <LogOut className="w-3.5 h-3.5" />
               <span>Logout</span>
             </a>
-
-            {/* Mobile Hamburger (3 parallel lines) Button */}
-            <button
-              onClick={() => setIsOpen(true)}
-              className={`p-2 rounded-xl border transition-colors flex items-center justify-center cursor-pointer ${
-                isSuperAdmin
-                  ? 'border-[#d4a359]/40 text-[#fef08a] hover:bg-[#144732]'
-                  : 'border-slate-200 text-[#144732] hover:bg-slate-100'
-              }`}
-              aria-label="Open Admin Menu"
-              title="Menu"
-            >
-              <Menu className="w-6 h-6" />
-            </button>
           </div>
         </div>
       </header>
 
-      {/* Slide-out Drawer Panel for Mobile/Tablet - Rendered outside with z-[99999] */}
+      {/* Slide-out Drawer Panel from LEFT - Rendered outside with z-[99999] */}
       {isOpen && (
         <div className="fixed inset-0 z-[99999]">
           {/* Dark Backdrop */}
@@ -200,8 +147,8 @@ export default function AdminNavbar({
             onClick={() => setIsOpen(false)}
           />
 
-          {/* Side Panel (Slide from Right, strictly in front of all page elements) */}
-          <div className="fixed top-0 right-0 bottom-0 w-[85%] sm:w-96 max-w-full bg-white text-slate-800 shadow-2xl z-[100000] flex flex-col justify-between overflow-y-auto animate-in slide-in-from-right duration-300">
+          {/* Side Panel (Slide from LEFT, strictly in front of all page elements) */}
+          <div className="fixed top-0 left-0 bottom-0 w-[85%] sm:w-80 max-w-full bg-white text-slate-800 shadow-2xl z-[100000] flex flex-col justify-between overflow-y-auto animate-in slide-in-from-left duration-300">
             {/* Drawer Header */}
             <div>
               <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-[#144732] to-[#0b2b1e] text-white">
