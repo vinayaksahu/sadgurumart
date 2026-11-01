@@ -1,0 +1,49 @@
+# Dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# Testing
+/coverage
+
+# Next.js
+/.next/
+/out/
+
+# Production
+/build
+
+# Misc
+.DS_Store
+*.pem
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment
+.env
+.env*.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Large Design Assets & Temporary Python Previews
+*.pdf
+compliance_preview/
+slides_preview/
+slides_4x3_preview/
+slides_bold_preview/
+slides_final_preview/
+__pycache__/
+*.pyc
+extracted_plan_summary.txt
+incomes_details.txt
+all_plan_details.txt

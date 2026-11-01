@@ -1,0 +1,451 @@
+// Prisma Schema for SGM Mart (E-Commerce & 16-Income MLM Platform)
+// Compliant with Indian Direct Selling Rules 2021
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ==========================================
+// 1. STEALTH SUPERADMIN ARCHITECTURE
+// (Completely isolated table; unseen by Admins)
+// ==========================================
+model SystemMaster {
+  id            String    @id @default(uuid())
+  username      String    @unique
+  email         String    @unique
+  passwordHash  String
+  stealthRole   String    @default("SUPER_ROOT")
+  ipWhitelist   String?
+  mfaSecret     String?
+  lastLoginAt   DateTime?
+  lastLoginIp   String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("system_masters")
+}
+
+// ==========================================
+// 2. OPERATIONAL ADMINS (Staff Roles)
+// (Admins only see other staff admins)
+// ==========================================
+enum AdminRole {
+  GENERAL_ADMIN
+  KYC_MANAGER
+  CATALOG_MANAGER
+  ORDER_DISPATCHER
+  FINANCE_OFFICER
+  SUPPORT_AGENT
+}
+
+model Admin {
+  id            String      @id @default(uuid())
+  username      String      @unique
+  email         String      @unique
+  fullName      String
+  passwordHash  String
+  role          AdminRole   @default(GENERAL_ADMIN)
+  permissions   Json?       // Granular RBAC permissions
+  isActive      Boolean     @default(true)
+  lastLoginAt   DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  auditLogs     AdminAuditLog[]
+  kycReviewed   KYCDetail[]
+
+  @@map("admins")
+}
+
+// ==========================================
+// 3. USERS / DISTRIBUTORS / CUSTOMERS
+// ==========================================
+enum RankDesignation {
+  DISTRIBUTOR
+  STAR_1
+  STAR_2
+  STAR_3
+  SILVER
+  GOLD
+  RUBY
+  PLATINUM
+  EMERALD
+  DIAMOND
+  DOUBLE_DIAMOND
+  TRIPLE_DIAMOND
+  KOHINOOR
+  AMBASSADOR
+  ROYAL_AMBASSADOR
+  CROWN_AMBASSADOR
+}
+
+enum BinaryPosition {
+  LEFT
+  RIGHT
+}
+
+enum KYCStatus {
+  NOT_SUBMITTED
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id                  String           @id @default(uuid())
+  userCode            String           @unique // e.g. SGM10001
+  name                String
+  email               String?          @unique
+  mobile              String           @unique
+  passwordHash        String
+  
+  // Binary & Sponsor Relationships
+  sponsorId           String?
+  sponsor             User?            @relation("SponsorReferrals", fields: [sponsorId], references: [id])
+  directReferrals     User[]           @relation("SponsorReferrals")
+  
+  placementParentId   String?
+  placementParent     User?            @relation("BinaryPlacements", fields: [placementParentId], references: [id])
+  binaryChildren      User[]           @relation("BinaryPlacements")
+  placementPosition   BinaryPosition?
+
+  // Business Performance Metrics
+  rank                RankDesignation  @default(DISTRIBUTOR)
+  isActive            Boolean          @default(false)
+  activatedAt         DateTime?
+  
+  leftVolumePV        Float            @default(0)
+  rightVolumePV       Float            @default(0)
+  leftCarryForwardPV  Float            @default(0)
+  rightCarryForwardPV Float            @default(0)
+  totalMatchingPaidPV Float            @default(0)
+  directBusinessPV    Float            @default(0) // For 3000 PV Leadership & 5000 PV CTO qualification
+  rewardPointsRP      Float            @default(0)
+
+  // System & Financial
+  wallet              Wallet?
+  kycDetail           KYCDetail?
+  orders              Order[]
+  autoPoolMemberships AutoPoolEntry[]
+  utilityRecharges    UtilityRecharge[]
+  withdrawalRequests  WithdrawalRequest[]
+
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+
+  @@index([sponsorId])
+  @@index([placementParentId])
+  @@index([userCode])
+  @@map("users")
+}
+
+// ==========================================
+// 4. KYC & BANK DETAILS
+// ==========================================
+model KYCDetail {
+  id                  String     @id @default(uuid())
+  userId              String     @unique
+  user                User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  panNumber           String     @unique
+  panPhotoUrl         String?
+  aadhaarNumber       String     @unique
+  aadhaarFrontUrl     String?
+  aadhaarBackUrl      String?
+
+  bankName            String
+  bankAccountNumber   String
+  ifscCode            String
+  accountHolderName   String
+  passbookChequeUrl   String?
+
+  status              KYCStatus  @default(PENDING)
+  rejectionReason     String?
+  
+  reviewedByAdminId   String?
+  reviewedBy          Admin?     @relation(fields: [reviewedByAdminId], references: [id])
+  reviewedAt          DateTime?
+
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+
+  @@map("kyc_details")
+}
+
+// ==========================================
+// 5. E-COMMERCE PRODUCTS & PACKAGES
+// ==========================================
+model Category {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  icon        String?
+  imageUrl    String?
+  products    Product[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("categories")
+}
+
+model Product {
+  id              String      @id @default(uuid())
+  categoryId      String
+  category        Category    @relation(fields: [categoryId], references: [id])
+  
+  title           String
+  slug            String      @unique
+  description     String
+  mrp             Float       // Maximum Retail Price
+  dpPrice         Float       // Distributor Price
+  pv              Float       // Point Value (Activation & Matching)
+  bv              Float       // Business Value (Repurchase Cashback)
+  stockQuantity   Int         @default(0)
+  images          String[]
+  isActivation    Boolean     @default(false)
+  isActive        Boolean     @default(true)
+  
+  orderItems      OrderItem[]
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@map("products")
+}
+
+// ==========================================
+// 6. ORDERS & INVOICES
+// ==========================================
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+model Order {
+  id              String        @id @default(uuid())
+  orderNumber     String        @unique // SGM-ORD-10001
+  userId          String
+  user            User          @relation(fields: [userId], references: [id])
+
+  totalMrp        Float
+  totalDp         Float
+  totalDiscount   Float
+  deliveryFee     Float         @default(0)
+  totalPV         Float         @default(0)
+  totalBV         Float         @default(0)
+  
+  orderStatus     OrderStatus   @default(PENDING)
+  paymentStatus   PaymentStatus @default(PENDING)
+  paymentMethod   String        @default("ONLINE") // RAZORPAY, CASHFREE, WALLET
+  paymentTxId     String?
+
+  shippingAddress Json
+  invoiceUrl      String?
+
+  items           OrderItem[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id          String   @id @default(uuid())
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id])
+
+  quantity    Int
+  unitMrp     Float
+  unitDp      Float
+  unitPV      Float
+  unitBV      Float
+
+  @@map("order_items")
+}
+
+// ==========================================
+// 7. AUTO POOL (7-LEVEL 2x2 GLOBAL MATRIX)
+// ==========================================
+model AutoPoolEntry {
+  id              String          @id @default(uuid())
+  userId          String
+  user            User            @relation(fields: [userId], references: [id])
+  
+  poolLevel       Int             @default(1) // Levels 1 to 7
+  parentPoolId    String?
+  parentPool      AutoPoolEntry?  @relation("AutoPoolTree", fields: [parentPoolId], references: [id])
+  children        AutoPoolEntry[] @relation("AutoPoolTree")
+  childPosition   Int?            // 1 (Left) or 2 (Right)
+
+  grossAmount     Float           @default(0)
+  upgradeDeducted Float           @default(0)
+  netPaidOut      Float           @default(0)
+  isCompleted     Boolean         @default(false)
+  completedAt     DateTime?
+
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@index([poolLevel, isCompleted])
+  @@map("autopool_entries")
+}
+
+// ==========================================
+// 8. MULTI-WALLET & LEDGER ENGINE
+// ==========================================
+model Wallet {
+  id                  String              @id @default(uuid())
+  userId              String              @unique
+  user                User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  mainBalance         Float               @default(0) // Available for withdrawal
+  shoppingBalance     Float               @default(0) // Repurchase & Utility balance
+  holdBalance         Float               @default(0) // Pending KYC or verification
+  autoPoolReserve     Float               @default(0) // Level upgrade deductions reserve
+
+  totalEarned         Float               @default(0)
+  totalWithdrawn      Float               @default(0)
+
+  transactions        WalletTransaction[]
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+
+  @@map("wallets")
+}
+
+enum TransactionType {
+  RETAIL_PROFIT
+  DIRECT_REFERRAL
+  BINARY_MATCHING
+  SPONSOR_ROYALTY
+  AWARD_REWARD
+  LEADERSHIP_CTO
+  COMPANY_CTO
+  AUTOPOOL_INCOME
+  PURCHASE_CASHBACK
+  REPURCHASE_TEAM
+  MOBILE_FUND
+  BIKE_FUND
+  CAR_FUND
+  HOUSE_FUND
+  MOBILE_RECHARGE_CASHBACK
+  DTH_RECHARGE_CASHBACK
+  WITHDRAWAL_REQUEST
+  WITHDRAWAL_ADMIN_FEE
+  WITHDRAWAL_TDS
+  WALLET_PURCHASE
+  SYSTEM_CREDIT
+  SYSTEM_DEBIT
+}
+
+model WalletTransaction {
+  id            String          @id @default(uuid())
+  walletId      String
+  wallet        Wallet          @relation(fields: [walletId], references: [id])
+  
+  type          TransactionType
+  amount        Float           // Positive for credit, negative for debit
+  closingBalance Float
+  referenceId   String?         // OrderId, WithdrawalId, AutoPoolId
+  remarks       String?
+
+  createdAt     DateTime        @default(now())
+
+  @@index([walletId, type])
+  @@map("wallet_transactions")
+}
+
+// ==========================================
+// 9. WITHDRAWAL SETTLEMENTS & DEDUCTIONS
+// ==========================================
+enum WithdrawalStatus {
+  PENDING
+  APPROVED
+  PAID
+  REJECTED
+}
+
+model WithdrawalRequest {
+  id              String            @id @default(uuid())
+  userId          String
+  user            User              @relation(fields: [userId], references: [id])
+
+  requestedAmount Float             // Min ₹100
+  adminCharge     Float             // 5%
+  tdsAmount       Float             // 5%
+  netPayable      Float             // 90%
+  
+  bankSnapshot    Json              // Frozen snapshot of bank details at request time
+  status          WithdrawalStatus  @default(PENDING)
+  rejectionReason String?
+  paymentTxId     String?           // UTR / IMPS / NEFT ref
+  paidAt          DateTime?
+
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@map("withdrawal_requests")
+}
+
+// ==========================================
+// 10. UTILITY RECHARGES (Mobile & DTH)
+// ==========================================
+enum ServiceType {
+  MOBILE_RECHARGE
+  DTH_RECHARGE
+}
+
+model UtilityRecharge {
+  id              String      @id @default(uuid())
+  userId          String
+  user            User        @relation(fields: [userId], references: [id])
+
+  serviceType     ServiceType
+  operatorName    String
+  circleOrRegion  String?
+  targetNumber    String      // Phone or DTH Subscriber ID
+  rechargeAmount  Float
+  cashbackEarned  Float       // 2.50%
+  status          String      @default("SUCCESS")
+  operatorTxId    String?
+
+  createdAt       DateTime    @default(now())
+
+  @@map("utility_recharges")
+}
+
+// ==========================================
+// 11. AUDIT LOGS (Admin activity tracking)
+// ==========================================
+model AdminAuditLog {
+  id          String   @id @default(uuid())
+  adminId     String
+  admin       Admin    @relation(fields: [adminId], references: [id])
+  action      String
+  targetEntity String
+  targetId    String?
+  ipAddress   String?
+  changes     Json?
+  createdAt   DateTime @default(now())
+
+  @@map("admin_audit_logs")
+}

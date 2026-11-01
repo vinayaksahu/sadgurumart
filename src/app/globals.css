@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Noto+Sans+Devanagari:wght@400;500;600;700;800;900&display=swap');
+
+:root {
+  --font-outfit: 'Outfit', sans-serif;
+  --font-devanagari: 'Noto Sans Devanagari', sans-serif;
+  --brand-forest-dark: #0b2b1e;
+  --brand-forest: #144732;
+  --brand-gold: #d4a359;
+  --brand-gold-deep: #92580a;
+  --brand-parchment: #f6f4ed;
+}
+
+body {
+  font-family: var(--font-outfit), var(--font-devanagari), system-ui, sans-serif;
+  background-color: #f8f6f0;
+  color: #1f2937;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Luxury Card & Glassmorphism accents following Impeccable guidelines */
+.impeccable-card {
+  background: #ffffff;
+  border: 1px solid #e8e3d5;
+  border-radius: 1.25rem;
+  box-shadow: 0 10px 30px -10px rgba(20, 71, 50, 0.08);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.impeccable-card:hover {
+  box-shadow: 0 16px 36px -12px rgba(20, 71, 50, 0.14);
+}
+
+.impeccable-glass {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(212, 163, 89, 0.2);
+}
+
+.gold-gradient-text {
+  background: linear-gradient(135deg, #d4a359 0%, #fef08a 50%, #bc853c 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.forest-gradient {
+  background: linear-gradient(135deg, #144732 0%, #0b2b1e 100%);
+}
+
+.gold-pill {
+  background: #d4a359;
+  color: #144732;
+  font-weight: 800;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}

@@ -1,0 +1,38 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  @page {
+    size: 16in 9in;
+    margin: 0;
+  }
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .slide {
+    width: 16in;
+    height: 9in;
+    page-break-after: always;
+    break-after: page;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 40px;
+    font-weight: bold;
+  }
+  .slide1 { background: linear-gradient(135deg, #0d324d, #7f5a83); }
+  .slide2 { background: linear-gradient(135deg, #11998e, #38ef7d); }
+</style>
+</head>
+<body>
+  <div class="slide slide1">Slide 1: Test 16:9 Landscape</div>
+  <div class="slide slide2">Slide 2: Sadguru Mart MLM Plan</div>
+</body>
+</html>
