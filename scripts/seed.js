@@ -24,21 +24,27 @@ async function main() {
   console.log('✅ Stealth Superadmin initialized in system_masters:', superAdmin.username);
 
   // 2. Create Operational Staff Admin (In admins table)
-  const adminPassword = await bcrypt.hash('AdminSGM@2026', 10);
+  const adminPassword = await bcrypt.hash('6267392508', 10);
   const admin = await prisma.admin.upsert({
-    where: { username: 'opsadmin' },
-    update: {},
+    where: { username: 'admin' },
+    update: {
+      passwordHash: adminPassword,
+      isActive: true,
+      role: 'GENERAL_ADMIN',
+    },
     create: {
-      username: 'opsadmin',
-      email: 'admin@sadgurumart.online',
-      fullName: 'Operations Manager',
+      username: 'admin',
+      email: 'admin@sadgurumart.com',
+      fullName: 'Operations Administrator',
       passwordHash: adminPassword,
       role: 'GENERAL_ADMIN',
       permissions: {
         canManageOrders: true,
         canVerifyKYC: true,
         canManageProducts: true,
-        canApproveWithdrawals: false, // Protected
+        canApproveWithdrawals: true,
+        canManageInventory: true,
+        canManageGallery: true,
       },
     },
   });
