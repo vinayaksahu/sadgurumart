@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { 
   Package, 
   Plus, 
@@ -48,12 +49,22 @@ interface InventoryManagerProps {
 }
 
 export default function InventoryManager({ initialProducts, categories }: InventoryManagerProps) {
+  const searchParams = useSearchParams();
+  const actionParam = searchParams.get('action');
+
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [filterType, setFilterType] = useState('ALL'); // ALL, ACTIVATION, REPURCHASE
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(actionParam === 'add');
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+
+  useEffect(() => {
+    if (actionParam === 'add') {
+      setEditingProduct(null);
+      setIsModalOpen(true);
+    }
+  }, [actionParam]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 

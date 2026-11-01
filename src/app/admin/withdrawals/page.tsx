@@ -4,11 +4,15 @@ import { cookies } from 'next/headers';
 import { verifyAdminToken, verifySuperToken } from '@/lib/auth/jwt';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { Wallet, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { Wallet, ShieldCheck, CheckCircle2, Clock, FileSpreadsheet, ArrowLeftRight } from 'lucide-react';
 import AdminNavbar from '@/components/AdminNavbar';
 import AdminWithdrawalActions from './AdminWithdrawalActions';
 
-export default async function AdminWithdrawalsPage() {
+export default async function AdminWithdrawalsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ status?: string; view?: string; tab?: string }>;
+}) {
   const cookieStore = await cookies();
   const adminToken = cookieStore.get('sgm_admin_token')?.value;
   const superToken = cookieStore.get('sgm_super_token')?.value;
@@ -18,33 +22,126 @@ export default async function AdminWithdrawalsPage() {
 
   if (!isAdmin && !isSuper) redirect('/adminlogin');
 
-  const withdrawals = await prisma.withdrawalRequest.findMany({
-    include: {
-      user: { select: { userCode: true, name: true, mobile: true } },
-    },
-    orderBy: { createdAt: 'desc' },
-  });
+  const { status, view, tab } = (await searchParams) || {};
+
+  const whereClause: any = {};
+  if (status === 'pending') {
+    whereClause.status = 'PENDING';
+  } else if (status === 'approved') {
+    whereClause.status = 'PAID';
+  }
+
+  const [withdrawals, totalPendingCount, totalPaidCount] = await Promise.all([
+    prisma.withdrawalRequest.findMany({
+      where: whereClause,
+      include: {
+        user: { select: { userCode: true, name: true, mobile: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+    }),
+    prisma.withdrawalRequest.count({ where: { status: 'PENDING' } }),
+    prisma.withdrawalRequest.count({ where: { status: 'PAID' } }),
+  ]);
+
+  const totalGross = withdrawals.reduce((sum, w) => sum + w.requestedAmount, 0);
+  const totalTDS = withdrawals.reduce((sum, w) => sum + w.tdsAmount, 0);
+  const totalAdminFee = withdrawals.reduce((sum, w) => sum + w.adminCharge, 0);
+  const totalNet = withdrawals.reduce((sum, w) => sum + w.netPayable, 0);
 
   return (
     <div className="min-h-screen bg-[#f6f4ed] text-[#2d3748] font-sans flex flex-col">
       <AdminNavbar 
-        title="Payout Settlements Desk"
-        subtitle="Weekly Bank Transfer Approvals & Deductions"
+        title="Payout Settlements & Banking Desk"
+        subtitle="Weekly Bank Transfer Approvals & TDS Deductions"
         role="STAFF_ADMIN"
         username={isAdmin ? (isAdmin as any).username : 'Admin'}
       />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full space-y-6">
+        {/* Navigation Filter Pills */}
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href="/admin/withdrawals"
+            className={`px-4 py-2 rounded-xl text-xs font-black transition-all ${
+              !status && !view && !tab
+                ? 'bg-[#144732] text-white shadow-sm'
+                : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
+            }`}
+          >
+            सभी विड्रॉल ({totalPendingCount + totalPaidCount})
+          </Link>
+
+          <Link
+            href="/admin/withdrawals?status=pending"
+            className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 ${
+              status === 'pending'
+                ? 'bg-amber-500 text-white shadow-sm'
+                : 'bg-white border border-slate-200 text-amber-700 hover:bg-amber-50'
+            }`}
+          >
+            <Clock className="w-3.5 h-3.5" />
+            <span>पेंडिंग भुगतान ({totalPendingCount})</span>
+          </Link>
+
+          <Link
+            href="/admin/withdrawals?status=approved"
+            className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 ${
+              status === 'approved'
+                ? 'bg-emerald-600 text-white shadow-sm'
+                : 'bg-white border border-slate-200 text-emerald-700 hover:bg-emerald-50'
+            }`}
+          >
+            <CheckCircle2 className="w-3.5 h-3.5" />
+            <span>स्वीकृत भुगतान ({totalPaidCount})</span>
+          </Link>
+
+          <Link
+            href="/admin/withdrawals?view=tds"
+            className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 ${
+              view === 'tds'
+                ? 'bg-blue-600 text-white shadow-sm'
+                : 'bg-white border border-slate-200 text-blue-700 hover:bg-blue-50'
+            }`}
+          >
+            <FileSpreadsheet className="w-3.5 h-3.5" />
+            <span>TDS व कटौती रिपोर्ट (5% + 5%)</span>
+          </Link>
+        </div>
+
+        {/* Overview Stats Cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="bg-white border border-[#e8e3d5] rounded-2xl p-4 shadow-xs">
+            <div className="text-[11px] font-bold text-slate-500">कुल ग्रॉस विड्रॉल</div>
+            <div className="text-xl sm:text-2xl font-black text-[#144732] mt-0.5">₹{totalGross.toLocaleString('en-IN')}</div>
+          </div>
+          <div className="bg-white border border-[#e8e3d5] rounded-2xl p-4 shadow-xs">
+            <div className="text-[11px] font-bold text-slate-500">5% सरकारी TDS</div>
+            <div className="text-xl sm:text-2xl font-black text-blue-700 mt-0.5">₹{totalTDS.toLocaleString('en-IN')}</div>
+          </div>
+          <div className="bg-white border border-[#e8e3d5] rounded-2xl p-4 shadow-xs">
+            <div className="text-[11px] font-bold text-slate-500">5% एडमिनिस्ट्रेटिव चार्ज</div>
+            <div className="text-xl sm:text-2xl font-black text-amber-700 mt-0.5">₹{totalAdminFee.toLocaleString('en-IN')}</div>
+          </div>
+          <div className="bg-white border border-[#e8e3d5] rounded-2xl p-4 shadow-xs">
+            <div className="text-[11px] font-bold text-slate-500">नेट बैंक भुगतान</div>
+            <div className="text-xl sm:text-2xl font-black text-emerald-700 mt-0.5">₹{totalNet.toLocaleString('en-IN')}</div>
+          </div>
+        </div>
+
+        {/* Withdrawals Table Card */}
         <div className="bg-white border border-[#e8e3d5] rounded-3xl p-6 sm:p-8 shadow-sm">
           <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-100">
             <h2 className="text-base font-black text-[#144732]">
-              विड्रॉल अनुरोध सूची ({withdrawals.length} कुल अनुरोध)
+              {status === 'pending' ? 'पेंडिंग विड्रॉल अनुरोध (Pending Queue)' :
+               status === 'approved' ? 'स्वीकृत बैंक भुगतान (Paid Settlements)' :
+               view === 'tds' ? 'TDS व कानूनी कटौती रिपोर्ट (TDS Ledger)' :
+               `विड्रॉल अनुरोध सूची (${withdrawals.length} कुल अनुरोध)`}
             </h2>
           </div>
 
           {withdrawals.length === 0 ? (
             <div className="py-12 text-center text-xs text-slate-400">
-              कोई लंबित विड्रॉल अनुरोध नहीं है।
+              इस श्रेणी में कोई विड्रॉल अनुरोध नहीं है।
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -74,9 +171,9 @@ export default async function AdminWithdrawalsPage() {
                           <div className="text-[10px] text-slate-500 font-normal">{req.user.name}</div>
                         </td>
                         <td className="py-3 px-3">
-                          <div className="font-bold text-slate-800">{bank?.bankName}</div>
-                          <div className="font-mono text-slate-600">A/C: {bank?.accountNumber}</div>
-                          <div className="font-mono text-[10px] text-slate-500">IFSC: {bank?.ifscCode}</div>
+                          <div className="font-bold text-slate-800">{bank?.bankName || 'N/A'}</div>
+                          <div className="font-mono text-slate-600">A/C: {bank?.accountNumber || 'N/A'}</div>
+                          <div className="font-mono text-[10px] text-slate-500">IFSC: {bank?.ifscCode || 'N/A'}</div>
                         </td>
                         <td className="py-3 px-3 font-bold text-slate-800">₹{req.requestedAmount}</td>
                         <td className="py-3 px-3 text-red-600 font-semibold">

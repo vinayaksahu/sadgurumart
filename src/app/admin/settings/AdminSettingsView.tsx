@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { 
   Sliders, 
   Database, 
@@ -37,7 +38,19 @@ interface Props {
 }
 
 export default function AdminSettingsView({ initialSettings, isSuperAdmin }: Props) {
-  const [activeTab, setActiveTab] = useState<'plan' | 'backup' | 'notice' | 'popup' | 'general' | 'drive'>('plan');
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState<'plan' | 'backup' | 'notice' | 'popup' | 'general' | 'drive'>(
+    (tabParam && ['plan', 'backup', 'notice', 'popup', 'general', 'drive'].includes(tabParam)) 
+      ? (tabParam as any) 
+      : 'plan'
+  );
+
+  useEffect(() => {
+    if (tabParam && ['plan', 'backup', 'notice', 'popup', 'general', 'drive'].includes(tabParam)) {
+      setActiveTab(tabParam as any);
+    }
+  }, [tabParam]);
   const [formData, setFormData] = useState(initialSettings || {});
   const [saving, setSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<{ type: 'success' | 'error' | null; message: string }>({

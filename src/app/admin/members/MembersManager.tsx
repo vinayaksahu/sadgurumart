@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { 
   Users, 
@@ -65,11 +66,28 @@ interface MemberSummary {
 }
 
 export default function MembersManager() {
+  const searchParams = useSearchParams();
+  const statusParam = searchParams.get('status');
+  const viewParam = searchParams.get('view');
+  const actionParam = searchParams.get('action');
+
   const [members, setMembers] = useState<MemberSummary[]>([]);
   const [metrics, setMetrics] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('ALL');
+  const [statusFilter, setStatusFilter] = useState<'ALL' | 'ACTIVE' | 'INACTIVE'>(
+    statusParam === 'inactive' ? 'INACTIVE' : statusParam === 'active' ? 'ACTIVE' : 'ALL'
+  );
+
+  useEffect(() => {
+    if (statusParam === 'inactive') {
+      setStatusFilter('INACTIVE');
+    } else if (statusParam === 'active') {
+      setStatusFilter('ACTIVE');
+    } else if (statusParam === 'all') {
+      setStatusFilter('ALL');
+    }
+  }, [statusParam]);
   
   // Selected Member for Modal Deep-Dive
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
@@ -325,7 +343,7 @@ export default function MembersManager() {
           <span className="text-xs font-bold text-slate-500 shrink-0">फ़िल्टर:</span>
           <select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
+            onChange={(e) => setStatusFilter(e.target.value as any)}
             className="px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold focus:outline-none focus:border-[#144732] bg-[#faf8f4]"
           >
             <option value="ALL">सभी मेंबर्स (All IDs)</option>

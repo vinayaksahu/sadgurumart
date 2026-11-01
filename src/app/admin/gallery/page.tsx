@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { prisma } from '@/lib/prisma';
 import { cookies } from 'next/headers';
 import { verifyAdminToken, verifySuperToken } from '@/lib/auth/jwt';
@@ -32,7 +32,14 @@ export default async function AdminGalleryPage() {
       />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
-        <GalleryManager initialItems={items as any} />
+        <Suspense fallback={
+          <div className="bg-white border border-[#e8e3d5] rounded-3xl p-16 text-center">
+            <div className="w-8 h-8 border-3 border-[#144732] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+            <div className="text-xs font-bold text-slate-500">गैलरी डेटा लोड हो रहा है...</div>
+          </div>
+        }>
+          <GalleryManager initialItems={items as any} />
+        </Suspense>
       </main>
     </div>
   );

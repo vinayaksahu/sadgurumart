@@ -65,7 +65,7 @@ export default function AdminNavbar({
   const logoutHref = `/api/auth/logout?target=${isSuperAdmin ? 'superadmin' : 'admin'}&redirect=/adminlogin`;
   const homeHref = isSuperAdmin ? '/superadmin/dashboard' : '/admin/dashboard';
 
-  // 7 Admin Accordion Groups matching user's exact reference screenshots
+  // 7 Admin Accordion Groups synchronized with distinct, purpose-built admin pages
   const menuGroups: MenuGroup[] = [
     {
       id: 'geneology',
@@ -82,8 +82,9 @@ export default function AdminNavbar({
       items: [
         { label: 'Add Package', href: '/admin/settings?tab=plan' },
         { label: 'Package List', href: '/admin/settings?tab=plan' },
-        { label: 'Add Product', href: '/admin/inventory' },
+        { label: 'Add Product', href: '/admin/inventory?action=add' },
         { label: 'Product List', href: '/admin/inventory' },
+        { label: 'Orders & Dispatch', href: '/admin/orders' },
       ],
     },
     {
@@ -91,11 +92,11 @@ export default function AdminNavbar({
       title: 'Member Panel',
       items: [
         { label: 'Search Members', href: '/admin/members' },
-        { label: 'Red Members List', href: '/admin/members?status=inactive' },
-        { label: 'Green Members List', href: '/admin/members?status=active' },
+        { label: 'Red Members List (Inactive)', href: '/admin/members?status=inactive' },
+        { label: 'Green Members List (Active)', href: '/admin/members?status=active' },
         { label: 'Downline Members', href: '/admin/members?view=downline' },
         { label: 'Sponsor List', href: '/admin/members?view=sponsors' },
-        { label: 'Customerwise Member List', href: '/admin/members?view=customers' },
+        { label: 'Customerwise Orders', href: '/admin/orders' },
         { label: 'Change Admin Password', href: '/admin/settings?tab=general' },
         { label: 'Add Admin User', href: '/admin/settings?tab=general' },
       ],
@@ -104,7 +105,7 @@ export default function AdminNavbar({
       id: 'payouts',
       title: 'Payouts',
       items: [
-        { label: 'Pending Withdrawals', href: '/admin/withdrawals' },
+        { label: 'Pending Withdrawals', href: '/admin/withdrawals?status=pending' },
         { label: 'Approved Withdrawals', href: '/admin/withdrawals?status=approved' },
         { label: 'Daily Closing & Payout', href: '/api/cron/daily-closing', external: true },
         { label: 'TDS Deductions Report', href: '/admin/withdrawals?view=tds' },
@@ -114,41 +115,41 @@ export default function AdminNavbar({
       id: 'banking',
       title: 'Banking',
       items: [
-        { label: 'Bank Details', href: '/admin/kyc' },
+        { label: 'Bank Details (KYC)', href: '/admin/kyc' },
         { label: 'TDS Reports', href: '/admin/withdrawals?view=tds' },
-        { label: 'Add Expancess', href: '/admin/settings?tab=general#expenses' },
-        { label: 'Expancess List', href: '/admin/settings?tab=general#expenses' },
-        { label: 'Add Income', href: '/admin/settings?tab=general#income' },
-        { label: 'Income List', href: '/admin/settings?tab=general#income' },
-        { label: 'Add Advance', href: '/admin/settings?tab=general#advance' },
-        { label: 'Advance List', href: '/admin/settings?tab=general#advance' },
+        { label: 'Add Expancess', href: '/admin/withdrawals?view=tds' },
+        { label: 'Expancess List', href: '/admin/withdrawals?view=tds' },
+        { label: 'Add Income', href: '/admin/withdrawals' },
+        { label: 'Income List', href: '/admin/withdrawals' },
+        { label: 'Add Advance', href: '/admin/withdrawals' },
+        { label: 'Advance List', href: '/admin/withdrawals' },
       ],
     },
     {
       id: 'activation-fund',
       title: 'Activation Fund',
       items: [
-        { label: 'Issue Fund', href: '/admin/members#fund' },
-        { label: 'Manage Fund', href: '/admin/settings?tab=plan#fund' },
+        { label: 'Issue Fund', href: '/admin/members' },
+        { label: 'Manage Fund', href: '/admin/members' },
       ],
     },
     {
       id: 'news-events',
       title: 'News & Events',
       items: [
-        { label: 'News & Events', href: '/admin/settings?tab=notice' },
-        { label: 'Add Meeting & Seminars', href: '/admin/gallery' },
-        { label: 'Meeting List', href: '/admin/gallery' },
+        { label: 'News & Events (Notice)', href: '/admin/settings?tab=notice' },
+        { label: 'Add Meeting & Seminars', href: '/admin/gallery?category=SEMINAR&action=add' },
+        { label: 'Meeting List', href: '/admin/gallery?category=SEMINAR' },
         { label: 'Add Category For Gallery', href: '/admin/gallery' },
         { label: 'Gallery Category List', href: '/admin/gallery' },
-        { label: 'Add Picture in gallery', href: '/admin/gallery' },
+        { label: 'Add Picture in gallery', href: '/admin/gallery?action=add' },
         { label: 'Gallery Picture List', href: '/admin/gallery' },
         { label: 'Add Banner', href: '/admin/settings?tab=notice' },
         { label: 'Banner List', href: '/admin/settings?tab=notice' },
         { label: 'Popup List', href: '/admin/settings?tab=popup' },
-        { label: 'Send SMS', href: '/admin/settings?tab=general#sms' },
+        { label: 'Send SMS', href: '/admin/settings?tab=general' },
         { label: 'Complaint List', href: 'https://wa.me/916267392508?text=Admin%20Support%20Tickets', external: true },
-        { label: 'Contact List', href: '/admin/settings?tab=general#contact' },
+        { label: 'Contact List', href: '/admin/settings?tab=general' },
       ],
     },
   ];

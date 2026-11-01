@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { 
   Image as ImageIcon, 
   Plus, 
@@ -30,8 +31,12 @@ interface GalleryManagerProps {
 }
 
 export default function GalleryManager({ initialItems }: GalleryManagerProps) {
+  const searchParams = useSearchParams();
+  const actionParam = searchParams.get('action');
+  const catParam = searchParams.get('category');
+
   const [items, setItems] = useState<GalleryItem[]>(initialItems);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(actionParam === 'add');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
@@ -39,8 +44,17 @@ export default function GalleryManager({ initialItems }: GalleryManagerProps) {
   const [title, setTitle] = useState('');
   const [caption, setCaption] = useState('');
   const [imageUrl, setImageUrl] = useState('');
-  const [category, setCategory] = useState('EVENT');
+  const [category, setCategory] = useState(catParam ? catParam.toUpperCase() : 'EVENT');
   const [sortOrder, setSortOrder] = useState('0');
+
+  useEffect(() => {
+    if (actionParam === 'add') {
+      setIsModalOpen(true);
+    }
+    if (catParam) {
+      setCategory(catParam.toUpperCase());
+    }
+  }, [actionParam, catParam]);
 
   const previewFormattedUrl = imageUrl ? formatGoogleDriveUrl(imageUrl) : '';
 
