@@ -70,23 +70,29 @@ export default async function AdminDashboardPage() {
 
         {/* 4 Stat Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-white border-2 border-[#144732]/15 rounded-3xl p-6 shadow-sm">
+          <Link href="/admin/members" className="bg-white border-2 border-[#144732]/20 hover:border-[#144732] rounded-3xl p-6 shadow-sm transition-all group block">
             <div className="flex items-center justify-between text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
               <span>Total Distributors</span>
-              <Users className="w-4 h-4 text-[#144732]" />
+              <Users className="w-4 h-4 text-[#144732] group-hover:scale-110 transition-transform" />
             </div>
             <div className="text-3xl font-black text-[#144732]">{distributorCount}</div>
-            <div className="text-[11px] text-slate-500 mt-1">पंजीकृत डायरेक्ट सेलर्स</div>
-          </div>
+            <div className="text-[11px] text-slate-500 mt-1 flex items-center justify-between">
+              <span>पंजीकृत डायरेक्ट सेलर्स</span>
+              <span className="font-bold text-[#144732]">Manage Team →</span>
+            </div>
+          </Link>
 
-          <div className="bg-white border-2 border-[#d4a359]/30 rounded-3xl p-6 shadow-sm">
+          <Link href="/admin/orders" className="bg-white border-2 border-[#d4a359]/30 hover:border-[#92580a] rounded-3xl p-6 shadow-sm transition-all group block">
             <div className="flex items-center justify-between text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
               <span>Total Orders</span>
-              <ShoppingBag className="w-4 h-4 text-[#92580a]" />
+              <ShoppingBag className="w-4 h-4 text-[#92580a] group-hover:scale-110 transition-transform" />
             </div>
             <div className="text-3xl font-black text-[#92580a]">{orderCount}</div>
-            <div className="text-[11px] text-slate-500 mt-1">कुल डिलीवर व प्रोसेस ऑर्डर्स</div>
-          </div>
+            <div className="text-[11px] text-slate-500 mt-1 flex items-center justify-between">
+              <span>कुल डिलीवर व प्रोसेस ऑर्डर्स</span>
+              <span className="font-bold text-[#92580a]">Fulfill →</span>
+            </div>
+          </Link>
 
           <Link href="/admin/kyc" className="bg-white border-2 border-amber-200 hover:border-amber-400 rounded-3xl p-6 shadow-sm transition-all group block">
             <div className="flex items-center justify-between text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
@@ -137,29 +143,61 @@ export default async function AdminDashboardPage() {
           </Link>
         </div>
 
-        {/* Action Desks Navigation Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Action Desks Navigation Cards - 6 Key Management Sections */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <Link
+            href="/admin/members"
+            className="p-6 rounded-3xl bg-white border-2 border-[#144732]/20 hover:border-[#144732] shadow-sm hover:shadow-md transition-all flex items-center justify-between group"
+          >
+            <div className="flex items-center gap-3.5">
+              <div className="w-12 h-12 rounded-2xl bg-[#eaf5ed] text-[#144732] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                <Users className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="font-black text-sm text-[#144732]">मेंबर्स व टीम डायरेक्टरी</h3>
+                <p className="text-[11px] text-slate-500 mt-0.5">टीम, बाइनरी PV वॉल्यूम, ऑर्डर्स व वॉलेट स्थिति</p>
+              </div>
+            </div>
+            <ArrowRight className="w-4 h-4 text-[#144732] group-hover:translate-x-1 transition-transform shrink-0" />
+          </Link>
+
+          <Link
+            href="/admin/orders"
+            className="p-6 rounded-3xl bg-white border-2 border-[#d4a359]/30 hover:border-[#92580a] shadow-sm hover:shadow-md transition-all flex items-center justify-between group"
+          >
+            <div className="flex items-center gap-3.5">
+              <div className="w-12 h-12 rounded-2xl bg-[#fdfaf3] text-[#92580a] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                <ShoppingBag className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="font-black text-sm text-[#92580a]">ऑल ऑर्डर्स व डिस्पैच</h3>
+                <p className="text-[11px] text-slate-500 mt-0.5">पार्सल ट्रैकिंग, कूरियर AWB व स्थिति अपडेट</p>
+              </div>
+            </div>
+            <ArrowRight className="w-4 h-4 text-[#92580a] group-hover:translate-x-1 transition-transform shrink-0" />
+          </Link>
+
           <Link
             href="/admin/inventory"
             className="p-6 rounded-3xl bg-white border border-[#e8e3d5] hover:border-[#144732] shadow-sm hover:shadow-md transition-all flex items-center justify-between group"
           >
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3.5">
               <div className="w-12 h-12 rounded-2xl bg-[#eaf5ed] text-[#144732] flex items-center justify-center shrink-0">
                 <Package className="w-6 h-6" />
               </div>
               <div>
                 <h3 className="font-black text-sm text-[#144732]">इन्वेंट्री व उत्पाद</h3>
-                <p className="text-[11px] text-slate-500 mt-0.5">फोटो URL, DP, PV व स्टॉक अपडेट</p>
+                <p className="text-[11px] text-slate-500 mt-0.5">मोबाइल फोटो, DP, PV व स्टॉक अपडेट</p>
               </div>
             </div>
-            <ArrowRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
+            <ArrowRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform shrink-0" />
           </Link>
 
           <Link
             href="/admin/gallery"
             className="p-6 rounded-3xl bg-white border border-[#e8e3d5] hover:border-[#92580a] shadow-sm hover:shadow-md transition-all flex items-center justify-between group"
           >
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3.5">
               <div className="w-12 h-12 rounded-2xl bg-amber-50 text-[#92580a] flex items-center justify-center shrink-0">
                 <ShoppingBag className="w-6 h-6" />
               </div>
@@ -168,14 +206,14 @@ export default async function AdminDashboardPage() {
                 <p className="text-[11px] text-slate-500 mt-0.5">सेमिनार, अवार्ड्स व इवेंट फोटोज</p>
               </div>
             </div>
-            <ArrowRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
+            <ArrowRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform shrink-0" />
           </Link>
 
           <Link
             href="/admin/kyc"
             className="p-6 rounded-3xl bg-white border border-[#e8e3d5] hover:border-[#144732] shadow-sm hover:shadow-md transition-all flex items-center justify-between group"
           >
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3.5">
               <div className="w-12 h-12 rounded-2xl bg-[#eaf5ed] text-[#144732] flex items-center justify-center shrink-0">
                 <FileCheck className="w-6 h-6" />
               </div>
@@ -184,14 +222,14 @@ export default async function AdminDashboardPage() {
                 <p className="text-[11px] text-slate-500 mt-0.5">पैन व बैंक खाता अनुमोदन</p>
               </div>
             </div>
-            <ArrowRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
+            <ArrowRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform shrink-0" />
           </Link>
 
           <Link
             href="/admin/withdrawals"
             className="p-6 rounded-3xl bg-white border border-[#e8e3d5] hover:border-emerald-600 shadow-sm hover:shadow-md transition-all flex items-center justify-between group"
           >
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3.5">
               <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
                 <Building className="w-6 h-6" />
               </div>
@@ -200,17 +238,25 @@ export default async function AdminDashboardPage() {
                 <p className="text-[11px] text-slate-500 mt-0.5">बैंक ट्रांसफर UTR प्रविष्टि</p>
               </div>
             </div>
-            <ArrowRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
+            <ArrowRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform shrink-0" />
           </Link>
         </div>
 
         {/* Recent Orders Management Table */}
         <div className="bg-white border border-[#e8e3d5] rounded-3xl p-6 sm:p-8 shadow-sm">
           <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-100">
-            <h2 className="text-lg font-black text-[#144732]">
-              हाल के ऑर्डर्स (Recent Orders Fulfillment)
-            </h2>
-            <span className="text-xs font-bold text-slate-500">Live Database</span>
+            <div>
+              <h2 className="text-lg font-black text-[#144732]">
+                हाल के ऑर्डर्स (Recent Orders Fulfillment)
+              </h2>
+              <p className="text-[11px] text-slate-500">लाइव डेटाबेस से प्राप्त</p>
+            </div>
+            <Link
+              href="/admin/orders"
+              className="px-4 py-2 rounded-xl bg-[#144732] hover:bg-[#0b2b1e] text-[#fef08a] font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm"
+            >
+              <span>सभी ऑर्डर्स व डिस्पैच देखें →</span>
+            </Link>
           </div>
 
           <div className="overflow-x-auto">

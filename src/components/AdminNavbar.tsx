@@ -52,6 +52,8 @@ export default function AdminNavbar({
 
   const navLinks = [
     { label: 'Admin Dashboard (डैशबोर्ड)', href: isSuperAdmin ? '/superadmin/dashboard' : '/admin/dashboard', icon: Layers },
+    { label: 'Members & Team (मेंबर्स व टीम)', href: '/admin/members', icon: Users },
+    { label: 'All Orders & Dispatch (ऑर्डर्स व डिस्पैच)', href: '/admin/orders', icon: ShoppingBag },
     { label: 'System Settings (प्लान, बैकअप, नोटिस)', href: '/admin/settings', icon: Sliders },
     { label: 'Inventory Desk (इन्वेंट्री व उत्पाद)', href: '/admin/inventory', icon: Package },
     { label: 'Photo Gallery (फोटो गैलरी)', href: '/admin/gallery', icon: ImageIcon },
@@ -96,12 +98,24 @@ export default function AdminNavbar({
           </Link>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-5 text-xs font-bold">
+          <nav className="hidden lg:flex items-center gap-4 xl:gap-5 text-xs font-bold">
             <Link 
               href={isSuperAdmin ? '/superadmin/dashboard' : '/admin/dashboard'} 
               className={`hover:underline transition-colors ${isSuperAdmin ? 'text-slate-200 hover:text-white' : 'text-slate-700 hover:text-[#144732]'}`}
             >
               Dashboard
+            </Link>
+            <Link 
+              href="/admin/members" 
+              className={`hover:underline transition-colors font-black ${isSuperAdmin ? 'text-[#fef08a] hover:text-white' : 'text-[#144732] hover:text-[#0b2b1e]'}`}
+            >
+              👥 Members & Team
+            </Link>
+            <Link 
+              href="/admin/orders" 
+              className={`hover:underline transition-colors font-black ${isSuperAdmin ? 'text-slate-200 hover:text-white' : 'text-slate-700 hover:text-[#144732]'}`}
+            >
+              📦 Orders
             </Link>
             <Link 
               href="/admin/settings" 
