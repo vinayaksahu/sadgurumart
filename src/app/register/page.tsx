@@ -30,7 +30,6 @@ function RegisterForm() {
     name: '',
     mobile: '',
     email: '',
-    pan: '',
     password: '',
   });
 
@@ -79,8 +78,6 @@ function RegisterForm() {
       // Unlock the binary placement dropdown so they have full manual control
       setIsPlacementLocked(false);
       setFormData((prev) => ({ ...prev, sponsorId: value.toUpperCase() }));
-    } else if (name === 'pan') {
-      setFormData((prev) => ({ ...prev, [name]: value.toUpperCase() }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
@@ -278,27 +275,6 @@ function RegisterForm() {
                     className="w-full bg-[#fdfaf3] border border-[#d8d0bf] focus:border-[#144732] rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#144732]"
                   />
                 </div>
-              </div>
-
-              {/* PAN Card Number */}
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                    PAN Card Number (पैन कार्ड नंबर)
-                  </label>
-                  <span className="text-[11px] font-semibold text-[#92580a]">
-                    वैकल्पिक (Optional)
-                  </span>
-                </div>
-                <input
-                  type="text"
-                  name="pan"
-                  maxLength={10}
-                  value={formData.pan}
-                  onChange={handleChange}
-                  placeholder="ABCDE1234F"
-                  className="w-full bg-[#fdfaf3] border border-[#d8d0bf] focus:border-[#144732] rounded-xl px-4 py-2.5 text-sm font-mono font-bold text-slate-900 uppercase focus:outline-none focus:ring-1 focus:ring-[#144732]"
-                />
               </div>
 
               {/* Password */}
