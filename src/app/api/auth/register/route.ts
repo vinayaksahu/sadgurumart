@@ -104,9 +104,32 @@ export async function POST(req: NextRequest) {
     const position = placementPosition === 'RIGHT' ? 'RIGHT' : 'LEFT';
     const placement = await findSpilloverPlacement(sponsor.id, position);
 
-    // Generate unique sequential SGM User Code (e.g. SGM10002)
-    const userCount = await prisma.user.count();
-    const nextCode = `SGM${10001 + userCount}`;
+    // Generate unique random SGM User Code (e.g. SGM54963, SGM65884)
+    let nextCode = '';
+    let isUnique = false;
+    let attempts = 0;
+
+    while (!isUnique && attempts < 100) {
+      attempts++;
+      // Generate 5-digit random integer between 10000 and 99999 (e.g. SGM54963, SGM65884)
+      const randomNum = Math.floor(10000 + Math.random() * 90000);
+      const candidateCode = `SGM${randomNum}`;
+
+      const existing = await prisma.user.findUnique({
+        where: { userCode: candidateCode },
+        select: { id: true },
+      });
+
+      if (!existing) {
+        nextCode = candidateCode;
+        isUnique = true;
+      }
+    }
+
+    if (!nextCode) {
+      // High-entropy fallback if 100 attempts were occupied
+      nextCode = `SGM${Math.floor(10000 + Math.random() * 90000)}`;
+    }
 
     const passwordHash = await bcrypt.hash(password, 10);
 
