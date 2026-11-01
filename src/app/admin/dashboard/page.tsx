@@ -1,0 +1,176 @@
+import React from 'react';
+import { prisma } from '@/lib/prisma';
+import { cookies } from 'next/headers';
+import { verifyAdminToken } from '@/lib/auth/jwt';
+import { redirect } from 'next/navigation';
+import Link from 'next/link';
+import { 
+  Users, 
+  ShoppingBag, 
+  FileCheck, 
+  Package, 
+  TrendingUp, 
+  ShieldCheck, 
+  LogOut,
+  ArrowRight
+} from 'lucide-react';
+
+export default async function AdminDashboardPage() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get('sgm_admin_token')?.value;
+
+  if (!token) {
+    redirect('/adminlogin');
+  }
+
+  const decoded = verifyAdminToken(token);
+  if (!decoded) {
+    redirect('/adminlogin');
+  }
+
+  const [distributorCount, orderCount, productCount, pendingKYCCount, recentOrders] = await Promise.all([
+    prisma.user.count(),
+    prisma.order.count(),
+    prisma.product.count(),
+    prisma.kYCDetail.count({ where: { status: 'PENDING' } }),
+    prisma.order.findMany({
+      take: 6,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: { select: { userCode: true, name: true, mobile: true } },
+      },
+    }),
+  ]);
+
+  return (
+    <div className="min-h-screen bg-[#f6f4ed] text-[#2d3748] font-sans flex flex-col">
+      {/* Top Admin Bar */}
+      <header className="bg-white border-b border-[#e8e3d5] sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-[#144732] text-white flex items-center justify-center font-black text-lg border border-[#d4a359]">
+              SGM
+            </div>
+            <div>
+              <div className="font-black text-lg text-[#144732] leading-none">
+                SGM Mart Staff Admin Desk
+              </div>
+              <div className="text-[10px] font-extrabold uppercase tracking-widest text-[#92580a] mt-0.5">
+                Role: {decoded.role}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4 text-xs font-bold text-slate-700">
+            <span>Logged in: <strong className="text-[#144732]">{decoded.username}</strong></span>
+            <Link
+              href="/adminlogin"
+              className="p-2 rounded-xl text-red-600 hover:bg-red-50 flex items-center gap-1"
+            >
+              <LogOut className="w-4 h-4" />
+              <span className="hidden sm:inline">Logout</span>
+            </Link>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Admin Console */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-1 w-full space-y-8">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-black text-[#144732] tracking-tight">
+            Operational Overview (दैनिक ऑपरेशंस)
+          </h1>
+          <p className="text-xs text-slate-500 mt-1">
+            Real-time synchronization with Neon PostgreSQL Database
+          </p>
+        </div>
+
+        {/* 4 Stat Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="bg-white border-2 border-[#144732]/15 rounded-3xl p-6 shadow-sm">
+            <div className="flex items-center justify-between text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+              <span>Total Distributors</span>
+              <Users className="w-4 h-4 text-[#144732]" />
+            </div>
+            <div className="text-3xl font-black text-[#144732]">{distributorCount}</div>
+            <div className="text-[11px] text-slate-500 mt-1">पंजीकृत डायरेक्ट सेलर्स</div>
+          </div>
+
+          <div className="bg-white border-2 border-[#d4a359]/30 rounded-3xl p-6 shadow-sm">
+            <div className="flex items-center justify-between text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+              <span>Total Orders</span>
+              <ShoppingBag className="w-4 h-4 text-[#92580a]" />
+            </div>
+            <div className="text-3xl font-black text-[#92580a]">{orderCount}</div>
+            <div className="text-[11px] text-slate-500 mt-1">कुल डिलीवर व प्रोसेस ऑर्डर्स</div>
+          </div>
+
+          <div className="bg-white border border-[#e8e3d5] rounded-3xl p-6 shadow-sm">
+            <div className="flex items-center justify-between text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+              <span>Active Products</span>
+              <Package className="w-4 h-4 text-emerald-600" />
+            </div>
+            <div className="text-3xl font-black text-slate-800">{productCount}</div>
+            <div className="text-[11px] text-slate-500 mt-1">9 कैटेगरीज़ में उपलब्ध SKUs</div>
+          </div>
+
+          <div className="bg-white border border-[#e8e3d5] rounded-3xl p-6 shadow-sm">
+            <div className="flex items-center justify-between text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+              <span>Pending KYC Queue</span>
+              <FileCheck className="w-4 h-4 text-amber-600" />
+            </div>
+            <div className="text-3xl font-black text-amber-700">{pendingKYCCount}</div>
+            <div className="text-[11px] text-slate-500 mt-1">सत्यापन हेतु लंबित पैन/बैंक</div>
+          </div>
+        </div>
+
+        {/* Recent Orders Management Table */}
+        <div className="bg-white border border-[#e8e3d5] rounded-3xl p-6 sm:p-8 shadow-sm">
+          <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-100">
+            <h2 className="text-lg font-black text-[#144732]">
+              हाल के ऑर्डर्स (Recent Orders Fulfillment)
+            </h2>
+            <span className="text-xs font-bold text-slate-500">Live Database</span>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead>
+                <tr className="bg-[#faf8f4] text-slate-600 uppercase tracking-wider border-b border-slate-200">
+                  <th className="py-3 px-4">Order No</th>
+                  <th className="py-3 px-4">Customer</th>
+                  <th className="py-3 px-4">Amount</th>
+                  <th className="py-3 px-4">PV / BV</th>
+                  <th className="py-3 px-4">Status</th>
+                  <th className="py-3 px-4">Date</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {recentOrders.map((ord) => (
+                  <tr key={ord.id} className="hover:bg-slate-50">
+                    <td className="py-3 px-4 font-black text-[#144732]">{ord.orderNumber}</td>
+                    <td className="py-3 px-4 font-bold text-slate-800">
+                      {ord.user.name} ({ord.user.userCode})
+                    </td>
+                    <td className="py-3 px-4 font-bold text-slate-900">₹{ord.totalDp}</td>
+                    <td className="py-3 px-4 font-semibold text-[#92580a]">
+                      {ord.totalPV} PV | {ord.totalBV} BV
+                    </td>
+                    <td className="py-3 px-4">
+                      <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                        {ord.orderStatus}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-slate-500">
+                      {new Date(ord.createdAt).toLocaleDateString('hi-IN')}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}

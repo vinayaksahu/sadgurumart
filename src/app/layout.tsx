@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import { CartProvider } from '@/lib/cartContext';
 
 export const metadata: Metadata = {
   title: 'SGM Mart | Business Overview & Online Shopping',
@@ -14,7 +15,9 @@ export default function RootLayout({
   return (
     <html lang="hi" suppressHydrationWarning>
       <body className="min-h-screen flex flex-col antialiased selection:bg-gold-500 selection:text-forest-900">
-        {children}
+        <CartProvider>
+          {children}
+        </CartProvider>
       </body>
     </html>
   );
