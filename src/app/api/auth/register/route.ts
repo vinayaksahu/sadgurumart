@@ -157,3 +157,33 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+// GET /api/auth/register?code=SGM10001 - Check and return sponsor details
+export async function GET(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const code = searchParams.get('sponsorCode') || searchParams.get('code') || searchParams.get('ref');
+
+    if (!code) {
+      return NextResponse.json({ error: 'Sponsor code is required' }, { status: 400 });
+    }
+
+    const sponsor = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { userCode: code.trim().toUpperCase() },
+          { id: code.trim() },
+        ],
+      },
+      select: { userCode: true, name: true, isActive: true },
+    });
+
+    if (!sponsor) {
+      return NextResponse.json({ error: 'मान्य स्पॉन्सर कोड नहीं मिला (Sponsor not found)' }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true, sponsor });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message || 'Lookup failed' }, { status: 500 });
+  }
+}

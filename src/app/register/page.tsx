@@ -1,13 +1,32 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { UserPlus, ArrowRight, Check, AlertCircle, Sparkles, ShieldCheck } from 'lucide-react';
+import React, { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { 
+  UserPlus, 
+  ArrowRight, 
+  Check, 
+  AlertCircle, 
+  Sparkles, 
+  ShieldCheck, 
+  Lock, 
+  Unlock,
+  RefreshCw 
+} from 'lucide-react';
 import Link from 'next/link';
 
-export default function RegisterPage() {
+function RegisterForm() {
+  const searchParams = useSearchParams();
+
+  // URL parameters from referral link (?ref=SGM10001&pos=RIGHT)
+  const queryRef = searchParams.get('ref') || searchParams.get('sponsor') || searchParams.get('sponsorCode') || '';
+  const queryPos = searchParams.get('pos') || searchParams.get('position') || searchParams.get('side') || '';
+
+  const normalizedPos = queryPos.toUpperCase() === 'RIGHT' ? 'RIGHT' : queryPos.toUpperCase() === 'LEFT' ? 'LEFT' : null;
+
   const [formData, setFormData] = useState({
-    sponsorId: 'SGM10001',
-    placementPosition: 'LEFT',
+    sponsorId: queryRef ? queryRef.toUpperCase() : 'SGM10001',
+    placementPosition: normalizedPos || 'LEFT',
     name: '',
     mobile: '',
     email: '',
@@ -15,17 +34,55 @@ export default function RegisterPage() {
     password: '',
   });
 
-  const [sponsorName, setSponsorName] = useState('SGM Mart Master Account');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  // Lock status: locked if came through a link with explicit position
+  const [isPlacementLocked, setIsPlacementLocked] = useState<boolean>(Boolean(normalizedPos));
+  const [sponsorName, setSponsorName] = useState<string>('');
+  const [isCheckingSponsor, setIsCheckingSponsor] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>('');
+  const [success, setSuccess] = useState<string>('');
 
+  // Fetch sponsor name on mount and when sponsorId changes
+  useEffect(() => {
+    const code = formData.sponsorId?.trim();
+    if (!code) {
+      setSponsorName('');
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setIsCheckingSponsor(true);
+      try {
+        const res = await fetch(`/api/auth/register?code=${encodeURIComponent(code)}`);
+        const data = await res.json();
+        if (res.ok && data.sponsor) {
+          setSponsorName(data.sponsor.name);
+        } else {
+          setSponsorName('');
+        }
+      } catch {
+        setSponsorName('');
+      } finally {
+        setIsCheckingSponsor(false);
+      }
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [formData.sponsorId]);
+
+  // Handle manual input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    if (name === 'pan') {
-      setFormData({ ...formData, [name]: value.toUpperCase() });
+
+    if (name === 'sponsorId') {
+      // User is manually typing / modifying the sponsor code:
+      // Unlock the binary placement dropdown so they have full manual control
+      setIsPlacementLocked(false);
+      setFormData((prev) => ({ ...prev, sponsorId: value.toUpperCase() }));
+    } else if (name === 'pan') {
+      setFormData((prev) => ({ ...prev, [name]: value.toUpperCase() }));
     } else {
-      setFormData({ ...formData, [name]: value });
+      setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
@@ -56,11 +113,11 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#f8f6f0] via-[#ffffff] to-[#eae5d8] text-[#2d3748] flex items-center justify-center p-6 font-sans">
+    <div className="min-h-screen bg-gradient-to-br from-[#f8f6f0] via-[#ffffff] to-[#eae5d8] text-[#2d3748] flex items-center justify-center p-4 sm:p-6 font-sans">
       <div className="w-full max-w-lg relative z-10">
-        <div className="bg-white/95 border-2 border-[#144732]/20 backdrop-blur-xl rounded-3xl p-8 sm:p-10 shadow-2xl shadow-[#144732]/10">
+        <div className="bg-white/95 border-2 border-[#144732]/20 backdrop-blur-xl rounded-3xl p-6 sm:p-10 shadow-2xl shadow-[#144732]/10">
           {/* Header */}
-          <div className="text-center mb-8">
+          <div className="text-center mb-7">
             <div className="inline-flex p-3 rounded-2xl bg-[#eaf5ed] border border-[#144732]/20 mb-3">
               <UserPlus className="w-8 h-8 text-[#144732]" />
             </div>
@@ -96,40 +153,81 @@ export default function RegisterPage() {
 
           {!success && (
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Sponsor Code */}
+              {/* Sponsor Code & Placement Position */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                    Sponsor Code *
-                  </label>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                      Sponsor Code *
+                    </label>
+                    {isCheckingSponsor && (
+                      <RefreshCw className="w-3 h-3 text-[#144732] animate-spin" />
+                    )}
+                  </div>
                   <input
                     type="text"
                     name="sponsorId"
                     value={formData.sponsorId}
                     onChange={handleChange}
                     required
+                    placeholder="SGM10001"
                     className="w-full bg-[#fdfaf3] border border-[#d8d0bf] focus:border-[#144732] rounded-xl px-4 py-2.5 text-sm text-slate-900 font-bold uppercase focus:outline-none focus:ring-1 focus:ring-[#144732]"
                   />
-                  {sponsorName && (
+                  {sponsorName ? (
                     <span className="text-[11px] font-semibold text-emerald-700 mt-1 block">
                       ✓ Sponsor: {sponsorName}
                     </span>
-                  )}
+                  ) : formData.sponsorId ? (
+                    <span className="text-[11px] font-medium text-slate-400 mt-1 block">
+                      स्पॉन्सर कोड टाइप करने पर नाम दिखेगा
+                    </span>
+                  ) : null}
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                    Binary Placement *
-                  </label>
-                  <select
-                    name="placementPosition"
-                    value={formData.placementPosition}
-                    onChange={handleChange}
-                    className="w-full bg-[#fdfaf3] border border-[#d8d0bf] focus:border-[#144732] rounded-xl px-4 py-2.5 text-sm text-slate-900 font-bold focus:outline-none focus:ring-1 focus:ring-[#144732]"
-                  >
-                    <option value="LEFT">Left Team (लेफ्ट)</option>
-                    <option value="RIGHT">Right Team (राइट)</option>
-                  </select>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                      Binary Placement *
+                    </label>
+                    {isPlacementLocked ? (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-black text-amber-800 bg-amber-100 px-2 py-0.5 rounded-md border border-amber-300">
+                        <Lock className="w-3 h-3 text-amber-700" />
+                        <span>लिंक से लॉक्ड</span>
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-500">
+                        <Unlock className="w-3 h-3 text-slate-400" />
+                        <span>स्वतंत्र चयन</span>
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="relative">
+                    <select
+                      name="placementPosition"
+                      value={formData.placementPosition}
+                      onChange={handleChange}
+                      disabled={isPlacementLocked}
+                      className={`w-full border rounded-xl px-4 py-2.5 text-sm font-bold focus:outline-none focus:ring-1 transition-all ${
+                        isPlacementLocked
+                          ? 'bg-slate-100 border-slate-300 text-slate-700 cursor-not-allowed opacity-90'
+                          : 'bg-[#fdfaf3] border-[#d8d0bf] focus:border-[#144732] text-slate-900 focus:ring-[#144732]'
+                      }`}
+                    >
+                      <option value="LEFT">Left Team (लेफ्ट)</option>
+                      <option value="RIGHT">Right Team (राइट)</option>
+                    </select>
+                  </div>
+
+                  {isPlacementLocked ? (
+                    <p className="text-[10px] text-amber-800 font-bold mt-1 flex items-center gap-1">
+                      🔒 रेफ़रल लिंक द्वारा {formData.placementPosition === 'RIGHT' ? 'राइट' : 'लेफ्ट'} टीम लॉक है (स्पॉन्सर कोड बदलने पर अनलॉक होगा)
+                    </p>
+                  ) : (
+                    <p className="text-[10px] text-slate-500 mt-1">
+                      अपनी इच्छानुसार लेफ्ट या राइट टीम का चयन करें
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -258,5 +356,17 @@ export default function RegisterPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#f8f6f0] flex items-center justify-center p-6">
+        <div className="w-8 h-8 border-3 border-[#144732] border-t-transparent rounded-full animate-spin" />
+      </div>
+    }>
+      <RegisterForm />
+    </Suspense>
   );
 }
