@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { 
   ShoppingBag, 
-  Users, 
   Sparkles, 
   PhoneCall, 
   ShieldCheck, 
@@ -13,13 +12,9 @@ import {
   Home, 
   TrendingUp, 
   Award, 
-  Layers, 
-  Wallet, 
-  FileCheck, 
-  Smartphone,
-  ChevronRight,
-  LogIn,
-  Image as ImageIcon
+  ChevronRight, 
+  LogIn, 
+  Image as ImageIcon 
 } from 'lucide-react';
 import { useCart } from '@/lib/cartContext';
 
@@ -46,15 +41,6 @@ export default function Navbar() {
     { label: '16 Income Plan (प्लान)', href: '/#incomes', icon: TrendingUp },
     { label: 'Awards & Ranks (रिवार्ड्स)', href: '/#rewards', icon: Award },
     { label: 'Rules & Legal (नियम)', href: '/#compliance', icon: ShieldCheck },
-  ];
-
-  const memberLinks = [
-    { label: 'Member Dashboard (डैशबोर्ड)', href: '/dashboard', icon: Layers, badge: 'Member' },
-    { label: 'Binary Tree (बाइनरी ट्री)', href: '/genealogy/binary', icon: Users },
-    { label: '2x2 AutoPool (ऑटोपूल)', href: '/autopool', icon: TrendingUp, badge: '₹13 Cr+' },
-    { label: 'Payout / Withdrawal (विड्रॉल)', href: '/payout', icon: Wallet },
-    { label: 'KYC Verification (केवाईसी)', href: '/kyc', icon: FileCheck },
-    { label: 'Mobile/DTH Recharge (रिचार्ज)', href: '/recharge', icon: Smartphone, badge: '2.5% Off' },
   ];
 
   return (
@@ -221,35 +207,6 @@ export default function Navbar() {
                         <span>{item.label}</span>
                       </div>
                       <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-[#144732] group-hover:translate-x-0.5 transition-all" />
-                    </Link>
-                  );
-                })}
-              </div>
-
-              {/* Member Services & Direct Selling Tools */}
-              <div className="px-4 pb-4 space-y-1 border-t border-slate-100 pt-3">
-                <div className="text-[10px] font-black uppercase tracking-wider text-[#92580a] px-3 py-1.5">
-                  मेम्बर टूल्स (Member Business Tools)
-                </div>
-
-                {memberLinks.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-slate-700 hover:text-[#144732] hover:bg-[#144732]/10 transition-colors group"
-                    >
-                      <div className="flex items-center gap-3">
-                        <Icon className="w-4 h-4 text-[#92580a] group-hover:scale-110 transition-transform" />
-                        <span>{item.label}</span>
-                      </div>
-                      {item.badge && (
-                        <span className="px-2 py-0.5 text-[9px] font-black uppercase tracking-wider rounded-md bg-[#144732]/10 text-[#144732]">
-                          {item.badge}
-                        </span>
-                      )}
                     </Link>
                   );
                 })}
