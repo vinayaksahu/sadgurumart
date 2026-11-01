@@ -15,20 +15,50 @@ import {
   ChevronRight, 
   LogIn, 
   Image as ImageIcon,
-  ArrowLeftRight
+  ArrowLeftRight,
+  Layers,
+  LogOut,
+  UserCheck
 } from 'lucide-react';
 import { useCart } from '@/lib/cartContext';
 
 export default function Navbar() {
   const { itemCount } = useCart();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isAdminActive, setIsAdminActive] = useState(false);
+  const [session, setSession] = useState<{
+    isLoggedIn: boolean;
+    isAdminActive: boolean;
+    user: { userCode?: string; name?: string } | null;
+  }>({
+    isLoggedIn: false,
+    isAdminActive: false,
+    user: null,
+  });
 
-  // Check if admin session cookie exists
+  // Check auth state on mount and sync with backend
   useEffect(() => {
     if (typeof document !== 'undefined') {
-      setIsAdminActive(document.cookie.includes('sgm_admin_active=true'));
+      const hasAdmin = document.cookie.includes('sgm_admin_active=true');
+      const hasUser = document.cookie.includes('sgm_user_active=true') || document.cookie.includes('sgm_admin_mode=');
+      setSession((prev) => ({
+        ...prev,
+        isAdminActive: hasAdmin,
+        isLoggedIn: hasUser,
+      }));
     }
+
+    fetch('/api/auth/me')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data) {
+          setSession({
+            isLoggedIn: data.isLoggedIn,
+            isAdminActive: data.isAdminActive,
+            user: data.user,
+          });
+        }
+      })
+      .catch(() => {});
   }, []);
 
   // Lock body scroll when side panel is open
@@ -55,8 +85,8 @@ export default function Navbar() {
   return (
     <>
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-[#e8e3d5]">
-        {/* Admin Masquerade Switch Bar (Shows whenever Admin is logged in) */}
-        {isAdminActive && (
+        {/* Admin Masquerade Switch Bar (Shows whenever Admin session is active) */}
+        {session.isAdminActive && (
           <div className="bg-gradient-to-r from-[#92580a] via-[#b45309] to-[#78350f] text-white px-3 sm:px-4 py-1.5 text-xs font-black flex items-center justify-between border-b border-[#fef08a]/30 shadow-md">
             <div className="flex items-center gap-1.5 sm:gap-2">
               <ShieldCheck className="w-4 h-4 text-[#fef08a] shrink-0" />
@@ -64,7 +94,7 @@ export default function Navbar() {
             </div>
             <a
               href="/api/auth/switch-portal?target=admin"
-              className="px-2.5 sm:px-3 py-1 rounded-lg bg-white text-[#92580a] hover:bg-[#fef08a] hover:text-[#0b2b1e] text-[11px] sm:text-xs font-black transition-all flex items-center gap-1.5 shrink-0 shadow"
+              className="px-2.5 sm:px-3 py-1 rounded-lg bg-white text-[#92580a] hover:bg-[#fef08a] hover:text-[#0b2b1e] text-[11px] sm:text-xs font-black transition-all flex items-center gap-1 shrink-0 shadow cursor-pointer"
             >
               <ArrowLeftRight className="w-3.5 h-3.5" />
               <span>वापस एडमिन डेस्क (Switch to Admin) &rarr;</span>
@@ -124,32 +154,45 @@ export default function Navbar() {
             </Link>
 
             {/* Admin Quick Switch (Desktop) */}
-            {isAdminActive && (
+            {session.isAdminActive && (
               <a
                 href="/api/auth/switch-portal?target=admin"
-                className="hidden md:inline-flex px-3 py-2 rounded-xl bg-[#92580a] text-white font-black text-xs hover:bg-[#78350f] transition-all shadow items-center gap-1.5"
+                className="hidden md:inline-flex px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#92580a] to-[#78350f] text-white font-black text-xs hover:opacity-95 transition-all shadow items-center gap-1.5"
                 title="Switch back to Admin Desk"
               >
-                <ArrowLeftRight className="w-3.5 h-3.5" />
+                <ArrowLeftRight className="w-3.5 h-3.5 text-[#fef08a]" />
                 <span>Admin Desk</span>
               </a>
             )}
 
-            {/* Desktop Sign In / Join Buttons */}
-            <Link
-              href="/login"
-              className="hidden md:inline-flex px-3.5 py-2 rounded-xl border-2 border-[#144732] text-[#144732] font-bold text-xs sm:text-sm hover:bg-[#144732] hover:text-white transition-all duration-200"
-            >
-              Sign In
-            </Link>
+            {/* When Logged In (including Switched Admin): Show Member Dashboard button */}
+            {session.isLoggedIn ? (
+              <Link
+                href="/dashboard"
+                className="hidden sm:inline-flex px-3.5 py-2 rounded-xl bg-[#144732] text-[#fef08a] font-black text-xs sm:text-sm hover:bg-[#0b2b1e] transition-all duration-200 items-center gap-1.5 shadow-sm"
+              >
+                <Layers className="w-3.5 h-3.5" />
+                <span>Dashboard ({session.user?.userCode || 'Member'})</span>
+              </Link>
+            ) : !session.isAdminActive ? (
+              /* ONLY show Sign In and Join Free when NOT logged in and NOT an admin! */
+              <>
+                <Link
+                  href="/login"
+                  className="hidden md:inline-flex px-3.5 py-2 rounded-xl border-2 border-[#144732] text-[#144732] font-bold text-xs sm:text-sm hover:bg-[#144732] hover:text-white transition-all duration-200"
+                >
+                  Sign In
+                </Link>
 
-            <Link
-              href="/register"
-              className="hidden sm:inline-flex px-4 py-2 rounded-xl bg-gradient-to-r from-[#144732] to-[#0b2b1e] text-white font-bold text-xs sm:text-sm hover:shadow-lg hover:shadow-[#144732]/20 transition-all duration-200 items-center gap-1.5"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-[#fef08a]" />
-              <span>Join Free</span>
-            </Link>
+                <Link
+                  href="/register"
+                  className="hidden sm:inline-flex px-4 py-2 rounded-xl bg-gradient-to-r from-[#144732] to-[#0b2b1e] text-white font-bold text-xs sm:text-sm hover:shadow-lg hover:shadow-[#144732]/20 transition-all duration-200 items-center gap-1.5"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-[#fef08a]" />
+                  <span>Join Free</span>
+                </Link>
+              </>
+            ) : null}
 
             {/* Mobile & Tablet Hamburger Button (3 Parallel Lines) */}
             <button
@@ -206,8 +249,8 @@ export default function Navbar() {
               </div>
 
               {/* Admin Mode Switch inside Drawer */}
-              {isAdminActive && (
-                <div className="p-3 bg-[#fdfaf3] border-b border-[#e8e3d5]">
+              {session.isAdminActive && (
+                <div className="p-3.5 bg-[#fdfaf3] border-b border-[#e8e3d5]">
                   <a
                     href="/api/auth/switch-portal?target=admin"
                     onClick={() => setIsMobileMenuOpen(false)}
@@ -219,25 +262,51 @@ export default function Navbar() {
                 </div>
               )}
 
-              {/* Quick Auth Actions inside Drawer */}
-              <div className="p-4 bg-[#faf8f4] border-b border-[#e8e3d5] grid grid-cols-2 gap-2">
-                <Link
-                  href="/login"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl border-2 border-[#144732] text-[#144732] font-black text-xs hover:bg-[#144732] hover:text-white transition-all text-center"
-                >
-                  <LogIn className="w-3.5 h-3.5" />
-                  <span>Sign In (लॉगिन)</span>
-                </Link>
-                <Link
-                  href="/register"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-gradient-to-r from-[#144732] to-[#0b2b1e] text-white font-black text-xs hover:opacity-90 shadow-md text-center"
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-[#fef08a]" />
-                  <span>Join Free</span>
-                </Link>
-              </div>
+              {/* If Logged In: Show Member Identity & Quick Dashboard Link */}
+              {session.isLoggedIn ? (
+                <div className="p-4 bg-[#faf8f4] border-b border-[#e8e3d5] flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-[#144732] text-[#fef08a] font-black text-sm flex items-center justify-center shadow">
+                      {session.user?.name ? session.user.name.charAt(0).toUpperCase() : 'M'}
+                    </div>
+                    <div>
+                      <div className="text-xs font-black text-[#144732]">
+                        {session.user?.name || 'Member Active'}
+                      </div>
+                      <div className="text-[10px] text-slate-500 font-mono">
+                        ID: {session.user?.userCode || 'SGM10001'}
+                      </div>
+                    </div>
+                  </div>
+                  <Link
+                    href="/dashboard"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="px-3.5 py-1.5 rounded-xl bg-[#144732] text-[#fef08a] font-black text-xs hover:bg-[#0b2b1e] transition-colors shadow-sm"
+                  >
+                    डैशबोर्ड →
+                  </Link>
+                </div>
+              ) : !session.isAdminActive ? (
+                /* ONLY show Sign In and Join Free when NOT logged in */
+                <div className="p-4 bg-[#faf8f4] border-b border-[#e8e3d5] grid grid-cols-2 gap-2">
+                  <Link
+                    href="/login"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl border-2 border-[#144732] text-[#144732] font-black text-xs hover:bg-[#144732] hover:text-white transition-all text-center"
+                  >
+                    <LogIn className="w-3.5 h-3.5" />
+                    <span>Sign In (लॉगिन)</span>
+                  </Link>
+                  <Link
+                    href="/register"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-gradient-to-r from-[#144732] to-[#0b2b1e] text-white font-black text-xs hover:opacity-90 shadow-md text-center"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 text-[#fef08a]" />
+                    <span>Join Free</span>
+                  </Link>
+                </div>
+              ) : null}
 
               {/* Main Navigation Links */}
               <div className="p-4 space-y-1">

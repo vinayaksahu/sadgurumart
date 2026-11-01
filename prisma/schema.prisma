@@ -258,6 +258,9 @@ model Order {
 
   shippingAddress Json
   invoiceUrl      String?
+  isActivation    Boolean       @default(false)
+  targetUserCode  String?       // Populated when package bought for another member
+  notes           String?
 
   items           OrderItem[]
   createdAt       DateTime      @default(now())
@@ -318,6 +321,7 @@ model Wallet {
   user                User                @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   mainBalance         Float               @default(0) // Available for withdrawal
+  p2pBalance          Float               @default(0) // P2P wallet for fund transfers and activations
   shoppingBalance     Float               @default(0) // Repurchase & Utility balance
   holdBalance         Float               @default(0) // Pending KYC or verification
   autoPoolReserve     Float               @default(0) // Level upgrade deductions reserve
@@ -355,22 +359,31 @@ enum TransactionType {
   WALLET_PURCHASE
   SYSTEM_CREDIT
   SYSTEM_DEBIT
+  P2P_TRANSFER_SENT
+  P2P_TRANSFER_RECEIVED
+  MAIN_TO_P2P_TRANSFER
+  PACKAGE_ACTIVATION_SELF
+  PACKAGE_ACTIVATION_OTHER
 }
 
 model WalletTransaction {
-  id            String          @id @default(uuid())
-  walletId      String
-  wallet        Wallet          @relation(fields: [walletId], references: [id])
+  id                    String          @id @default(uuid())
+  walletId              String
+  wallet                Wallet          @relation(fields: [walletId], references: [id])
   
-  type          TransactionType
-  amount        Float           // Positive for credit, negative for debit
-  closingBalance Float
-  referenceId   String?         // OrderId, WithdrawalId, AutoPoolId
-  remarks       String?
+  type                  TransactionType
+  walletScope           String          @default("MAIN") // MAIN, P2P, SHOPPING
+  amount                Float           // Positive for credit, negative for debit
+  closingBalance        Float
+  counterpartyUserCode  String?         // Sender/Recipient member ID for P2P transfers/activations
+  counterpartyName      String?         // Sender/Recipient member name
+  referenceId           String?         // OrderId, WithdrawalId, AutoPoolId, P2P Transfer ID
+  remarks               String?
 
-  createdAt     DateTime        @default(now())
+  createdAt             DateTime        @default(now())
 
   @@index([walletId, type])
+  @@index([walletId, walletScope])
   @@map("wallet_transactions")
 }
 

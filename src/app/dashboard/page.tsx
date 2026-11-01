@@ -59,6 +59,7 @@ export default async function DashboardPage() {
 
   const wallet = user.wallet || {
     mainBalance: 0,
+    p2pBalance: 0,
     shoppingBalance: 0,
     holdBalance: 0,
     autoPoolReserve: 0,
@@ -136,11 +137,18 @@ export default async function DashboardPage() {
             {/* Quick Action Buttons */}
             <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
               <Link
-                href="/payout"
-                className="px-5 py-3 rounded-2xl bg-[#d4a359] hover:bg-[#bc853c] text-[#0b2b1e] font-black text-xs transition-colors flex items-center justify-center gap-2"
+                href="/wallet"
+                className="px-5 py-3 rounded-2xl bg-[#d4a359] hover:bg-[#bc853c] text-[#0b2b1e] font-black text-xs transition-colors flex items-center justify-center gap-2 shadow-md"
               >
-                <Wallet className="w-4 h-4" />
-                <span>विड्रॉल अनुरोध (Withdraw)</span>
+                <Wallet className="w-4 h-4 text-[#0b2b1e]" />
+                <span>वॉलेट हब व P2P (Wallet Hub)</span>
+              </Link>
+              <Link
+                href="/orders"
+                className="px-4 py-3 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold text-xs transition-colors flex items-center justify-center gap-1.5"
+              >
+                <ShoppingBag className="w-4 h-4 text-[#fef08a]" />
+                <span>My Orders</span>
               </Link>
               <Link
                 href="/kyc"
@@ -161,22 +169,42 @@ export default async function DashboardPage() {
         {/* 4 Multi-Wallet Overview */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* Main Wallet */}
-          <div className="bg-white border-2 border-[#144732]/20 rounded-3xl p-6 shadow-sm flex flex-col justify-between">
+          <div className="bg-white border-2 border-[#144732]/30 rounded-3xl p-6 shadow-sm flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-                <span>Main E-Wallet (विड्रॉल)</span>
+                <span>1. Main Wallet (विड्रॉल)</span>
                 <Wallet className="w-4 h-4 text-[#144732]" />
               </div>
               <div className="text-3xl font-black text-[#144732]">
-                ₹{wallet.mainBalance.toLocaleString('en-IN')}
+                ₹{wallet.mainBalance.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </div>
               <div className="text-[11px] text-slate-500 mt-1">
-                साप्ताहिक बैंक ट्रांसफर हेतु उपलब्ध
+                साप्ताहिक बैंक ट्रांसफर व P2P हेतु
               </div>
             </div>
             <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-[#144732]">
-              <span>मिनिमम विड्रॉल ₹100</span>
-              <Link href="/payout" className="text-[#92580a] hover:underline">विड्रॉल करें →</Link>
+              <Link href="/wallet" className="text-[#144732] hover:underline">P2P में भेजें</Link>
+              <Link href="/wallet" className="text-[#92580a] hover:underline">बैंक विड्रॉल →</Link>
+            </div>
+          </div>
+
+          {/* P2P Wallet */}
+          <div className="bg-white border-2 border-[#92580a]/40 rounded-3xl p-6 shadow-sm flex flex-col justify-between bg-gradient-to-b from-white to-[#fdfaf3]">
+            <div>
+              <div className="flex items-center justify-between text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                <span>2. P2P Wallet (ट्रांसफर)</span>
+                <ArrowLeftRight className="w-4 h-4 text-[#92580a]" />
+              </div>
+              <div className="text-3xl font-black text-[#92580a]">
+                ₹{wallet.p2pBalance.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </div>
+              <div className="text-[11px] text-slate-500 mt-1">
+                सदस्य ट्रांसफर व आईडी एक्टिवेशन
+              </div>
+            </div>
+            <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-[#92580a]">
+              <Link href="/wallet" className="text-[#144732] hover:underline">आईडी एक्टिवेट करें</Link>
+              <Link href="/wallet" className="hover:underline">P2P भेजें →</Link>
             </div>
           </div>
 
@@ -184,11 +212,11 @@ export default async function DashboardPage() {
           <div className="bg-white border-2 border-[#d4a359]/30 rounded-3xl p-6 shadow-sm flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-                <span>Shopping Wallet (शॉपिंग)</span>
+                <span>3. Shopping Wallet (शॉपिंग)</span>
                 <ShoppingBag className="w-4 h-4 text-[#92580a]" />
               </div>
               <div className="text-3xl font-black text-[#92580a]">
-                ₹{wallet.shoppingBalance.toLocaleString('en-IN')}
+                ₹{wallet.shoppingBalance.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </div>
               <div className="text-[11px] text-slate-500 mt-1">
                 रीपरचेस व रिचार्ज कैशबैक बैलेंस

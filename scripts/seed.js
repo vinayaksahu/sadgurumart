@@ -208,6 +208,7 @@ async function main() {
       wallet: {
         create: {
           mainBalance: 0,
+          p2pBalance: 0,
           shoppingBalance: 0,
           holdBalance: 0,
           autoPoolReserve: 0,

@@ -73,6 +73,7 @@ export async function POST(req: NextRequest) {
         wallet: {
           create: {
             mainBalance: 0,
+            p2pBalance: 0,
             shoppingBalance: 0,
             holdBalance: 0,
             autoPoolReserve: 0,

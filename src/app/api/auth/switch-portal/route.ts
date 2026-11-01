@@ -69,12 +69,22 @@ export async function GET(req: NextRequest) {
       maxAge: 12 * 60 * 60,
     });
 
+    response.cookies.set('sgm_user_active', 'true', {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 7 * 24 * 60 * 60,
+    });
+
     return response;
   }
 
   // 2. Switch back to Admin Portal
   const adminDest = isSuper ? '/superadmin/dashboard' : '/admin/dashboard';
   const response = NextResponse.redirect(new URL(adminDest, req.url));
+
+  response.cookies.delete('sgm_admin_mode');
 
   response.cookies.set('sgm_admin_active', 'true', {
     httpOnly: false,
