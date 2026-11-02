@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma';
+import { getSystemSettings } from '@/lib/settings';
 
 export interface BinaryPlacementResult {
   parentId: string;
@@ -122,12 +123,99 @@ export async function calculateUserBinaryMatching(
     return { matchedPV: 0, matchingIncome: 0, leftCarry: totalLeft, rightCarry: totalRight };
   }
 
-  // 1:1 Matching
-  const matchedPV = Math.min(totalLeft, totalRight);
-  const matchingIncome = matchedPV * 0.10; // 10% Matching Income as per PDF
+  // Fetch system settings for dynamic MLM plan rules
+  const settings = await getSystemSettings();
+  const unitPV = (settings && settings.minActivationPV > 0) ? settings.minActivationPV : 100;
+  const matchingPercent = (settings && settings.binaryMatchingPercent !== undefined) ? settings.binaryMatchingPercent : 10;
+  const cappingPV = (settings && settings.dailyMatchingCappingPV > 0) ? settings.dailyMatchingCappingPV : 2500;
+  const firstPairRatio = (settings && (settings as any).firstBinaryPairRatio) ? (settings as any).firstBinaryPairRatio : '1:2_OR_2:1';
 
-  const leftCarry = totalLeft - matchedPV;
-  const rightCarry = totalRight - matchedPV;
+  // Check whether first matching pair was already completed previously
+  const hasDoneFirstPair = Boolean((user as any).firstBinaryPairDone || user.totalMatchingPaidPV > 0);
+
+  let matchedPV = 0;
+  let leftCarry = totalLeft;
+  let rightCarry = totalRight;
+  let pairDescription = '1:1 Ratio';
+  let isNewFirstPairCompleted = false;
+
+  if (!hasDoneFirstPair && firstPairRatio === '1:2_OR_2:1') {
+    // FIRST PAIR CALCULATION (1:2 or 2:1)
+    // 2:1 condition: Left >= 2 * unitPV AND Right >= 1 * unitPV
+    // 1:2 condition: Left >= 1 * unitPV AND Right >= 2 * unitPV
+    const is2to1Eligible = totalLeft >= 2 * unitPV && totalRight >= unitPV;
+    const is1to2Eligible = totalLeft >= unitPV && totalRight >= 2 * unitPV;
+
+    if (!is2to1Eligible && !is1to2Eligible) {
+      // Team volume has not yet achieved 1:2 or 2:1 (e.g. only 100:100 or less).
+      // Carry forward all volume until 1:2 or 2:1 is achieved.
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          leftCarryForwardPV: totalLeft,
+          rightCarryForwardPV: totalRight,
+          leftVolumePV: 0,
+          rightVolumePV: 0,
+        },
+      });
+      return { matchedPV: 0, matchingIncome: 0, leftCarry: totalLeft, rightCarry: totalRight };
+    }
+
+    // Qualifies for First Pair (1:2 or 2:1)!
+    let leftFirstDeduct = 0;
+    let rightFirstDeduct = 0;
+
+    if (totalLeft >= totalRight) {
+      if (is2to1Eligible) {
+        leftFirstDeduct = 2 * unitPV;
+        rightFirstDeduct = 1 * unitPV;
+        pairDescription = `First Pair 2:1 (${2 * unitPV}:${unitPV})`;
+      } else {
+        leftFirstDeduct = 1 * unitPV;
+        rightFirstDeduct = 2 * unitPV;
+        pairDescription = `First Pair 1:2 (${unitPV}:${2 * unitPV})`;
+      }
+    } else {
+      if (is1to2Eligible) {
+        leftFirstDeduct = 1 * unitPV;
+        rightFirstDeduct = 2 * unitPV;
+        pairDescription = `First Pair 1:2 (${unitPV}:${2 * unitPV})`;
+      } else {
+        leftFirstDeduct = 2 * unitPV;
+        rightFirstDeduct = 1 * unitPV;
+        pairDescription = `First Pair 2:1 (${2 * unitPV}:${unitPV})`;
+      }
+    }
+
+    // The first pair counts as 1 matched unit (e.g. 100 PV)
+    const firstPairMatchedPV = unitPV;
+
+    // Remaining volume after first pair deduction
+    const remLeft = totalLeft - leftFirstDeduct;
+    const remRight = totalRight - rightFirstDeduct;
+
+    // Subsequent volume in this same closing matches at 1:1
+    const subsequentMatchedPV = Math.min(remLeft, remRight);
+
+    matchedPV = firstPairMatchedPV + subsequentMatchedPV;
+    leftCarry = remLeft - subsequentMatchedPV;
+    rightCarry = remRight - subsequentMatchedPV;
+
+    if (subsequentMatchedPV > 0) {
+      pairDescription += ` + ${subsequentMatchedPV} PV (1:1)`;
+    }
+    isNewFirstPairCompleted = true;
+  } else {
+    // SUBSEQUENT PAIRS (Pure 1:1 Ratio)
+    matchedPV = Math.min(totalLeft, totalRight);
+    leftCarry = totalLeft - matchedPV;
+    rightCarry = totalRight - matchedPV;
+    pairDescription = '1:1 Ratio';
+  }
+
+  // Apply Daily Matching Capping (Default 2500 PV)
+  const payablePV = cappingPV > 0 ? Math.min(matchedPV, cappingPV) : matchedPV;
+  const matchingIncome = payablePV * (matchingPercent / 100);
 
   // Update user volume & matching record
   await prisma.user.update({
@@ -138,7 +226,8 @@ export async function calculateUserBinaryMatching(
       leftVolumePV: 0,
       rightVolumePV: 0,
       totalMatchingPaidPV: { increment: matchedPV },
-      rewardPointsRP: { increment: matchedPV }, // RP accumulates 1:1 for Awards & Rewards
+      ...(isNewFirstPairCompleted ? { firstBinaryPairDone: true } : {}),
+      rewardPointsRP: { increment: payablePV }, // RP accumulates for Awards & Rewards
     },
   });
 
@@ -158,10 +247,10 @@ export async function calculateUserBinaryMatching(
         type: 'BINARY_MATCHING',
         amount: matchingIncome,
         closingBalance: user.wallet.mainBalance + matchingIncome,
-        remarks: `Binary Matching 10% on ${matchedPV} PV (L: ${totalLeft}, R: ${totalRight})`,
+        remarks: `Binary Matching ${matchingPercent}% on ${payablePV} PV (${pairDescription}) [Total L: ${totalLeft}, R: ${totalRight}]`,
       },
     });
   }
 
-  return { matchedPV, matchingIncome, leftCarry, rightCarry };
+  return { matchedPV: payablePV, matchingIncome, leftCarry, rightCarry };
 }

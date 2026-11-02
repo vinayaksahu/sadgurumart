@@ -24,6 +24,11 @@ print("Chrome exit code:", res.returncode)
 
 if os.path.exists(pdf_path):
     print(f"PDF generated: {os.path.getsize(pdf_path)} bytes")
+    # Also update Sadguru_Mart.pdf
+    import shutil
+    target_pdf = os.path.abspath("Sadguru_Mart.pdf")
+    shutil.copy2(pdf_path, target_pdf)
+    print(f"Copied to {target_pdf}: {os.path.getsize(target_pdf)} bytes")
     os.makedirs("slides_4x3_preview", exist_ok=True)
     doc = pymupdf.open(pdf_path)
     print(f"Total pages: {len(doc)}")

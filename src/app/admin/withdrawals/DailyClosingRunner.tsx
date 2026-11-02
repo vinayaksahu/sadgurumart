@@ -90,7 +90,7 @@ export default function DailyClosingRunner({ activeMemberCount }: DailyClosingRu
               दैनिक मिडनाइट क्लोजिंग व पेआउट सिस्टम
             </h2>
             <p className="text-xs sm:text-sm text-slate-200 leading-relaxed">
-              यह मॉड्यूल 10% 1:1 बाइनरी मैचिंग, 10% स्पॉन्सर मैचिंग रॉयल्टी की गणना करता है और सभी डिस्ट्रीब्यूटर्स के संचयी रिवार्ड पॉइंट्स (RP) के आधार पर Star 1 से Crown Ambassador तक रैंक अपग्रेड करता है।
+              यह मॉड्यूल 10% बाइनरी मैचिंग (पहला पेयर 1:2 या 2:1, उसके बाद 1:1), 10% स्पॉन्सर मैचिंग रॉयल्टी की गणना करता है और सभी डिस्ट्रीब्यूटर्स के संचयी रिवार्ड पॉइंट्स (RP) के आधार पर Star 1 से Crown Ambassador तक रैंक अपग्रेड करता है।
             </p>
           </div>
 
@@ -181,10 +181,10 @@ export default function DailyClosingRunner({ activeMemberCount }: DailyClosingRu
           <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-700 flex items-center justify-center">
             <TrendingUp className="w-5 h-5" />
           </div>
-          <h3 className="text-sm font-black text-slate-800">10% 1:1 बाइनरी मैचिंग</h3>
-          <p className="text-2xl font-black text-blue-700">10% फ्लैट पेआउट</p>
+          <h3 className="text-sm font-black text-slate-800">10% बाइनरी मैचिंग</h3>
+          <p className="text-2xl font-black text-blue-700">1:2 / 2:1 फिर 1:1</p>
           <p className="text-xs text-slate-500">
-            लेफ्ट व राइट लेग में न्यूनतम मैचिंग पर 10% राशि वॉलेट में ट्रांसफर होती है तथा अतिरिक्त PV कैरी फॉरवर्ड होता है।
+            पहला पेयर 1:2 या 2:1 के अनुपात में 10% मैच होता है, उसके बाद आजीवन 1:1 के अनुपात में डेली क्लोजिंग मैचिंग पेआउट।
           </p>
         </div>
 
