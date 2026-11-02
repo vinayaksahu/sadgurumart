@@ -194,10 +194,6 @@ export default function UserLoginPage() {
                 <ShoppingBag className="w-3.5 h-3.5" />
                 Shop Products
               </Link>
-              <span>•</span>
-              <Link href="/adminlogin" className="hover:text-[#144732]">
-                Admin Desk
-              </Link>
             </div>
           </div>
         </div>
