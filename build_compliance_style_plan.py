@@ -393,7 +393,7 @@ html_content = f"""<!DOCTYPE html>
     <!-- Bottom contact in cover -->
     <div>
       <div style="font-size: 16px; font-weight: 700; color: #d4a359; margin-bottom: 4px;">
-        🌐 www.sadgurumart.online
+        🌐 www.sadgurumart.com
       </div>
       <div style="font-size: 13.5px; color: #cbd5e1;">
         📞 कॉल: <strong>6267392508</strong> &nbsp;|&nbsp; 💬 व्हाट्सऐप: <strong>7611148925</strong>
@@ -488,7 +488,7 @@ html_content = f"""<!DOCTYPE html>
   <div class="slide-footer">
     <div class="footer-line"></div>
     <div class="footer-content">
-      <div class="footer-left">SGM MART | <strong>BUSINESS OVERVIEW & MLM PLAN</strong> | sadgurumart.online</div>
+      <div class="footer-left">SGM MART | <strong>BUSINESS OVERVIEW & MLM PLAN</strong> | sadgurumart.com</div>
       <div class="footer-right">02 / 15</div>
     </div>
   </div>
@@ -577,7 +577,7 @@ html_content = f"""<!DOCTYPE html>
   <div class="slide-footer">
     <div class="footer-line"></div>
     <div class="footer-content">
-      <div class="footer-left">SGM MART | <strong>BUSINESS OVERVIEW & MLM PLAN</strong> | sadgurumart.online</div>
+      <div class="footer-left">SGM MART | <strong>BUSINESS OVERVIEW & MLM PLAN</strong> | sadgurumart.com</div>
       <div class="footer-right">03 / 15</div>
     </div>
   </div>
@@ -710,7 +710,7 @@ html_content = f"""<!DOCTYPE html>
   <div class="slide-footer">
     <div class="footer-line"></div>
     <div class="footer-content">
-      <div class="footer-left">SGM MART | <strong>BUSINESS OVERVIEW & MLM PLAN</strong> | sadgurumart.online</div>
+      <div class="footer-left">SGM MART | <strong>BUSINESS OVERVIEW & MLM PLAN</strong> | sadgurumart.com</div>
       <div class="footer-right">04 / 15</div>
     </div>
   </div>
@@ -812,7 +812,7 @@ html_content = f"""<!DOCTYPE html>
   <div class="slide-footer">
     <div class="footer-line"></div>
     <div class="footer-content">
-      <div class="footer-left">SGM MART | <strong>BUSINESS OVERVIEW & MLM PLAN</strong> | sadgurumart.online</div>
+      <div class="footer-left">SGM MART | <strong>BUSINESS OVERVIEW & MLM PLAN</strong> | sadgurumart.com</div>
       <div class="footer-right">05 / 15</div>
     </div>
   </div>
@@ -919,7 +919,7 @@ html_content = f"""<!DOCTYPE html>
   <div class="slide-footer">
     <div class="footer-line"></div>
     <div class="footer-content">
-      <div class="footer-left">SGM MART | <strong>BUSINESS OVERVIEW & MLM PLAN</strong> | sadgurumart.online</div>
+      <div class="footer-left">SGM MART | <strong>BUSINESS OVERVIEW & MLM PLAN</strong> | sadgurumart.com</div>
       <div class="footer-right">06 / 15</div>
     </div>
   </div>
@@ -1030,7 +1030,7 @@ html_content = f"""<!DOCTYPE html>
   <div class="slide-footer">
     <div class="footer-line"></div>
     <div class="footer-content">
-      <div class="footer-left">SGM MART | <strong>BUSINESS OVERVIEW & MLM PLAN</strong> | sadgurumart.online</div>
+      <div class="footer-left">SGM MART | <strong>BUSINESS OVERVIEW & MLM PLAN</strong> | sadgurumart.com</div>
       <div class="footer-right">07 / 15</div>
     </div>
   </div>
@@ -1220,7 +1220,7 @@ html_content = f"""<!DOCTYPE html>
   <div class="slide-footer">
     <div class="footer-line"></div>
     <div class="footer-content">
-      <div class="footer-left">SGM MART | <strong>BUSINESS OVERVIEW & MLM PLAN</strong> | sadgurumart.online</div>
+      <div class="footer-left">SGM MART | <strong>BUSINESS OVERVIEW & MLM PLAN</strong> | sadgurumart.com</div>
       <div class="footer-right">08 / 15</div>
     </div>
   </div>
@@ -1319,7 +1319,7 @@ html_content = f"""<!DOCTYPE html>
   <div class="slide-footer">
     <div class="footer-line"></div>
     <div class="footer-content">
-      <div class="footer-left">SGM MART | <strong>BUSINESS OVERVIEW & MLM PLAN</strong> | sadgurumart.online</div>
+      <div class="footer-left">SGM MART | <strong>BUSINESS OVERVIEW & MLM PLAN</strong> | sadgurumart.com</div>
       <div class="footer-right">09 / 15</div>
     </div>
   </div>
@@ -1434,7 +1434,7 @@ html_content = f"""<!DOCTYPE html>
   <div class="slide-footer">
     <div class="footer-line"></div>
     <div class="footer-content">
-      <div class="footer-left">SGM MART | <strong>BUSINESS OVERVIEW & MLM PLAN</strong> | sadgurumart.online</div>
+      <div class="footer-left">SGM MART | <strong>BUSINESS OVERVIEW & MLM PLAN</strong> | sadgurumart.com</div>
       <div class="footer-right">10 / 15</div>
     </div>
   </div>
@@ -1528,7 +1528,7 @@ html_content = f"""<!DOCTYPE html>
   <div class="slide-footer">
     <div class="footer-line"></div>
     <div class="footer-content">
-      <div class="footer-left">SGM MART | <strong>BUSINESS OVERVIEW & MLM PLAN</strong> | sadgurumart.online</div>
+      <div class="footer-left">SGM MART | <strong>BUSINESS OVERVIEW & MLM PLAN</strong> | sadgurumart.com</div>
       <div class="footer-right">11 / 15</div>
     </div>
   </div>
@@ -1624,7 +1624,7 @@ html_content = f"""<!DOCTYPE html>
   <div class="slide-footer">
     <div class="footer-line"></div>
     <div class="footer-content">
-      <div class="footer-left">SGM MART | <strong>BUSINESS OVERVIEW & MLM PLAN</strong> | sadgurumart.online</div>
+      <div class="footer-left">SGM MART | <strong>BUSINESS OVERVIEW & MLM PLAN</strong> | sadgurumart.com</div>
       <div class="footer-right">12 / 15</div>
     </div>
   </div>
@@ -1760,7 +1760,7 @@ html_content = f"""<!DOCTYPE html>
   <div class="slide-footer">
     <div class="footer-line"></div>
     <div class="footer-content">
-      <div class="footer-left">SGM MART | <strong>BUSINESS OVERVIEW & MLM PLAN</strong> | sadgurumart.online</div>
+      <div class="footer-left">SGM MART | <strong>BUSINESS OVERVIEW & MLM PLAN</strong> | sadgurumart.com</div>
       <div class="footer-right">13 / 15</div>
     </div>
   </div>
@@ -1859,7 +1859,7 @@ html_content = f"""<!DOCTYPE html>
   <div class="slide-footer">
     <div class="footer-line"></div>
     <div class="footer-content">
-      <div class="footer-left">SGM MART | <strong>BUSINESS OVERVIEW & MLM PLAN</strong> | sadgurumart.online</div>
+      <div class="footer-left">SGM MART | <strong>BUSINESS OVERVIEW & MLM PLAN</strong> | sadgurumart.com</div>
       <div class="footer-right">14 / 15</div>
     </div>
   </div>
@@ -1914,7 +1914,7 @@ html_content = f"""<!DOCTYPE html>
             OFFICIAL WEBSITE | आधिकारिक वेबसाइट
           </div>
           <div style="font-size: 24px; font-weight: 800; color: #fef08a; line-height: 1.2;">
-            www.sadgurumart.online
+            www.sadgurumart.com
           </div>
         </div>
       </div>

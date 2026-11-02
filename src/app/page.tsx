@@ -202,7 +202,7 @@ export default async function HomePage() {
 
                 <div className="mt-6 pt-5 border-t border-white/10 text-center">
                   <div className="text-xs font-bold text-slate-300">
-                    आधिकारिक पोर्टल: <span className="text-[#fef08a] font-black">www.sadgurumart.online</span>
+                    आधिकारिक पोर्टल: <span className="text-[#fef08a] font-black">www.sadgurumart.com</span>
                   </div>
                 </div>
               </div>
@@ -325,7 +325,7 @@ export default async function HomePage() {
               <h4 className="text-sm font-bold text-[#d4a359] uppercase tracking-wider mb-4">Support & Portal</h4>
               <div className="space-y-2 text-xs text-slate-300">
                 <p className="flex items-center gap-2"><MessageSquare className="w-3.5 h-3.5 text-[#22c55e]" /> 24x7 ऑनलाइन सपोर्ट टिकट</p>
-                <p className="text-[#fef08a] font-semibold mt-2">www.sadgurumart.online</p>
+                <p className="text-[#fef08a] font-semibold mt-2">www.sadgurumart.com</p>
               </div>
             </div>
           </div>

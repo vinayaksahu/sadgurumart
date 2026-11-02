@@ -42,7 +42,7 @@ def slide_footer(page_num):
   <div class="slide-footer">
     <div class="footer-line"></div>
     <div class="footer-content">
-      <div class="footer-left">SGM MART | <strong>BUSINESS OVERVIEW & MLM PLAN</strong> | sadgurumart.online</div>
+      <div class="footer-left">SGM MART | <strong>BUSINESS OVERVIEW & MLM PLAN</strong> | sadgurumart.com</div>
       <div class="footer-right">{page_num:02d} / {TOTAL_PAGES:02d}</div>
     </div>
   </div>
@@ -307,7 +307,7 @@ s1 = f"""
     <!-- Contact line bottom -->
     <div style="border-top:1px solid rgba(255,255,255,0.2); padding-top:16px; display:flex; justify-content:space-between; align-items:center;">
       <div style="font-size:18px; color:#fef08a; font-weight:800;">
-        🌐 www.sadgurumart.online
+        🌐 www.sadgurumart.com
       </div>
       <div style="font-size:17px; color:#ffffff; font-weight:700;">
         📞 6267392508 &nbsp;|&nbsp; 💬 7611148925
@@ -476,7 +476,7 @@ s4 = f"""
     </div>
     
     <div style="margin-top:24px; text-align:center; font-size:17px; font-weight:700; color:#4a5568;">
-      💡 <em>नोट: सभी श्रेणियों के विस्तृत SKU, पैक साइज और कीमतें आधिकारिक पोर्टल <span style="color:#144732; font-weight:900;">www.sadgurumart.online</span> पर उपलब्ध हैं।</em>
+      💡 <em>नोट: सभी श्रेणियों के विस्तृत SKU, पैक साइज और कीमतें आधिकारिक पोर्टल <span style="color:#144732; font-weight:900;">www.sadgurumart.com</span> पर उपलब्ध हैं।</em>
     </div>
   </div>
 
@@ -1835,7 +1835,7 @@ s25 = f"""
 
       <!-- Website Box -->
       <div style="font-size:24px; font-weight:900; color:#fef08a;">
-        🌐 आधिकारिक वेबसाइट: <span style="text-decoration:underline;">www.sadgurumart.online</span>
+        🌐 आधिकारिक वेबसाइट: <span style="text-decoration:underline;">www.sadgurumart.com</span>
       </div>
     </div>
 

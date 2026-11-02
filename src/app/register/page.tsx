@@ -115,7 +115,7 @@ function RegisterForm() {
       `🔑 *Password:* ${registeredData.password}\n` +
       `👥 *Sponsor:* ${registeredData.sponsorName} (${registeredData.sponsorId})\n` +
       `📍 *Team Position:* ${registeredData.placementPosition === 'RIGHT' ? 'Right Team' : 'Left Team'}\n\n` +
-      `🌐 *Login Link:* https://sadgurumart.com/login\n\n` +
+      `🌐 *Login Link:* https://www.sadgurumart.com/login\n\n` +
       `कृपया अपनी आईडी और पासवर्ड सुरक्षित रखें।`;
 
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`, '_blank');

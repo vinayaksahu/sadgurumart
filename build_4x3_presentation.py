@@ -46,7 +46,7 @@ def slide_footer(page_num):
   <div class="slide-footer">
     <div class="footer-line"></div>
     <div class="footer-content">
-      <div class="footer-left">SGM MART | <strong>BUSINESS OVERVIEW & MLM PLAN</strong> | sadgurumart.online</div>
+      <div class="footer-left">SGM MART | <strong>BUSINESS OVERVIEW & MLM PLAN</strong> | sadgurumart.com</div>
       <div class="footer-right">{page_num:02d} / {TOTAL_PAGES:02d}</div>
     </div>
   </div>
@@ -323,7 +323,7 @@ s2 = f"""
     <!-- Contact line bottom -->
     <div style="border-top:1px solid rgba(255,255,255,0.2); padding-top:14px; display:flex; justify-content:space-between; align-items:center;">
       <div style="font-size:17px; color:#fef08a; font-weight:800;">
-        🌐 www.sadgurumart.online
+        🌐 www.sadgurumart.com
       </div>
       <div style="font-size:16px; color:#ffffff; font-weight:700;">
         ✨ बेरोजगारी और रोग मुक्त हो भारत हमारा
@@ -482,7 +482,7 @@ s5 = f"""
     </div>
     
     <div style="margin-top:20px; text-align:center; font-size:16.5px; font-weight:700; color:#4a5568;">
-      💡 <em>नोट: सभी श्रेणियों के विस्तृत SKU, पैक साइज और कीमतें आधिकारिक पोर्टल <span style="color:#144732; font-weight:900;">www.sadgurumart.online</span> पर उपलब्ध हैं।</em>
+      💡 <em>नोट: सभी श्रेणियों के विस्तृत SKU, पैक साइज और कीमतें आधिकारिक पोर्टल <span style="color:#144732; font-weight:900;">www.sadgurumart.com</span> पर उपलब्ध हैं।</em>
     </div>
   </div>
 
@@ -1773,7 +1773,7 @@ s30 = f"""
         ✔ सद्गुरु मार्ट की वचनबद्धता: सुरक्षित सिस्टम • समय पर पेआउट • 100% लीगल प्रक्रिया
       </div>
       <div style="font-size:17px; font-weight:700; color:#ffffff;">
-        🌐 www.sadgurumart.online
+        🌐 www.sadgurumart.com
       </div>
     </div>
   </div>
@@ -1826,7 +1826,7 @@ s31 = f"""
             OFFICIAL WEBSITE | आधिकारिक पोर्टल
           </div>
           <div style="font-size:28px; font-weight:900; color:#fef08a; letter-spacing:1px; margin-top:4px;">
-            www.sadgurumart.online
+            www.sadgurumart.com
           </div>
           <div style="font-size:14px; color:#cbd5e1; font-weight:600; margin-top:3px;">
             24×7 Member Portal & Online Shopping

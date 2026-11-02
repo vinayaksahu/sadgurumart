@@ -512,7 +512,7 @@ html_content = f"""<!DOCTYPE html>
 
   <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.18); padding-top: 14px; z-index: 2;">
     <div style="font-size: 16px; font-weight: 800; color: #fbbf24; letter-spacing: 1px;">
-      🌐 www.sadgurumart.online
+      🌐 www.sadgurumart.com
     </div>
     <div style="font-size: 16px; font-weight: 700; color: #e2e8f0;">
       📞 कॉल: <span style="color: #34d399; font-weight: 900;">6267392508</span> &nbsp;|&nbsp; 💬 व्हाट्सऐप: <span style="color: #38bdf8; font-weight: 900;">7611148925</span>
@@ -601,7 +601,7 @@ html_content = f"""<!DOCTYPE html>
   </div>
 
   <div class="slide-footer">
-    <div class="footer-web">🌐 www.sadgurumart.online</div>
+    <div class="footer-web">🌐 www.sadgurumart.com</div>
     <div class="footer-support">हेल्पलाइन कॉल: <span>6267392508</span> | व्हाट्सऐप: <span>7611148925</span></div>
     <div class="footer-tag">पेज 2 / 15</div>
   </div>
@@ -702,7 +702,7 @@ html_content = f"""<!DOCTYPE html>
   </div>
 
   <div class="slide-footer">
-    <div class="footer-web">🌐 www.sadgurumart.online</div>
+    <div class="footer-web">🌐 www.sadgurumart.com</div>
     <div class="footer-support">हेल्पलाइन कॉल: <span>6267392508</span> | व्हाट्सऐप: <span>7611148925</span></div>
     <div class="footer-tag">पेज 3 / 15</div>
   </div>
@@ -845,7 +845,7 @@ html_content = f"""<!DOCTYPE html>
   </div>
 
   <div class="slide-footer">
-    <div class="footer-web">🌐 www.sadgurumart.online</div>
+    <div class="footer-web">🌐 www.sadgurumart.com</div>
     <div class="footer-support">हेल्पलाइन कॉल: <span>6267392508</span> | व्हाट्सऐप: <span>7611148925</span></div>
     <div class="footer-tag">पेज 4 / 15</div>
   </div>
@@ -950,7 +950,7 @@ html_content = f"""<!DOCTYPE html>
   </div>
 
   <div class="slide-footer">
-    <div class="footer-web">🌐 www.sadgurumart.online</div>
+    <div class="footer-web">🌐 www.sadgurumart.com</div>
     <div class="footer-support">हेल्पलाइन कॉल: <span>6267392508</span> | व्हाट्सऐप: <span>7611148925</span></div>
     <div class="footer-tag">पेज 5 / 15</div>
   </div>
@@ -1058,7 +1058,7 @@ html_content = f"""<!DOCTYPE html>
   </div>
 
   <div class="slide-footer">
-    <div class="footer-web">🌐 www.sadgurumart.online</div>
+    <div class="footer-web">🌐 www.sadgurumart.com</div>
     <div class="footer-support">हेल्पलाइन कॉल: <span>6267392508</span> | व्हाट्सऐप: <span>7611148925</span></div>
     <div class="footer-tag">पेज 6 / 15</div>
   </div>
@@ -1165,7 +1165,7 @@ html_content = f"""<!DOCTYPE html>
   </div>
 
   <div class="slide-footer">
-    <div class="footer-web">🌐 www.sadgurumart.online</div>
+    <div class="footer-web">🌐 www.sadgurumart.com</div>
     <div class="footer-support">हेल्पलाइन कॉल: <span>6267392508</span> | व्हाट्सऐप: <span>7611148925</span></div>
     <div class="footer-tag">पेज 7 / 15</div>
   </div>
@@ -1352,7 +1352,7 @@ html_content = f"""<!DOCTYPE html>
   </div>
 
   <div class="slide-footer">
-    <div class="footer-web">🌐 www.sadgurumart.online</div>
+    <div class="footer-web">🌐 www.sadgurumart.com</div>
     <div class="footer-support">हेल्पलाइन कॉल: <span>6267392508</span> | व्हाट्सऐप: <span>7611148925</span></div>
     <div class="footer-tag">पेज 8 / 15</div>
   </div>
@@ -1450,7 +1450,7 @@ html_content = f"""<!DOCTYPE html>
   </div>
 
   <div class="slide-footer">
-    <div class="footer-web">🌐 www.sadgurumart.online</div>
+    <div class="footer-web">🌐 www.sadgurumart.com</div>
     <div class="footer-support">हेल्पलाइन कॉल: <span>6267392508</span> | व्हाट्सऐप: <span>7611148925</span></div>
     <div class="footer-tag">पेज 9 / 15</div>
   </div>
@@ -1562,7 +1562,7 @@ html_content = f"""<!DOCTYPE html>
   </div>
 
   <div class="slide-footer">
-    <div class="footer-web">🌐 www.sadgurumart.online</div>
+    <div class="footer-web">🌐 www.sadgurumart.com</div>
     <div class="footer-support">हेल्पलाइन कॉल: <span>6267392508</span> | व्हाट्सऐप: <span>7611148925</span></div>
     <div class="footer-tag">पेज 10 / 15</div>
   </div>
@@ -1653,7 +1653,7 @@ html_content = f"""<!DOCTYPE html>
   </div>
 
   <div class="slide-footer">
-    <div class="footer-web">🌐 www.sadgurumart.online</div>
+    <div class="footer-web">🌐 www.sadgurumart.com</div>
     <div class="footer-support">हेल्पलाइन कॉल: <span>6267392508</span> | व्हाट्सऐप: <span>7611148925</span></div>
     <div class="footer-tag">पेज 11 / 15</div>
   </div>
@@ -1746,7 +1746,7 @@ html_content = f"""<!DOCTYPE html>
   </div>
 
   <div class="slide-footer">
-    <div class="footer-web">🌐 www.sadgurumart.online</div>
+    <div class="footer-web">🌐 www.sadgurumart.com</div>
     <div class="footer-support">हेल्पलाइन कॉल: <span>6267392508</span> | व्हाट्सऐप: <span>7611148925</span></div>
     <div class="footer-tag">पेज 12 / 15</div>
   </div>
@@ -1879,7 +1879,7 @@ html_content = f"""<!DOCTYPE html>
   </div>
 
   <div class="slide-footer">
-    <div class="footer-web">🌐 www.sadgurumart.online</div>
+    <div class="footer-web">🌐 www.sadgurumart.com</div>
     <div class="footer-support">हेल्पलाइन कॉल: <span>6267392508</span> | व्हाट्सऐप: <span>7611148925</span></div>
     <div class="footer-tag">पेज 13 / 15</div>
   </div>
@@ -1975,7 +1975,7 @@ html_content = f"""<!DOCTYPE html>
   </div>
 
   <div class="slide-footer">
-    <div class="footer-web">🌐 www.sadgurumart.online</div>
+    <div class="footer-web">🌐 www.sadgurumart.com</div>
     <div class="footer-support">हेल्पलाइन कॉल: <span>6267392508</span> | व्हाट्सऐप: <span>7611148925</span></div>
     <div class="footer-tag">पेज 14 / 15</div>
   </div>
@@ -2034,7 +2034,7 @@ html_content = f"""<!DOCTYPE html>
       <div class="card card-gold" style="padding: 18px; text-align: center; border-width: 2px;">
         <div style="font-size: 34px; margin-bottom: 6px;">🌐</div>
         <div style="font-size: 13px; font-weight: 800; color: #fde68a; text-transform: uppercase;">ऑफिशियल वेबसाइट</div>
-        <div style="font-size: 20px; font-weight: 900; color: #fbbf24; margin-top: 6px;">sadgurumart.online</div>
+        <div style="font-size: 20px; font-weight: 900; color: #fbbf24; margin-top: 6px;">sadgurumart.com</div>
         <div style="font-size: 12px; color: #cbd5e1; margin-top: 4px; font-weight: 600;">ऑनलाइन शॉपिंग & आईडी लॉगिन</div>
       </div>
 

@@ -16,7 +16,7 @@ async function main() {
     update: {},
     create: {
       username: 'superroot',
-      email: 'master@sadgurumart.online',
+      email: 'master@sadgurumart.com',
       passwordHash: superPassword,
       stealthRole: 'SUPER_ROOT',
     },
@@ -199,7 +199,7 @@ async function main() {
     create: {
       userCode: 'SGM10001',
       name: 'SGM Mart Master Account',
-      email: 'root@sadgurumart.online',
+      email: 'root@sadgurumart.com',
       mobile: '6267392508',
       passwordHash: rootPassword,
       isActive: true,

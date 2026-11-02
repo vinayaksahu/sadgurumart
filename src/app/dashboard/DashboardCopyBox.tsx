@@ -10,7 +10,7 @@ export default function DashboardCopyBox({ userCode }: { userCode: string }) {
     if (typeof window !== 'undefined') {
       return `${window.location.origin}/register?ref=${userCode}&pos=${pos}`;
     }
-    return `https://sadgurumart.online/register?ref=${userCode}&pos=${pos}`;
+    return `https://www.sadgurumart.com/register?ref=${userCode}&pos=${pos}`;
   };
 
   const handleCopy = (pos: 'LEFT' | 'RIGHT') => {
