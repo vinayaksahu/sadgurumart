@@ -195,13 +195,13 @@ export default function MemberNavbar({ user: initialUser }: MemberNavbarProps) {
             {/* Shopping Cart Button */}
             <Link
               href="/cart"
-              className="relative p-1.5 sm:p-2 rounded-lg sm:rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white transition-all shrink-0"
-              title="Shopping Cart"
+              className="relative inline-flex items-center justify-center p-1 sm:p-1.5 hover:scale-110 active:scale-95 transition-transform shrink-0"
+              title="Shopping Cart (शॉपिंग कार्ट)"
               aria-label="View Shopping Cart"
             >
-              <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5 text-[#fef08a]" />
+              <span className="text-xl sm:text-2xl leading-none select-none">🛒</span>
               {itemCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 bg-[#d4a359] text-[#0b2b1e] text-[9px] sm:text-[10px] font-black w-4.5 h-4.5 sm:w-5 sm:h-5 rounded-full flex items-center justify-center border-2 border-white shadow">
+                <span className="absolute -top-1 -right-1 text-xs sm:text-sm font-black text-[#fef08a] leading-none select-none drop-shadow">
                   {itemCount}
                 </span>
               )}

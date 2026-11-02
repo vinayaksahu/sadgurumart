@@ -137,13 +137,13 @@ export default function Navbar() {
             {/* Shopping Cart Icon */}
             <Link
               href="/cart"
-              className="relative p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl border border-slate-200 text-slate-700 hover:text-[#144732] hover:border-[#144732] transition-all bg-[#faf8f4] shrink-0"
-              title="Shopping Cart"
+              className="relative inline-flex items-center justify-center p-1 sm:p-1.5 hover:scale-110 active:scale-95 transition-transform shrink-0"
+              title="Shopping Cart (शॉपिंग कार्ट)"
               aria-label="View Shopping Cart"
             >
-              <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5 text-[#144732]" />
+              <span className="text-xl sm:text-2xl leading-none select-none">🛒</span>
               {itemCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 bg-[#92580a] text-white text-[9px] sm:text-[10px] font-black w-4.5 h-4.5 sm:w-5 sm:h-5 rounded-full flex items-center justify-center border-2 border-white shadow">
+                <span className="absolute -top-1 -right-1 text-xs sm:text-sm font-black text-[#144732] leading-none select-none">
                   {itemCount}
                 </span>
               )}
