@@ -128,7 +128,7 @@ export default function AdminNavbar({
       title: 'Master',
       icon: Database,
       items: [
-        { label: 'Add Product', href: '/admin/inventory?action=add' },
+        { label: 'Add Package', href: '/admin/inventory?action=add' },
         { label: 'Product List', href: '/admin/inventory' },
         { label: 'Orders & Dispatch', href: '/admin/orders' },
       ],

@@ -219,7 +219,7 @@ export default function InventoryManager({ initialProducts, categories }: Invent
           className="px-5 py-3 rounded-2xl bg-[#144732] hover:bg-[#0b2b1e] text-white font-black text-xs shadow-md transition-all flex items-center gap-2 cursor-pointer shrink-0"
         >
           <Plus className="w-4 h-4 text-[#fef08a]" />
-          <span>नया प्रोडक्ट जोड़ें (Add Product)</span>
+          <span>नया पैकेज जोड़ें (Add Package)</span>
         </button>
       </div>
 
@@ -584,7 +584,7 @@ export default function InventoryManager({ initialProducts, categories }: Invent
                   className="px-6 py-2.5 rounded-xl bg-[#144732] hover:bg-[#0b2b1e] text-white font-black text-xs shadow-md transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
                 >
                   {loading && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
-                  <span>{editingProduct ? 'बदलाव सेव करें (Save Changes)' : 'प्रोडक्ट जोड़ें (Add Product)'}</span>
+                  <span>{editingProduct ? 'बदलाव सेव करें (Save Changes)' : 'पैकेज जोड़ें (Add Package)'}</span>
                 </button>
               </div>
             </form>
