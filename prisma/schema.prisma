@@ -133,6 +133,7 @@ model User {
   leftCarryForwardPV  Float            @default(0)
   rightCarryForwardPV Float            @default(0)
   totalMatchingPaidPV Float            @default(0)
+  firstBinaryPairDone Boolean          @default(false)
   directBusinessPV    Float            @default(0) // For 3000 PV Leadership & 5000 PV CTO qualification
   rewardPointsRP      Float            @default(0)
 
@@ -507,6 +508,7 @@ model SystemSetting {
   minActivationPV         Float    @default(100)
   directSponsorBonus      Float    @default(50)
   binaryMatchingPercent   Float    @default(10)
+  firstBinaryPairRatio    String   @default("1:2_OR_2:1")
   dailyMatchingCappingPV  Float    @default(2500)
   adminChargePercent      Float    @default(5)
   tdsPercent              Float    @default(5)

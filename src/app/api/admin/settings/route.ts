@@ -56,6 +56,7 @@ export async function POST(req: NextRequest) {
         minActivationPV: parseFloat(body.minActivationPV) || current.minActivationPV,
         directSponsorBonus: parseFloat(body.directSponsorBonus) ?? current.directSponsorBonus,
         binaryMatchingPercent: parseFloat(body.binaryMatchingPercent) ?? current.binaryMatchingPercent,
+        firstBinaryPairRatio: body.firstBinaryPairRatio ?? (current as any).firstBinaryPairRatio ?? '1:2_OR_2:1',
         dailyMatchingCappingPV: parseFloat(body.dailyMatchingCappingPV) ?? current.dailyMatchingCappingPV,
         adminChargePercent: parseFloat(body.adminChargePercent) ?? current.adminChargePercent,
         tdsPercent: parseFloat(body.tdsPercent) ?? current.tdsPercent,

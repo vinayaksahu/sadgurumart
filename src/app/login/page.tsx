@@ -128,7 +128,7 @@ export default function UserLoginPage() {
                   type="text"
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
-                  placeholder="e.g. SGM10001 or 6267392508"
+                  placeholder="e.g. SGM10001 या मोबाइल नंबर"
                   required
                   className="w-full bg-[#fdfaf3] border border-[#d8d0bf] focus:border-[#144732] rounded-xl px-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-[#144732] transition-all"
                 />

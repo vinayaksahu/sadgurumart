@@ -495,7 +495,7 @@ export default function MemberNavbar({ user: initialUser, isAdminActive: initial
                 </a>
               )}
               <div className="text-[10px] text-center text-slate-400">
-                SGM Mart Online Service • Helpline: 6267392508
+                SGM Mart Online Service • 24x7 सपोर्ट टिकट
               </div>
             </div>
           </div>

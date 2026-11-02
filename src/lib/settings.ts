@@ -7,6 +7,7 @@ export const DEFAULT_SYSTEM_SETTINGS = {
   minActivationPV: 100,
   directSponsorBonus: 50,
   binaryMatchingPercent: 10,
+  firstBinaryPairRatio: '1:2_OR_2:1',
   dailyMatchingCappingPV: 2500,
   adminChargePercent: 5,
   tdsPercent: 5,

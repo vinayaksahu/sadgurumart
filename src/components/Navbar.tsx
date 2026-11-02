@@ -89,8 +89,8 @@ export default function Navbar() {
         {/* Top Banner Notice */}
         <div className="bg-[#0b2b1e] text-[#fef08a] px-3 sm:px-4 py-1.5 text-[11px] sm:text-xs font-bold border-b border-[#d4a359]/30 tracking-wider flex items-center justify-between max-w-7xl mx-auto w-full overflow-hidden">
           <span className="truncate min-w-0 flex-1">🇮🇳 “बेरोजगारी और रोग मुक्त हो भारत हमारा” • SGM MART</span>
-          <span className="text-[10px] sm:text-[11px] text-slate-300 font-normal shrink-0 ml-2">
-            हेल्पलाइन: <a href="tel:6267392508" className="text-[#fef08a] font-bold hover:underline">6267392508</a>
+          <span className="text-[10px] sm:text-[11px] text-[#fef08a] font-bold shrink-0 ml-2">
+            24x7 ऑनलाइन सपोर्ट
           </span>
         </div>
 
@@ -348,17 +348,13 @@ export default function Navbar() {
               </div>
             </div>
 
-            {/* Drawer Footer with Support */}
-            <div className="p-4 border-t border-[#e8e3d5] bg-[#fdfaf3] space-y-2">
-              <div className="text-xs text-slate-600 flex items-center justify-between">
-                <span>हेल्पलाइन:</span>
-                <a href="tel:6267392508" className="font-black text-[#144732] hover:underline flex items-center gap-1">
-                  <PhoneCall className="w-3.5 h-3.5 text-[#d4a359]" />
-                  <span>6267392508</span>
-                </a>
+            {/* Drawer Footer */}
+            <div className="p-4 border-t border-[#e8e3d5] bg-[#fdfaf3] space-y-1">
+              <div className="text-xs text-center font-bold text-[#144732]">
+                SGM Mart Online Service Pvt. Ltd.
               </div>
               <div className="text-[10px] text-center text-slate-400">
-                SGM Mart Online Service Pvt. Ltd.
+                24x7 सपोर्ट टिकट प्रणाली • Always Transparent
               </div>
             </div>
           </div>

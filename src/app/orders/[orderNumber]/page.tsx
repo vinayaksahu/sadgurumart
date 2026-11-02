@@ -99,7 +99,7 @@ export default async function OrderConfirmationPage({ params }: OrderPageProps) 
             <div className="text-left sm:text-right text-xs text-slate-500">
               <div className="font-bold text-slate-800">SGM MART ONLINE SERVICE PVT. LTD.</div>
               <div>GSTIN: Registered Direct Seller Entity</div>
-              <div>Helpline: 6267392508 • www.sadgurumart.online</div>
+              <div>Support Portal • www.sadgurumart.online</div>
             </div>
           </div>
 
