@@ -208,9 +208,9 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    if (wasInactive && product.pv > 0) {
+    if (wasInactive && (product.pv > 0 || ((product as any).directIncome && (product as any).directIncome > 0))) {
       try {
-        await creditDirectReferralBonus(targetUser.id, product.pv);
+        await creditDirectReferralBonus(targetUser.id, product.pv, (product as any).directIncome);
       } catch (bonusErr) {
         console.error('Direct bonus credit warning:', bonusErr);
       }

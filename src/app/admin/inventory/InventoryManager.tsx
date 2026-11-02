@@ -35,6 +35,7 @@ interface Product {
   dpPrice: number;
   pv: number;
   bv: number;
+  directIncome?: number;
   stockQuantity: number;
   images: string[];
   isActivation: boolean;
@@ -76,6 +77,7 @@ export default function InventoryManager({ initialProducts, categories }: Invent
   const [dpPrice, setDpPrice] = useState('150');
   const [pv, setPv] = useState('15');
   const [bv, setBv] = useState('10');
+  const [directIncome, setDirectIncome] = useState('0');
   const [stockQuantity, setStockQuantity] = useState('100');
   const [imageUrl, setImageUrl] = useState('');
   const [isActivation, setIsActivation] = useState(false);
@@ -90,6 +92,7 @@ export default function InventoryManager({ initialProducts, categories }: Invent
     setDpPrice('150');
     setPv('15');
     setBv('10');
+    setDirectIncome('0');
     setStockQuantity('100');
     setImageUrl('');
     setIsActivation(false);
@@ -110,6 +113,7 @@ export default function InventoryManager({ initialProducts, categories }: Invent
     setDpPrice(p.dpPrice.toString());
     setPv(p.pv.toString());
     setBv(p.bv.toString());
+    setDirectIncome((p.directIncome ?? 0).toString());
     setStockQuantity(p.stockQuantity.toString());
     setImageUrl(p.images && p.images.length > 0 ? p.images[0] : '');
     setIsActivation(p.isActivation);
@@ -131,6 +135,7 @@ export default function InventoryManager({ initialProducts, categories }: Invent
         dpPrice: parseFloat(dpPrice),
         pv: parseFloat(pv),
         bv: parseFloat(bv),
+        directIncome: parseFloat(directIncome) || 0,
         stockQuantity: parseInt(stockQuantity),
         imageUrl,
         isActivation,
@@ -343,9 +348,14 @@ export default function InventoryManager({ initialProducts, categories }: Invent
                         <span className="text-[#144732] bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 mr-1">
                           {p.pv} PV
                         </span>
-                        <span className="text-[#92580a] bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                        <span className="text-[#92580a] bg-amber-50 px-2 py-0.5 rounded border border-amber-200 mr-1">
                           {p.bv} BV
                         </span>
+                        {p.directIncome !== undefined && p.directIncome > 0 && (
+                          <span className="text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200 text-[11px]">
+                            ₹{p.directIncome} Direct
+                          </span>
+                        )}
                       </td>
 
                       <td className="py-3 px-4">
@@ -475,8 +485,8 @@ export default function InventoryManager({ initialProducts, categories }: Invent
                 folder="products"
               />
 
-              {/* Pricing, PV & BV */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {/* Pricing, PV, BV & Direct Income */}
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                 <div>
                   <label className="block text-[11px] font-bold text-slate-600 mb-1">
                     MRP (₹) *
@@ -528,6 +538,20 @@ export default function InventoryManager({ initialProducts, categories }: Invent
                     value={bv}
                     onChange={(e) => setBv(e.target.value)}
                     className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold focus:outline-none focus:border-[#144732]"
+                  />
+                </div>
+
+                <div className="col-span-2 sm:col-span-1">
+                  <label className="block text-[11px] font-black text-blue-700 mb-1">
+                    डायरेक्ट इनकम (Direct ₹)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    placeholder="0"
+                    value={directIncome}
+                    onChange={(e) => setDirectIncome(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl border border-blue-200 bg-blue-50/40 text-xs font-bold text-blue-900 focus:outline-none focus:border-[#144732] focus:bg-white"
                   />
                 </div>
               </div>

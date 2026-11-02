@@ -66,6 +66,7 @@ export async function POST(req: Request) {
       dpPrice, 
       pv, 
       bv, 
+      directIncome,
       stockQuantity, 
       imageUrl, 
       isActivation, 
@@ -98,6 +99,7 @@ export async function POST(req: Request) {
         dpPrice: parseFloat(dpPrice),
         pv: pv ? parseFloat(pv) : 0,
         bv: bv ? parseFloat(bv) : 0,
+        directIncome: directIncome ? parseFloat(directIncome) : 0,
         stockQuantity: stockQuantity ? parseInt(stockQuantity) : 100,
         images: imagesArray,
         isActivation: Boolean(isActivation),
@@ -130,6 +132,7 @@ export async function PUT(req: Request) {
       dpPrice, 
       pv, 
       bv, 
+      directIncome,
       stockQuantity, 
       imageUrl, 
       isActivation, 
@@ -153,6 +156,7 @@ export async function PUT(req: Request) {
     if (dpPrice !== undefined) updateData.dpPrice = parseFloat(dpPrice);
     if (pv !== undefined) updateData.pv = parseFloat(pv);
     if (bv !== undefined) updateData.bv = parseFloat(bv);
+    if (directIncome !== undefined) updateData.directIncome = parseFloat(directIncome);
     if (stockQuantity !== undefined) updateData.stockQuantity = parseInt(stockQuantity);
     if (isActivation !== undefined) updateData.isActivation = Boolean(isActivation);
     if (isActive !== undefined) updateData.isActive = Boolean(isActive);

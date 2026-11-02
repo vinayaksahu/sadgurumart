@@ -6,9 +6,10 @@ import { creditIncomeWithAutoPoolCheck } from './incomeDistributor';
  */
 export async function creditDirectReferralBonus(
   newUserId: string,
-  activationPV: number
+  activationPV: number,
+  customDirectIncome?: number
 ): Promise<number> {
-  if (activationPV <= 0) return 0;
+  if (activationPV <= 0 && (!customDirectIncome || customDirectIncome <= 0)) return 0;
 
   const newUser = await prisma.user.findUnique({
     where: { id: newUserId },
@@ -27,15 +28,19 @@ export async function creditDirectReferralBonus(
   const wallet = sponsor.wallet;
   if (!wallet) return 0;
 
-  const directBonus = activationPV * 0.10; // 10% PV Direct Bonus as per PDF
+  const directBonus = (customDirectIncome !== undefined && customDirectIncome > 0)
+    ? customDirectIncome
+    : activationPV * 0.10;
 
   // Track sponsor direct business volume for Leadership (3000 PV) & CTO (5000 PV) qualification
-  await prisma.user.update({
-    where: { id: sponsor.id },
-    data: {
-      directBusinessPV: { increment: activationPV },
-    },
-  });
+  if (activationPV > 0) {
+    await prisma.user.update({
+      where: { id: sponsor.id },
+      data: {
+        directBusinessPV: { increment: activationPV },
+      },
+    });
+  }
 
   // Credit sponsor wallet with 1st income AutoPool check
   await creditIncomeWithAutoPoolCheck({
@@ -43,7 +48,9 @@ export async function creditDirectReferralBonus(
     amount: directBonus,
     type: 'DIRECT_REFERRAL',
     referenceId: newUser.id,
-    remarks: `Direct Referral Bonus 10% on ${activationPV} PV from ${newUser.name} (${newUser.userCode})`,
+    remarks: (customDirectIncome !== undefined && customDirectIncome > 0)
+      ? `Direct Referral Bonus ₹${directBonus} from ${newUser.name} (${newUser.userCode})`
+      : `Direct Referral Bonus 10% on ${activationPV} PV from ${newUser.name} (${newUser.userCode})`,
   });
 
   return directBonus;

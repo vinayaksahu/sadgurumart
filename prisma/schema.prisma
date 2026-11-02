@@ -226,6 +226,7 @@ model Product {
   dpPrice         Float       // Distributor Price
   pv              Float       // Point Value (Activation & Matching)
   bv              Float       // Business Value (Repurchase Cashback)
+  directIncome    Float       @default(0) // Direct Sponsor Income in ₹
   stockQuantity   Int         @default(0)
   images          String[]
   isActivation    Boolean     @default(false)
