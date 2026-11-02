@@ -157,52 +157,51 @@ export default function MemberNavbar({ user: initialUser }: MemberNavbarProps) {
     <>
       {/* Top Portal Header Bar */}
       <header className="sticky top-0 z-40 bg-gradient-to-r from-[#0b2b1e] via-[#144732] to-[#0b2b1e] text-white border-b border-[#d4a359]/30 shadow-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-18 flex items-center justify-between w-full min-w-0">
+        <div className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 h-16 sm:h-18 flex items-center justify-between w-full min-w-0 gap-1.5 sm:gap-4">
           {/* LEFT: Hamburger Menu Button (Opens Left Drawer) */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             <button
               onClick={() => setIsOpen(true)}
-              className="p-2 sm:p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-[#fef08a] border border-white/20 flex items-center justify-center transition-all cursor-pointer shadow-sm active:scale-95"
+              className="p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl bg-white/10 hover:bg-white/20 text-[#fef08a] border border-white/20 flex items-center justify-center transition-all cursor-pointer shadow-sm active:scale-95 shrink-0"
               aria-label="Open Navigation Menu"
               title="Menu"
             >
-              <Menu className="w-6 h-6" />
+              <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
 
             {/* Brand Logo & Name */}
-            <Link href="/dashboard" className="flex items-center gap-2.5 group shrink-0">
-              <div className="w-10 h-10 rounded-full overflow-hidden bg-white flex items-center justify-center border-2 border-[#d4a359] shadow p-0.5 group-hover:scale-105 transition-transform">
+            <Link href="/dashboard" className="flex items-center gap-2 sm:gap-2.5 group shrink-0">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden bg-white flex items-center justify-center border-2 border-[#d4a359] shadow p-0.5 group-hover:scale-105 transition-transform shrink-0">
                 <img src="/sgm_logo.png" alt="SGM Mart Logo" className="w-full h-full object-contain" />
               </div>
-              <div className="hidden sm:block">
-                <div className="font-black text-lg tracking-tight text-white leading-none">
+              <div className="hidden xs:block sm:block">
+                <div className="font-black text-sm sm:text-lg tracking-tight text-white leading-none">
                   SGM MART
                 </div>
-                <div className="text-[9px] font-extrabold uppercase tracking-widest text-[#fef08a] mt-0.5">
+                <div className="text-[8px] sm:text-[9px] font-extrabold uppercase tracking-widest text-[#fef08a] mt-0.5">
                   Member Portal
                 </div>
               </div>
             </Link>
           </div>
 
-          {/* CENTER: Mobile Brand Title */}
-          <div className="sm:hidden text-center">
-            <span className="font-black text-base text-[#fef08a] tracking-tight">SGM MART</span>
-            <span className="block text-[9px] text-slate-300 uppercase tracking-widest">Portal</span>
+          {/* CENTER: Mobile Brand Title (Only for very small screens if brand name hidden) */}
+          <div className="xs:hidden text-center truncate px-1">
+            <span className="font-black text-sm text-[#fef08a] tracking-tight">SGM MART</span>
           </div>
 
           {/* RIGHT: Cart + User Profile Badge + Logout */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             {/* Shopping Cart Button */}
             <Link
               href="/cart"
-              className="relative p-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white transition-all"
+              className="relative p-1.5 sm:p-2 rounded-lg sm:rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white transition-all shrink-0"
               title="Shopping Cart"
               aria-label="View Shopping Cart"
             >
-              <ShoppingBag className="w-5 h-5 text-[#fef08a]" />
+              <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5 text-[#fef08a]" />
               {itemCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 bg-[#d4a359] text-[#0b2b1e] text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-white shadow">
+                <span className="absolute -top-1.5 -right-1.5 bg-[#d4a359] text-[#0b2b1e] text-[9px] sm:text-[10px] font-black w-4.5 h-4.5 sm:w-5 sm:h-5 rounded-full flex items-center justify-center border-2 border-white shadow">
                   {itemCount}
                 </span>
               )}
@@ -219,10 +218,10 @@ export default function MemberNavbar({ user: initialUser }: MemberNavbarProps) {
             {/* Logout Button */}
             <a
               href="/api/auth/logout?target=user&redirect=/login"
-              className="p-2 sm:px-3 sm:py-2 rounded-xl bg-red-600/90 hover:bg-red-700 text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow border border-red-500/40"
+              className="p-1.5 sm:px-3 sm:py-2 rounded-lg sm:rounded-xl bg-red-600/90 hover:bg-red-700 text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow border border-red-500/40 shrink-0"
               title="लॉगआउट (Logout)"
             >
-              <LogOut className="w-4 h-4 shrink-0" />
+              <LogOut className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
               <span className="hidden sm:inline">Logout</span>
             </a>
           </div>

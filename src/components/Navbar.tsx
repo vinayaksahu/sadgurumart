@@ -94,29 +94,29 @@ export default function Navbar() {
           </span>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between w-full min-w-0">
+        <div className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between w-full min-w-0 gap-1.5 sm:gap-4">
           {/* LEFT: Hamburger Button on Mobile + Brand Logo */}
-          <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-3 min-w-0 shrink">
             {/* Mobile Hamburger on LEFT */}
             <button
               onClick={() => setIsMobileMenuOpen(true)}
-              className="lg:hidden p-2 rounded-xl border border-slate-200 text-[#144732] bg-[#faf8f4] hover:bg-slate-100 transition-colors flex items-center justify-center cursor-pointer"
+              className="lg:hidden p-1.5 sm:p-2 rounded-lg sm:rounded-xl border border-slate-200 text-[#144732] bg-[#faf8f4] hover:bg-slate-100 transition-colors flex items-center justify-center cursor-pointer shrink-0"
               aria-label="Open Mobile Menu"
               title="Menu (मेनू)"
             >
-              <Menu className="w-6 h-6" />
+              <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
 
             {/* Brand Logo */}
-            <Link href="/" className="flex items-center gap-2.5 sm:gap-3 group shrink-0">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden bg-white flex items-center justify-center border-2 border-[#d4a359] shadow-md group-hover:scale-105 transition-transform p-0.5">
+            <Link href="/" className="flex items-center gap-2 sm:gap-3 group min-w-0 shrink">
+              <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-full overflow-hidden bg-white flex items-center justify-center border-2 border-[#d4a359] shadow-md group-hover:scale-105 transition-transform p-0.5 shrink-0">
                 <img src="/sgm_logo.png" alt="SGM Mart Logo" className="w-full h-full object-contain" />
               </div>
-              <div>
-                <div className="font-black text-xl sm:text-2xl tracking-tight text-[#144732] leading-none">
+              <div className="min-w-0">
+                <div className="font-black text-base sm:text-2xl tracking-tight text-[#144732] leading-none truncate">
                   SGM MART
                 </div>
-                <div className="text-[9px] sm:text-[10px] font-extrabold uppercase tracking-[0.25em] text-[#d4a359] mt-0.5">
+                <div className="hidden xs:block text-[8px] sm:text-[10px] font-extrabold uppercase tracking-[0.18em] sm:tracking-[0.25em] text-[#d4a359] mt-0.5 truncate">
                   Online Service
                 </div>
               </div>
@@ -133,17 +133,17 @@ export default function Navbar() {
           </nav>
 
           {/* Right Action Buttons */}
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
             {/* Shopping Cart Icon */}
             <Link
               href="/cart"
-              className="relative p-2 sm:p-2.5 rounded-xl border border-slate-200 text-slate-700 hover:text-[#144732] hover:border-[#144732] transition-all bg-[#faf8f4]"
+              className="relative p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl border border-slate-200 text-slate-700 hover:text-[#144732] hover:border-[#144732] transition-all bg-[#faf8f4] shrink-0"
               title="Shopping Cart"
               aria-label="View Shopping Cart"
             >
-              <ShoppingBag className="w-5 h-5 text-[#144732]" />
+              <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5 text-[#144732]" />
               {itemCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 bg-[#92580a] text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-white shadow">
+                <span className="absolute -top-1.5 -right-1.5 bg-[#92580a] text-white text-[9px] sm:text-[10px] font-black w-4.5 h-4.5 sm:w-5 sm:h-5 rounded-full flex items-center justify-center border-2 border-white shadow">
                   {itemCount}
                 </span>
               )}
@@ -151,38 +151,41 @@ export default function Navbar() {
 
             {/* When Logged In (Member): Show Member Dashboard button & Logout */}
             {session.isLoggedIn ? (
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
                 <Link
                   href="/dashboard"
-                  className="px-3.5 py-2 rounded-xl bg-[#144732] text-[#fef08a] font-black text-xs sm:text-sm hover:bg-[#0b2b1e] transition-all duration-200 flex items-center gap-1.5 shadow-sm"
+                  className="px-2 py-1.5 sm:px-3.5 sm:py-2 rounded-lg sm:rounded-xl bg-[#144732] text-[#fef08a] font-black text-[11px] sm:text-sm hover:bg-[#0b2b1e] transition-all duration-200 flex items-center gap-1 sm:gap-1.5 shadow-sm shrink-0"
+                  title="Member Dashboard"
                 >
-                  <Layers className="w-3.5 h-3.5" />
+                  <Layers className="w-3.5 h-3.5 shrink-0" />
                   <span>Dashboard</span>
                 </Link>
                 <a
                   href="/api/auth/logout?target=user&redirect=/login"
-                  className="p-2 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 transition-colors"
+                  className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl border border-red-200 text-red-600 hover:bg-red-50 transition-colors shrink-0 flex items-center justify-center"
                   title="लॉगआउट करें (Logout)"
                 >
-                  <LogOut className="w-4 h-4" />
+                  <LogOut className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 </a>
               </div>
             ) : session.isAdminActive ? (
               /* When Logged In (Admin): Show Admin Desk button & Logout */
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
                 <Link
                   href="/admin/dashboard"
-                  className="px-3.5 py-2 rounded-xl bg-[#18181b] text-[#fef08a] border border-white/20 font-black text-xs sm:text-sm hover:bg-black transition-all duration-200 flex items-center gap-1.5 shadow-sm"
+                  className="px-2 py-1.5 sm:px-3.5 sm:py-2 rounded-lg sm:rounded-xl bg-[#18181b] text-[#fef08a] border border-white/20 font-black text-[11px] sm:text-sm hover:bg-black transition-all duration-200 flex items-center gap-1 sm:gap-1.5 shadow-sm shrink-0"
+                  title="Admin Dashboard"
                 >
-                  <ShieldCheck className="w-3.5 h-3.5 text-[#d4a359]" />
-                  <span>Admin Desk</span>
+                  <ShieldCheck className="w-3.5 h-3.5 text-[#d4a359] shrink-0" />
+                  <span className="hidden xs:inline">Admin Desk</span>
+                  <span className="xs:hidden">Admin</span>
                 </Link>
                 <a
                   href="/api/auth/logout?target=admin&redirect=/adminlogin"
-                  className="p-2 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 transition-colors"
+                  className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl border border-red-200 text-red-600 hover:bg-red-50 transition-colors shrink-0 flex items-center justify-center"
                   title="एडमिन लॉगआउट (Logout)"
                 >
-                  <LogOut className="w-4 h-4" />
+                  <LogOut className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 </a>
               </div>
             ) : (
