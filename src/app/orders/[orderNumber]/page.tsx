@@ -182,19 +182,25 @@ export default async function OrderConfirmationPage({ params }: OrderPageProps) 
             <div className="space-y-2 text-xs">
               <div className="flex justify-between text-slate-600">
                 <span>Subtotal (DP):</span>
-                <span>₹{order.totalDp - order.deliveryFee}</span>
+                <span>₹{(order.totalDp - order.deliveryFee + (order.repurchaseWalletUsed || 0)).toFixed(2)}</span>
               </div>
+              {order.repurchaseWalletUsed > 0 && (
+                <div className="flex justify-between text-emerald-700 font-bold">
+                  <span>रीपरचेस वॉलेट छूट (5%):</span>
+                  <span>-₹{order.repurchaseWalletUsed.toFixed(2)}</span>
+                </div>
+              )}
               <div className="flex justify-between text-slate-600">
                 <span>Delivery Charges:</span>
-                <span>{order.deliveryFee === 0 ? 'FREE' : `₹${order.deliveryFee}`}</span>
+                <span>{order.deliveryFee === 0 ? 'FREE' : `₹${order.deliveryFee.toFixed(2)}`}</span>
               </div>
               <div className="flex justify-between text-emerald-700 font-bold">
                 <span>MRP Savings:</span>
-                <span>₹{order.totalDiscount}</span>
+                <span>₹{order.totalDiscount.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-base font-black text-[#144732] pt-2 border-t border-slate-100">
                 <span>Total Amount Paid:</span>
-                <span>₹{order.totalDp}</span>
+                <span>₹{order.totalDp.toFixed(2)}</span>
               </div>
             </div>
           </div>

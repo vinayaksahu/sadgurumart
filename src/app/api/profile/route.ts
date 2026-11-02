@@ -43,6 +43,13 @@ export async function GET(req: NextRequest) {
         },
         placementPosition: true,
         kycDetail: true,
+        wallet: {
+          select: {
+            mainBalance: true,
+            shoppingBalance: true,
+            p2pBalance: true,
+          },
+        },
       },
     });
 

@@ -17,6 +17,8 @@ export const DEFAULT_SYSTEM_SETTINGS = {
   leadershipCTOPercent: 5,
   companyCTOPercent: 5,
   autoPoolEnabled: true,
+  activationCashbackPercent: 100,
+  repurchaseWalletUsagePercent: 5,
 
   // Notice & Announcement
   noticeEnabled: true,

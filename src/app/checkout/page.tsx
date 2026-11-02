@@ -42,6 +42,7 @@ export default function CheckoutPage() {
   });
 
   const [paymentMethod, setPaymentMethod] = useState('ONLINE');
+  const [useRepurchaseWallet, setUseRepurchaseWallet] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -107,7 +108,12 @@ export default function CheckoutPage() {
   };
 
   const deliveryFee = totalDp >= 500 || totalDp === 0 ? 0 : 50;
-  const finalTotal = totalDp + deliveryFee;
+  const repurchaseBalance = currentUser?.wallet?.shoppingBalance || 0;
+  const maxRepurchaseUsage = parseFloat((totalDp * 0.05).toFixed(2));
+  const appliedRepurchaseDiscount = (useRepurchaseWallet && repurchaseBalance > 0)
+    ? Math.min(repurchaseBalance, maxRepurchaseUsage)
+    : 0;
+  const finalTotal = Math.max(0, totalDp - appliedRepurchaseDiscount) + deliveryFee;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setShipping({ ...shipping, [e.target.name]: e.target.value });
@@ -144,6 +150,7 @@ export default function CheckoutPage() {
           shippingAddress: shipping,
           paymentMethod,
           saveToProfile: addressMode === 'MANUAL' ? saveToProfile : true,
+          useRepurchaseWallet: Boolean(useRepurchaseWallet && appliedRepurchaseDiscount > 0),
         }),
       });
 
@@ -571,18 +578,47 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
+                {/* Repurchase Wallet 5% Usage Banner */}
+                {repurchaseBalance > 0 && (
+                  <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-xs space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="flex items-center gap-2 cursor-pointer font-black text-amber-950">
+                        <input
+                          type="checkbox"
+                          checked={useRepurchaseWallet}
+                          onChange={(e) => setUseRepurchaseWallet(e.target.checked)}
+                          className="w-4 h-4 rounded text-[#144732] focus:ring-[#144732]"
+                        />
+                        <span>रीपरचेस वॉलेट (5% उपयोग)</span>
+                      </label>
+                      <span className="font-mono font-bold text-amber-900 bg-amber-100/80 px-2 py-0.5 rounded-md">
+                        बैलेंस: ₹{repurchaseBalance.toFixed(2)}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-amber-800 leading-tight">
+                      उत्पाद कीमत का 5% (₹{maxRepurchaseUsage.toFixed(2)}) आपके रीपरचेस वॉलेट से काटा जाएगा।
+                    </p>
+                  </div>
+                )}
+
                 <div className="space-y-2 text-xs pt-2 border-t border-slate-100">
                   <div className="flex justify-between text-slate-600">
-                    <span>Subtotal:</span>
-                    <span>₹{totalDp}</span>
+                    <span>Subtotal (DP):</span>
+                    <span>₹{totalDp.toFixed(2)}</span>
                   </div>
+                  {appliedRepurchaseDiscount > 0 && (
+                    <div className="flex justify-between font-bold text-emerald-700">
+                      <span>रीपरचेस वॉलेट छूट (5%):</span>
+                      <span>-₹{appliedRepurchaseDiscount.toFixed(2)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between text-slate-600">
                     <span>Shipping:</span>
                     <span>{deliveryFee === 0 ? 'FREE' : `₹${deliveryFee}`}</span>
                   </div>
                   <div className="flex justify-between text-base font-black text-[#144732] pt-2 border-t border-slate-100">
                     <span>Total Amount:</span>
-                    <span>₹{finalTotal}</span>
+                    <span>₹{finalTotal.toFixed(2)}</span>
                   </div>
                 </div>
 

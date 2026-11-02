@@ -267,6 +267,7 @@ model Order {
   deliveryFee     Float         @default(0)
   totalPV         Float         @default(0)
   totalBV         Float         @default(0)
+  repurchaseWalletUsed Float     @default(0) // 5% of product price redeemed from Repurchase Wallet
   
   orderStatus     OrderStatus   @default(PENDING)
   paymentStatus   PaymentStatus @default(PENDING)
@@ -518,6 +519,8 @@ model SystemSetting {
   leadershipCTOPercent    Float    @default(5)
   companyCTOPercent       Float    @default(5)
   autoPoolEnabled         Boolean  @default(true)
+  activationCashbackPercent Float  @default(100) // 100% cashback on ID activation
+  repurchaseWalletUsagePercent Float @default(5) // Max 5% of product price can be paid from Repurchase Wallet
 
   // Admin Notice & Ticker Announcement
   noticeEnabled           Boolean  @default(true)

@@ -326,23 +326,23 @@ export default async function DashboardPage({
             </div>
           </div>
 
-          {/* Shopping Wallet */}
+          {/* Repurchase / Shopping Wallet */}
           <div className="bg-white border-2 border-[#d4a359]/30 rounded-3xl p-6 shadow-sm flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-                <span>3. Shopping Wallet (शॉपिंग)</span>
+                <span>3. Repurchase Wallet (रीपरचेस)</span>
                 <ShoppingBag className="w-4 h-4 text-[#92580a]" />
               </div>
               <div className="text-3xl font-black text-[#92580a]">
                 ₹{wallet.shoppingBalance.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </div>
               <div className="text-[11px] text-slate-500 mt-1">
-                रीपरचेस व रिचार्ज कैशबैक बैलेंस
+                100% एक्टिवेशन कैशबैक • रीपरचेस पर 5% उपयोग
               </div>
             </div>
             <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-[#92580a]">
-              <Link href="/recharge" className="text-emerald-700 hover:underline">Recharge Mobile →</Link>
-              <Link href="/store" className="hover:underline">Shop Now →</Link>
+              <Link href="/recharge" className="text-emerald-700 hover:underline">Recharge →</Link>
+              <Link href="/store" className="hover:underline">Shop (5% Off) →</Link>
             </div>
           </div>
 

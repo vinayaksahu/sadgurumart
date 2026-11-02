@@ -159,9 +159,43 @@ export async function POST(req: NextRequest) {
         },
       });
 
+      // 4.5 100% Cashback to Target User's Repurchase / Shopping Wallet
+      let targetWallet = await tx.wallet.findUnique({
+        where: { userId: targetUser.id },
+      });
+      if (!targetWallet) {
+        targetWallet = await tx.wallet.create({
+          data: { userId: targetUser.id },
+        });
+      }
+
+      const cashbackAmount = parseFloat(product.dpPrice.toFixed(2));
+      if (cashbackAmount > 0) {
+        const updatedTargetWallet = await tx.wallet.update({
+          where: { id: targetWallet.id },
+          data: {
+            shoppingBalance: { increment: cashbackAmount },
+            totalEarned: { increment: cashbackAmount },
+          },
+        });
+
+        await tx.walletTransaction.create({
+          data: {
+            walletId: targetWallet.id,
+            type: 'PURCHASE_CASHBACK',
+            walletScope: 'SHOPPING',
+            amount: cashbackAmount,
+            closingBalance: updatedTargetWallet.shoppingBalance,
+            referenceId: orderNumber,
+            remarks: `100% एक्टिवेशन कैशबैक (रीपरचेस वॉलेट में क्रेडिट) - ${product.title} (₹${cashbackAmount})`,
+          },
+        });
+      }
+
       return {
         order: newOrder,
         newBalance: updatedSenderWallet.p2pBalance,
+        cashbackCredited: cashbackAmount,
       };
     });
 

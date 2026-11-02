@@ -66,6 +66,8 @@ export async function POST(req: NextRequest) {
         leadershipCTOPercent: parseFloat(body.leadershipCTOPercent) ?? current.leadershipCTOPercent,
         companyCTOPercent: parseFloat(body.companyCTOPercent) ?? current.companyCTOPercent,
         autoPoolEnabled: Boolean(body.autoPoolEnabled),
+        activationCashbackPercent: body.activationCashbackPercent !== undefined ? parseFloat(body.activationCashbackPercent) : (current as any).activationCashbackPercent ?? 100,
+        repurchaseWalletUsagePercent: body.repurchaseWalletUsagePercent !== undefined ? parseFloat(body.repurchaseWalletUsagePercent) : (current as any).repurchaseWalletUsagePercent ?? 5,
 
         // Notice Settings
         noticeEnabled: Boolean(body.noticeEnabled),

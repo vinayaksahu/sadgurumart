@@ -30,7 +30,8 @@ import {
   QrCode,
   PlusCircle,
   Eye,
-  Check
+  Check,
+  ShoppingBag
 } from 'lucide-react';
 import ImageUploader from '@/components/ImageUploader';
 
@@ -138,7 +139,7 @@ export default function WalletView({
   const [fundRequests, setFundRequests] = useState<FundRequestItem[]>(initialFundRequests);
 
   // Active Filter & Search
-  const [activeTab, setActiveTab] = useState<'ALL' | 'MAIN' | 'P2P' | 'TRANSFERS' | 'ACTIVATIONS' | 'FUND_REQUESTS'>('ALL');
+  const [activeTab, setActiveTab] = useState<'ALL' | 'MAIN' | 'P2P' | 'REPURCHASE' | 'TRANSFERS' | 'ACTIVATIONS' | 'FUND_REQUESTS'>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -514,6 +515,7 @@ export default function WalletView({
     // Tab filter
     if (activeTab === 'MAIN' && tx.walletScope !== 'MAIN') return false;
     if (activeTab === 'P2P' && tx.walletScope !== 'P2P') return false;
+    if (activeTab === 'REPURCHASE' && tx.walletScope !== 'SHOPPING') return false;
     if (activeTab === 'TRANSFERS' && !tx.type.includes('P2P') && !tx.type.includes('MAIN_TO_P2P')) return false;
     if (activeTab === 'ACTIVATIONS' && !tx.type.includes('ACTIVATION')) return false;
 
@@ -574,8 +576,8 @@ export default function WalletView({
         </div>
       </div>
 
-      {/* DUAL WALLET HERO CARDS */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* 3-TIER WALLET HERO CARDS */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* CARD 1: MAIN INCOME WALLET */}
         <div className="bg-gradient-to-br from-[#144732] via-[#0f3827] to-[#0b2b1e] text-white rounded-3xl p-6 sm:p-8 shadow-xl border-2 border-[#d4a359]/40 relative overflow-hidden flex flex-col justify-between">
           <div className="absolute top-0 right-0 w-64 h-64 bg-radial from-white/10 to-transparent rounded-full -mr-20 -mt-20 pointer-events-none" />
@@ -731,6 +733,67 @@ export default function WalletView({
             </div>
           </div>
         </div>
+
+        {/* CARD 3: REPURCHASE / PURCHASE WALLET (100% CASHBACK WALLET) */}
+        <div className="bg-gradient-to-br from-[#1e1b4b] via-[#312e81] to-[#1e1b4b] text-white rounded-3xl p-6 sm:p-8 shadow-xl border-2 border-indigo-400/40 relative overflow-hidden flex flex-col justify-between">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-radial from-white/10 to-transparent rounded-full -mr-20 -mt-20 pointer-events-none" />
+
+          <div>
+            <div className="flex items-center justify-between pb-4 border-b border-white/15">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-white/10 border border-indigo-300 flex items-center justify-center text-indigo-200 shadow-inner">
+                  <ShoppingBag className="w-6 h-6" />
+                </div>
+                <div>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-indigo-300">
+                    3. REPURCHASE WALLET
+                  </span>
+                  <div className="text-sm font-bold text-slate-200">
+                    रीपरचेस / परचेस वॉलेट
+                  </div>
+                </div>
+              </div>
+
+              <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-indigo-500/20 text-indigo-200 border border-indigo-400/30">
+                100% Cashback
+              </span>
+            </div>
+
+            <div className="my-6">
+              <div className="text-xs text-indigo-200 font-medium mb-1">उपलब्ध रीपरचेस बैलेंस (पॉइंट्स):</div>
+              <div className="text-4xl sm:text-5xl font-black text-[#fef08a] tracking-tight flex items-baseline gap-1">
+                <span>₹{wallet.shoppingBalance.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                <span className="text-sm text-indigo-200 font-bold ml-1">Pts</span>
+              </div>
+              <p className="text-[11px] text-slate-300 mt-2 leading-relaxed">
+                आईडी एक्टिवेशन पर 100% कैशबैक इसी वॉलेट में क्रेडिट होता है। स्टोर खरीदारी पर <strong>उत्पाद कीमत का 5% उपयोग</strong> मान्य है (1 Point = ₹1)।
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-3 pt-4 border-t border-white/15">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
+              <Link
+                href="/store"
+                className="w-full py-3 px-4 rounded-2xl bg-[#d4a359] hover:bg-[#bc853c] text-[#0b2b1e] font-black text-xs flex items-center justify-center gap-2 shadow-lg transition-transform hover:scale-[1.02] cursor-pointer"
+              >
+                <ShoppingBag className="w-4 h-4" />
+                <span>स्टोर (5% उपयोग)</span>
+              </Link>
+              <Link
+                href="/recharge"
+                className="w-full py-3 px-4 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-black text-xs flex items-center justify-center gap-2 transition-transform hover:scale-[1.02] cursor-pointer"
+              >
+                <Zap className="w-4 h-4 text-[#fef08a]" />
+                <span>रिचार्ज (2.5%)</span>
+              </Link>
+            </div>
+
+            <div className="text-[10px] text-indigo-200/90 text-center">
+              ✓ 100% एक्टिवेशन कैशबैक • ✓ रीपरचेस पर 5% उपयोग
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* QUICK WORKFLOW BAR */}
@@ -802,6 +865,7 @@ export default function WalletView({
             { id: 'ALL', label: 'All Transactions (सभी)' },
             { id: 'MAIN', label: 'Main Wallet (मेन वॉलेट)' },
             { id: 'P2P', label: 'P2P Wallet (P2P वॉलेट)' },
+            { id: 'REPURCHASE', label: 'Repurchase Wallet (रीपरचेस / कैशबैक)' },
             { id: 'TRANSFERS', label: 'P2P Transfers (ट्रांसफर)' },
             { id: 'ACTIVATIONS', label: 'ID Activations (एक्टिवेशन)' },
             { id: 'FUND_REQUESTS', label: `फंड रिक्वेस्ट इतिहास (${fundRequests.length})` },

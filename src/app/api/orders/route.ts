@@ -7,7 +7,7 @@ import { creditDirectReferralBonus } from '@/lib/mlm/royaltyEngine';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { items, shippingAddress, paymentMethod, saveToProfile } = body;
+    const { items, shippingAddress, paymentMethod, saveToProfile, useRepurchaseWallet } = body;
 
     if (!items || items.length === 0) {
       return NextResponse.json(
@@ -77,7 +77,22 @@ export async function POST(req: NextRequest) {
     });
 
     const deliveryFee = totalDp >= 500 ? 0 : 50;
-    const totalDiscount = Math.max(0, totalMrp - totalDp);
+    const baseDiscount = Math.max(0, totalMrp - totalDp);
+
+    // Repurchase Wallet (Shopping Balance) usage: max 5% of product price (totalDp)
+    let repurchaseDiscount = 0;
+    let userWallet: any = null;
+
+    if (userId) {
+      userWallet = await prisma.wallet.findUnique({ where: { userId } });
+    }
+
+    if (useRepurchaseWallet && userWallet && userWallet.shoppingBalance > 0) {
+      const maxAllowed5Percent = parseFloat((totalDp * 0.05).toFixed(2));
+      repurchaseDiscount = Math.min(userWallet.shoppingBalance, maxAllowed5Percent);
+    }
+
+    const finalPayableDp = Math.max(0, totalDp - repurchaseDiscount) + deliveryFee;
 
     // Generate Order Number
     const orderCount = await prisma.order.count();
@@ -87,13 +102,62 @@ export async function POST(req: NextRequest) {
 
     // Create Order with Items in a transaction
     const order = await prisma.$transaction(async (tx) => {
+      // 1. Deduct 5% from Repurchase Wallet if redeemed
+      if (repurchaseDiscount > 0 && userWallet) {
+        const updatedShoppingWallet = await tx.wallet.update({
+          where: { id: userWallet.id },
+          data: {
+            shoppingBalance: { decrement: repurchaseDiscount },
+          },
+        });
+
+        await tx.walletTransaction.create({
+          data: {
+            walletId: userWallet.id,
+            type: 'WALLET_PURCHASE',
+            walletScope: 'SHOPPING',
+            amount: -repurchaseDiscount,
+            closingBalance: updatedShoppingWallet.shoppingBalance,
+            referenceId: orderNumber,
+            remarks: `रीपरचेस ऑर्डर में 5% वॉलेट उपयोग (छूट) - ऑर्डर #${orderNumber}`,
+          },
+        });
+      }
+
+      // 2. If paymentMethod is WALLET (Main Balance), verify and deduct
+      if (paymentMethod === 'WALLET') {
+        const currentWallet = await tx.wallet.findUnique({ where: { userId } });
+        if (!currentWallet || currentWallet.mainBalance < finalPayableDp) {
+          throw new Error(`अपर्याप्त मेन वॉलेट बैलेंस। कुल देय राशि ₹${finalPayableDp} है।`);
+        }
+        const updatedMain = await tx.wallet.update({
+          where: { id: currentWallet.id },
+          data: {
+            mainBalance: { decrement: finalPayableDp },
+          },
+        });
+
+        await tx.walletTransaction.create({
+          data: {
+            walletId: currentWallet.id,
+            type: 'WALLET_PURCHASE',
+            walletScope: 'MAIN',
+            amount: -finalPayableDp,
+            closingBalance: updatedMain.mainBalance,
+            referenceId: orderNumber,
+            remarks: `ऑर्डर भुगतान (मेन वॉलेट) - ऑर्डर #${orderNumber}`,
+          },
+        });
+      }
+
       const newOrder = await tx.order.create({
         data: {
           orderNumber,
           userId,
           totalMrp,
-          totalDp: totalDp + deliveryFee,
-          totalDiscount,
+          totalDp: finalPayableDp,
+          totalDiscount: baseDiscount + repurchaseDiscount,
+          repurchaseWalletUsed: repurchaseDiscount,
           deliveryFee,
           totalPV,
           totalBV,
@@ -118,6 +182,39 @@ export async function POST(req: NextRequest) {
           },
         });
         isNewActivation = true;
+      }
+
+      // 100% Cashback to Repurchase Wallet if activation package order
+      const hasActivationItem = dbProducts.some((p) => p.isActivation);
+      if (hasActivationItem || isNewActivation) {
+        const activationAmount = hasActivationItem
+          ? dbProducts.filter((p) => p.isActivation).reduce((sum, p) => sum + p.dpPrice, 0)
+          : totalDp;
+
+        if (activationAmount > 0) {
+          let targetW = await tx.wallet.findUnique({ where: { userId } });
+          if (!targetW) {
+            targetW = await tx.wallet.create({ data: { userId } });
+          }
+          const updatedW = await tx.wallet.update({
+            where: { id: targetW.id },
+            data: {
+              shoppingBalance: { increment: activationAmount },
+              totalEarned: { increment: activationAmount },
+            },
+          });
+          await tx.walletTransaction.create({
+            data: {
+              walletId: targetW.id,
+              type: 'PURCHASE_CASHBACK',
+              walletScope: 'SHOPPING',
+              amount: activationAmount,
+              closingBalance: updatedW.shoppingBalance,
+              referenceId: orderNumber,
+              remarks: `100% एक्टिवेशन कैशबैक (रीपरचेस वॉलेट में क्रेडिट) - ऑर्डर #${orderNumber}`,
+            },
+          });
+        }
       }
 
       return newOrder;
