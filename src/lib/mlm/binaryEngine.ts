@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { getSystemSettings } from '@/lib/settings';
 import { creditIncomeWithAutoPoolCheck } from './incomeDistributor';
+import { creditSponsorMatchingRoyalty } from './royaltyEngine';
 
 export interface BinaryPlacementResult {
   parentId: string;
@@ -69,6 +70,22 @@ export async function propagateBinaryVolume(
       });
     }
 
+    // Immediately calculate and credit matching income in real time
+    try {
+      const matchResult = await calculateUserBinaryMatching(parentId);
+      if (matchResult.matchingIncome > 0) {
+        const parentUser = await prisma.user.findUnique({
+          where: { id: parentId },
+          select: { sponsorId: true },
+        });
+        if (parentUser?.sponsorId) {
+          await creditSponsorMatchingRoyalty(parentId, matchResult.matchingIncome);
+        }
+      }
+    } catch (matchErr) {
+      console.error('Real-time binary matching calculation error for parent:', parentId, matchErr);
+    }
+
     // Move up to the next ancestor
     currentUser = await prisma.user.findUnique({
       where: { id: parentId },
@@ -129,7 +146,7 @@ export async function calculateUserBinaryMatching(
   const unitPV = (settings && settings.minActivationPV > 0) ? settings.minActivationPV : 100;
   const matchingPercent = (settings && settings.binaryMatchingPercent !== undefined) ? settings.binaryMatchingPercent : 10;
   const cappingPV = (settings && settings.dailyMatchingCappingPV > 0) ? settings.dailyMatchingCappingPV : 2500;
-  const firstPairRatio = (settings && (settings as any).firstBinaryPairRatio) ? (settings as any).firstBinaryPairRatio : '1:2_OR_2:1';
+  const firstPairRatio = (settings && (settings as any).firstBinaryPairRatio) ? (settings as any).firstBinaryPairRatio : '1:1';
 
   // Check whether first matching pair was already completed previously
   const hasDoneFirstPair = Boolean((user as any).firstBinaryPairDone || user.totalMatchingPaidPV > 0);

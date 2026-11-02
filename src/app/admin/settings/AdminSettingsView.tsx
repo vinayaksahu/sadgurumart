@@ -318,15 +318,15 @@ export default function AdminSettingsView({ initialSettings, isSuperAdmin }: Pro
               <div className="space-y-1.5">
                 <label className="text-xs font-black text-slate-700 flex items-center justify-between">
                   <span>First Pair Matching Ratio (पहला पेयर)</span>
-                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">1:2 या 2:1</span>
+                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">1:1 मैचिंग</span>
                 </label>
                 <select
-                  value={formData.firstBinaryPairRatio ?? '1:2_OR_2:1'}
+                  value={formData.firstBinaryPairRatio ?? '1:1'}
                   onChange={(e) => handleInputChange('firstBinaryPairRatio', e.target.value)}
                   className="w-full px-4 py-2.5 rounded-xl border border-slate-300 bg-slate-50 text-xs font-bold focus:bg-white focus:border-[#144732] focus:outline-none"
                 >
-                  <option value="1:2_OR_2:1">1:2 या 2:1 (First Pair 1:2 or 2:1, बाद में 1:1) [Standard MLM]</option>
-                  <option value="1:1">1:1 (सीधे पहले पेयर से ही 1:1 मैचिंग)</option>
+                  <option value="1:1">1:1 (सीधे पहले पेयर से ही 1:1 मैचिंग) [डिफ़ॉल्ट]</option>
+                  <option value="1:2_OR_2:1">1:2 या 2:1 (First Pair 1:2 or 2:1, बाद में 1:1)</option>
                 </select>
                 <span className="text-[10px] text-slate-500">पहला पेयर 1:2 या 2:1 पूरा होने के बाद ही अगला बिजनेस 1:1 में मैच होगा</span>
               </div>
