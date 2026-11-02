@@ -47,3 +47,10 @@ __pycache__/
 extracted_plan_summary.txt
 incomes_details.txt
 all_plan_details.txt
+
+# Portal Analysis & Crawled Scraping Dumps
+portal_analysis/
+scripts/*.html
+scripts/*.txt
+scripts/*.json
+scripts/*.py
