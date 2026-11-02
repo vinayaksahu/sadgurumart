@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import { findSpilloverPlacement } from '@/lib/mlm/binaryEngine';
-import { placeInAutoPool } from '@/lib/mlm/autoPoolEngine';
 import { getSystemSettings } from '@/lib/settings';
 
 export async function POST(req: NextRequest) {
@@ -156,13 +155,6 @@ export async function POST(req: NextRequest) {
         },
       },
     });
-
-    // Enter user into 2x2 AutoPool Level 1
-    try {
-      await placeInAutoPool(newUser.id, 1);
-    } catch (poolErr) {
-      console.error('AutoPool entry warning:', poolErr);
-    }
 
     return NextResponse.json({
       success: true,

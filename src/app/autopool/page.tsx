@@ -89,6 +89,45 @@ export default async function AutoPoolPage(props: AutoPoolPageProps) {
           </div>
         </div>
 
+        {/* AutoPool Entry Status Banner */}
+        <div className={`p-4 sm:p-5 rounded-3xl border flex items-center justify-between gap-4 text-xs ${
+          user.autoPoolDeducted || entries.length > 0
+            ? 'bg-emerald-50 border-emerald-300 text-emerald-900'
+            : 'bg-amber-50 border-amber-300 text-amber-900'
+        }`}>
+          <div className="flex items-center gap-3">
+            <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 font-bold ${
+              user.autoPoolDeducted || entries.length > 0
+                ? 'bg-emerald-600 text-white'
+                : 'bg-amber-500 text-white'
+            }`}>
+              {user.autoPoolDeducted || entries.length > 0 ? '✓' : 'ℹ'}
+            </div>
+            <div>
+              <div className="font-black text-sm">
+                {user.autoPoolDeducted || entries.length > 0
+                  ? 'ऑटोपूल सक्रिय (Active in Universal AutoPool)'
+                  : 'ऑटोपूल प्रवेश स्थिति: पहली इनकम से ₹100 कटौती पर सक्रिय'}
+              </div>
+              <div className="text-[11px] opacity-80 mt-0.5">
+                {user.autoPoolDeducted || entries.length > 0
+                  ? `प्रथम आमदनी से ₹100 ऑटोपूल प्रवेश शुल्क सफलतापूर्वक समायोजित हो चुका है। आप 2x2 ग्लोबल मैट्रिक्स में शामिल हैं।`
+                  : `नियम: आपकी पहली आमदनी (मैचिंग/रेफरल इनकम) से ₹100 कटकर स्वतः 2x2 ग्लोबल ऑटोपूल (लेवल 1) में प्लेसमेंट हो जाएगा।`}
+              </div>
+            </div>
+          </div>
+
+          <div className="text-right shrink-0">
+            <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
+              user.autoPoolDeducted || entries.length > 0
+                ? 'bg-emerald-200 text-emerald-900'
+                : 'bg-amber-200 text-amber-900'
+            }`}>
+              {user.autoPoolDeducted || entries.length > 0 ? 'Active' : `₹${user.autoPoolDeductionPaid || 0} / ₹100 Paid`}
+            </span>
+          </div>
+        </div>
+
         {/* 7 Levels Master Table */}
         <div className="bg-white border border-[#e8e3d5] rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
           <div className="flex items-center justify-between pb-3 border-b border-slate-100">

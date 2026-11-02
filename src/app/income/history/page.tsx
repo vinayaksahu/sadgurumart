@@ -41,6 +41,7 @@ const INCOME_META: Record<string, { label: string; hindi: string; color: string 
   LEADERSHIP_CTO: { label: 'Leadership Pool (5%)', hindi: 'लीडरशिप पूल', color: 'bg-rose-100 text-rose-800' },
   COMPANY_CTO: { label: 'Company Turnover (5%)', hindi: 'कंपनी सीटीओ', color: 'bg-yellow-100 text-yellow-800' },
   AUTOPOOL_INCOME: { label: 'Universal AutoPool', hindi: 'ऑटोपूल इनकम', color: 'bg-teal-100 text-teal-800' },
+  AUTOPOOL_ENTRY_DEDUCTION: { label: 'AutoPool Entry Deduction', hindi: 'ऑटोपूल एंट्री कटौती (1st इनकम)', color: 'bg-rose-100 text-rose-800' },
   PURCHASE_CASHBACK: { label: 'Self Purchase Cashback', hindi: 'परचेस कैशबैक', color: 'bg-emerald-100 text-emerald-800' },
   REPURCHASE_TEAM: { label: 'Team Repurchase Bonus', hindi: 'रीपरचेस बोनस', color: 'bg-cyan-100 text-cyan-800' },
   MOBILE_FUND: { label: 'Mobile Fund (2%)', hindi: 'मोबाइल फंड', color: 'bg-violet-100 text-violet-800' },

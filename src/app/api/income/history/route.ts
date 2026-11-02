@@ -34,6 +34,7 @@ export async function GET(req: NextRequest) {
       'LEADERSHIP_CTO',
       'COMPANY_CTO',
       'AUTOPOOL_INCOME',
+      'AUTOPOOL_ENTRY_DEDUCTION',
       'PURCHASE_CASHBACK',
       'REPURCHASE_TEAM',
       'MOBILE_FUND',

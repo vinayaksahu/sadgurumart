@@ -134,6 +134,8 @@ model User {
   rightCarryForwardPV Float            @default(0)
   totalMatchingPaidPV Float            @default(0)
   firstBinaryPairDone Boolean          @default(false)
+  autoPoolDeducted    Boolean          @default(false)
+  autoPoolDeductionPaid Float          @default(0)
   directBusinessPV    Float            @default(0) // For 3000 PV Leadership & 5000 PV CTO qualification
   rewardPointsRP      Float            @default(0)
 
@@ -363,6 +365,7 @@ enum TransactionType {
   LEADERSHIP_CTO
   COMPANY_CTO
   AUTOPOOL_INCOME
+  AUTOPOOL_ENTRY_DEDUCTION
   PURCHASE_CASHBACK
   REPURCHASE_TEAM
   MOBILE_FUND

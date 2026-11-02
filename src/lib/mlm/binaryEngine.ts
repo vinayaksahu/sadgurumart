@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { getSystemSettings } from '@/lib/settings';
+import { creditIncomeWithAutoPoolCheck } from './incomeDistributor';
 
 export interface BinaryPlacementResult {
   parentId: string;
@@ -231,24 +232,13 @@ export async function calculateUserBinaryMatching(
     },
   });
 
-  // Credit user wallet if income > 0
+  // Credit user wallet if income > 0 (applies 1st Income AutoPool Deduction rule)
   if (matchingIncome > 0 && user.wallet) {
-    await prisma.wallet.update({
-      where: { id: user.wallet.id },
-      data: {
-        mainBalance: { increment: matchingIncome },
-        totalEarned: { increment: matchingIncome },
-      },
-    });
-
-    await prisma.walletTransaction.create({
-      data: {
-        walletId: user.wallet.id,
-        type: 'BINARY_MATCHING',
-        amount: matchingIncome,
-        closingBalance: user.wallet.mainBalance + matchingIncome,
-        remarks: `Binary Matching ${matchingPercent}% on ${payablePV} PV (${pairDescription}) [Total L: ${totalLeft}, R: ${totalRight}]`,
-      },
+    await creditIncomeWithAutoPoolCheck({
+      userId: user.id,
+      amount: matchingIncome,
+      type: 'BINARY_MATCHING',
+      remarks: `Binary Matching ${matchingPercent}% on ${payablePV} PV (${pairDescription}) [Total L: ${totalLeft}, R: ${totalRight}]`,
     });
   }
 
