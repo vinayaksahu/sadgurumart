@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { email, mobile, currentPassword, newPassword } = await req.json();
+    const { email, mobile, currentPassword, newPassword, addressLine, city, state, pincode } = await req.json();
 
     const user = await prisma.user.findUnique({
       where: { id: decoded.id },
@@ -28,7 +28,16 @@ export async function POST(req: NextRequest) {
       email?: string;
       mobile?: string;
       passwordHash?: string;
+      addressLine?: string | null;
+      city?: string | null;
+      state?: string | null;
+      pincode?: string | null;
     } = {};
+
+    if (addressLine !== undefined) updateData.addressLine = addressLine ? addressLine.trim() : null;
+    if (city !== undefined) updateData.city = city ? city.trim() : null;
+    if (state !== undefined) updateData.state = state ? state.trim() : null;
+    if (pincode !== undefined) updateData.pincode = pincode ? pincode.trim() : null;
 
     // Validate and update email
     if (email !== undefined) {
@@ -87,6 +96,10 @@ export async function POST(req: NextRequest) {
         name: true,
         email: true,
         mobile: true,
+        addressLine: true,
+        city: true,
+        state: true,
+        pincode: true,
       },
     });
 

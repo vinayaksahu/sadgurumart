@@ -7,7 +7,7 @@ import { creditDirectReferralBonus } from '@/lib/mlm/royaltyEngine';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { items, shippingAddress, paymentMethod } = body;
+    const { items, shippingAddress, paymentMethod, saveToProfile } = body;
 
     if (!items || items.length === 0) {
       return NextResponse.json(
@@ -25,11 +25,13 @@ export async function POST(req: NextRequest) {
 
     // Try to get logged-in user from cookie
     let userId: string | null = null;
+    let isRealUser = false;
     const token = req.cookies.get('sgm_user_token')?.value;
     if (token) {
       const decoded = verifyUserToken(token);
       if (decoded) {
         userId = decoded.id;
+        isRealUser = true;
       }
     }
 
@@ -120,6 +122,21 @@ export async function POST(req: NextRequest) {
 
       return newOrder;
     });
+
+    // If member asked to save or update this shipping address to profile
+    if (saveToProfile && isRealUser && userId) {
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          addressLine: shippingAddress.addressLine ? shippingAddress.addressLine.trim() : undefined,
+          city: shippingAddress.city ? shippingAddress.city.trim() : undefined,
+          state: shippingAddress.state ? shippingAddress.state.trim() : undefined,
+          pincode: (shippingAddress.pinCode || shippingAddress.pincode) ? (shippingAddress.pinCode || shippingAddress.pincode).trim() : undefined,
+        },
+      }).catch((err) => {
+        console.error('Failed to update profile address on checkout:', err);
+      });
+    }
 
     // Propagate Binary PV points up the tree
     if (totalPV > 0) {
@@ -214,4 +231,3 @@ export async function GET(req: NextRequest) {
     );
   }
 }
-

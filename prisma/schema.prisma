@@ -107,6 +107,12 @@ model User {
   pan                 String?
   passwordHash        String
   
+  // Shipping & Profile Address
+  addressLine         String?
+  city                String?
+  state               String?
+  pincode             String?
+  
   // Binary & Sponsor Relationships
   sponsorId           String?
   sponsor             User?            @relation("SponsorReferrals", fields: [sponsorId], references: [id])

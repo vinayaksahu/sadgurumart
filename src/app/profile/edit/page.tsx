@@ -16,7 +16,8 @@ import {
   Save,
   KeyRound,
   Building,
-  RefreshCw
+  RefreshCw,
+  MapPin
 } from 'lucide-react';
 
 export default function EditProfilePage() {
@@ -28,6 +29,10 @@ export default function EditProfilePage() {
   const [user, setUser] = useState<any>(null);
   const [email, setEmail] = useState('');
   const [mobile, setMobile] = useState('');
+  const [addressLine, setAddressLine] = useState('');
+  const [city, setCity] = useState('');
+  const [state, setState] = useState('');
+  const [pincode, setPincode] = useState('');
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -46,6 +51,10 @@ export default function EditProfilePage() {
       setUser(data.user);
       setEmail(data.user?.email || '');
       setMobile(data.user?.mobile || '');
+      setAddressLine(data.user?.addressLine || '');
+      setCity(data.user?.city || '');
+      setState(data.user?.state || '');
+      setPincode(data.user?.pincode || '');
     } catch (err: any) {
       setError(err.message || 'Error loading profile');
     } finally {
@@ -82,6 +91,10 @@ export default function EditProfilePage() {
       const payload: any = {
         email,
         mobile,
+        addressLine,
+        city,
+        state,
+        pincode,
       };
       if (newPassword) {
         payload.currentPassword = currentPassword;
@@ -326,6 +339,79 @@ export default function EditProfilePage() {
                 </div>
                 <div className="text-[11px] text-slate-400">
                   * पासवर्ड नहीं बदलना चाहते तो पासवर्ड फ़ील्ड्स को खाली छोड़ दें।
+                </div>
+              </div>
+
+              {/* 3. Delivery Address */}
+              <div className="space-y-4 pt-2">
+                <div className="flex items-center gap-2 pb-2 border-b border-slate-100 text-sm font-black text-[#144732] uppercase tracking-wider">
+                  <MapPin className="w-4 h-4 text-[#d4a359]" />
+                  <span>3. डिफ़ॉल्ट डिलीवरी पता (Default Delivery Address - शॉपिंग चेकआउट हेतु)</span>
+                </div>
+
+                <div className="space-y-4">
+                  {/* Address Line */}
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1.5">
+                      <MapPin className="w-3.5 h-3.5 text-slate-400" />
+                      <span>पूरा पता (House No, Street, Landmark)</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={addressLine}
+                      onChange={(e) => setAddressLine(e.target.value)}
+                      placeholder="e.g. Ward No 5, Near Gayatri Mandir, Main Road"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#144732]/20 focus:border-[#144732]"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    {/* City */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">
+                        शहर / जिला (City)
+                      </label>
+                      <input
+                        type="text"
+                        value={city}
+                        onChange={(e) => setCity(e.target.value)}
+                        placeholder="City / District"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#144732]/20 focus:border-[#144732]"
+                      />
+                    </div>
+
+                    {/* State */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">
+                        राज्य (State)
+                      </label>
+                      <input
+                        type="text"
+                        value={state}
+                        onChange={(e) => setState(e.target.value)}
+                        placeholder="State"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#144732]/20 focus:border-[#144732]"
+                      />
+                    </div>
+
+                    {/* PIN Code */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">
+                        पिनकोड (PIN Code)
+                      </label>
+                      <input
+                        type="text"
+                        maxLength={6}
+                        value={pincode}
+                        onChange={(e) => setPincode(e.target.value)}
+                        placeholder="6-digit PIN"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-mono text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#144732]/20 focus:border-[#144732]"
+                      />
+                    </div>
+                  </div>
+                  <div className="text-[11px] text-slate-400">
+                    * यह पता चेकआउट के समय ऑटोमैटिक सिंक हो जाएगा, जिससे आपको बार-बार पता टाइप नहीं करना पड़ेगा।
+                  </div>
                 </div>
               </div>
 
