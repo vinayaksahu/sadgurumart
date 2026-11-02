@@ -292,12 +292,20 @@ export async function PATCH(req: NextRequest) {
       const response = NextResponse.json({
         success: true,
         message: `मेंबर ID ${user.userCode} (${user.name}) के पोर्टल में लॉगिन तैयार है।`,
-        redirectUrl: '/dashboard',
+        redirectUrl: `/dashboard?user=${user.userCode}`,
         user: {
           id: user.id,
           userCode: user.userCode,
           name: user.name,
         },
+      });
+
+      response.cookies.set('sgm_admin_view_user', user.id, {
+        httpOnly: false,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 7 * 24 * 60 * 60,
       });
 
       response.cookies.set('sgm_user_token', token, {

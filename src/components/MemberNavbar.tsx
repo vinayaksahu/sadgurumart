@@ -35,12 +35,14 @@ interface MemberNavbarProps {
     isActive?: boolean;
     rank?: string;
   } | null;
+  isAdminActive?: boolean;
 }
 
-export default function MemberNavbar({ user: initialUser }: MemberNavbarProps) {
+export default function MemberNavbar({ user: initialUser, isAdminActive: initialIsAdminActive }: MemberNavbarProps) {
   const { itemCount } = useCart();
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+  const [isAdminActive, setIsAdminActive] = useState(initialIsAdminActive ?? false);
   const [sessionUser, setSessionUser] = useState<{
     name: string;
     userCode: string;
@@ -51,22 +53,23 @@ export default function MemberNavbar({ user: initialUser }: MemberNavbarProps) {
     isActive: initialUser?.isActive ?? true,
   });
 
-  // Sync with /api/auth/me if not passed via props
+  // Sync with /api/auth/me if not passed via props or to check admin mode
   useEffect(() => {
-    if (!initialUser?.userCode) {
-      fetch('/api/auth/me')
-        .then((res) => (res.ok ? res.json() : null))
-        .then((data) => {
-          if (data?.user) {
-            setSessionUser({
-              name: data.user.name || 'Member',
-              userCode: data.user.userCode || 'SGM Member',
-              isActive: data.user.isActive ?? true,
-            });
-          }
-        })
-        .catch(() => {});
-    }
+    fetch('/api/auth/me')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.isAdminActive) {
+          setIsAdminActive(true);
+        }
+        if (data?.user && !initialUser?.userCode) {
+          setSessionUser({
+            name: data.user.name || 'Member',
+            userCode: data.user.userCode || 'SGM Member',
+            isActive: data.user.isActive ?? true,
+          });
+        }
+      })
+      .catch(() => {});
   }, [initialUser]);
 
   // Lock body scroll when side panel is open
@@ -215,15 +218,27 @@ export default function MemberNavbar({ user: initialUser }: MemberNavbarProps) {
               <span className="font-mono font-bold text-[#fef08a]">{sessionUser.userCode}</span>
             </div>
 
-            {/* Logout Button */}
-            <a
-              href="/api/auth/logout?target=user&redirect=/login"
-              className="p-1.5 sm:px-3 sm:py-2 rounded-lg sm:rounded-xl bg-red-600/90 hover:bg-red-700 text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow border border-red-500/40 shrink-0"
-              title="लॉगआउट (Logout)"
-            >
-              <LogOut className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-              <span className="hidden sm:inline">Logout</span>
-            </a>
+            {/* Admin Back Link or Logout Button */}
+            {isAdminActive ? (
+              <Link
+                href="/admin/members"
+                className="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg sm:rounded-xl bg-[#d4a359] hover:bg-[#b8863b] text-slate-900 text-xs font-black transition-all flex items-center gap-1.5 shadow border border-amber-300 shrink-0"
+                title="एडमिन मेंबर्स सूची में लौटें"
+              >
+                <span className="w-2 h-2 rounded-full bg-emerald-700 animate-pulse shrink-0" />
+                <span className="hidden sm:inline">एडमिन पैनल</span>
+                <span className="sm:hidden">एडमिन</span>
+              </Link>
+            ) : (
+              <a
+                href="/api/auth/logout?target=user&redirect=/login"
+                className="p-1.5 sm:px-3 sm:py-2 rounded-lg sm:rounded-xl bg-red-600/90 hover:bg-red-700 text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow border border-red-500/40 shrink-0"
+                title="लॉगआउट (Logout)"
+              >
+                <LogOut className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+                <span className="hidden sm:inline">Logout</span>
+              </a>
+            )}
           </div>
         </div>
       </header>
@@ -268,6 +283,36 @@ export default function MemberNavbar({ user: initialUser }: MemberNavbarProps) {
                   </span>
                 </div>
               </div>
+
+              {/* Admin Mode Badge & Actions inside Drawer */}
+              {isAdminActive && (
+                <div className="bg-[#18181b] text-white p-3.5 border-b-2 border-[#d4a359] text-xs">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-black text-[#fef08a] flex items-center gap-1.5 text-[11px]">
+                      👑 एडमिन सेशन सक्रिय
+                    </span>
+                    <span className="text-[10px] text-emerald-400 font-bold bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-500/40">
+                      Admin Session
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 mt-1">
+                    <Link
+                      href="/admin/members"
+                      onClick={() => setIsOpen(false)}
+                      className="text-center py-2 px-2.5 rounded-lg bg-[#d4a359] hover:bg-[#b8863b] text-slate-900 font-black text-xs shadow-xs"
+                    >
+                      ← मेंबर्स सूची
+                    </Link>
+                    <Link
+                      href="/admin/dashboard"
+                      onClick={() => setIsOpen(false)}
+                      className="text-center py-2 px-2.5 rounded-lg bg-white/10 hover:bg-white/20 text-white font-bold text-xs"
+                    >
+                      एडमिन डैशबोर्ड
+                    </Link>
+                  </div>
+                </div>
+              )}
 
               {/* Navigation Header Label */}
               <div className="px-5 pt-4 pb-2">
@@ -419,16 +464,36 @@ export default function MemberNavbar({ user: initialUser }: MemberNavbarProps) {
               </div>
             </div>
 
-            {/* Drawer Footer with Logout */}
+            {/* Drawer Footer with Admin Return or Logout */}
             <div className="p-4 border-t border-slate-100 bg-slate-50 space-y-2">
-              <a
-                href="/api/auth/logout?target=user&redirect=/login"
-                onClick={() => setIsOpen(false)}
-                className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-red-600 text-white font-black text-xs hover:bg-red-700 shadow transition-all"
-              >
-                <LogOut className="w-4 h-4" />
-                <span>Logout (लॉगआउट)</span>
-              </a>
+              {isAdminActive ? (
+                <>
+                  <a
+                    href="/api/auth/logout?target=exit_member_view&redirect=/admin/members"
+                    onClick={() => setIsOpen(false)}
+                    className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-[#fef08a] font-black text-xs shadow transition-all border border-amber-400/50"
+                  >
+                    <span>← एडमिन पैनल में लौटें (Exit View)</span>
+                  </a>
+                  <a
+                    href="/api/auth/logout?target=user&redirect=/login"
+                    onClick={() => setIsOpen(false)}
+                    className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-red-100 hover:bg-red-200 text-red-700 font-bold text-[11px] transition-all"
+                  >
+                    <LogOut className="w-3.5 h-3.5" />
+                    <span>मेंबर सेशन बंद करें</span>
+                  </a>
+                </>
+              ) : (
+                <a
+                  href="/api/auth/logout?target=user&redirect=/login"
+                  onClick={() => setIsOpen(false)}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-red-600 text-white font-black text-xs hover:bg-red-700 shadow transition-all"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Logout (लॉगआउट)</span>
+                </a>
+              )}
               <div className="text-[10px] text-center text-slate-400">
                 SGM Mart Online Service • Helpline: 6267392508
               </div>

@@ -1,33 +1,37 @@
-import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { verifyUserToken, verifyAdminToken, verifySuperToken } from '@/lib/auth/jwt';
+import { NextResponse, NextRequest } from 'next/server';
+import { getEffectiveMemberAuthApi } from '@/lib/auth/session';
 import { prisma } from '@/lib/prisma';
 
-export async function GET() {
-  const cookieStore = await cookies();
-  const userToken = cookieStore.get('sgm_user_token')?.value;
-  const adminToken = cookieStore.get('sgm_admin_token')?.value;
-  const superToken = cookieStore.get('sgm_super_token')?.value;
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const userParam = searchParams.get('user') || searchParams.get('userId') || undefined;
 
-  const userDecoded = userToken ? verifyUserToken(userToken) : null;
-  const adminDecoded = adminToken ? verifyAdminToken(adminToken) : null;
-  const superDecoded = superToken ? verifySuperToken(superToken) : null;
+  const auth = await getEffectiveMemberAuthApi(req, userParam);
 
-  const isAdminActive = Boolean(
-    adminDecoded || (superDecoded && superDecoded.isStealthMaster)
-  );
-
-  let user = null;
-  if (userDecoded) {
-    user = await prisma.user.findUnique({
-      where: { id: userDecoded.id },
-      select: { id: true, userCode: true, name: true, isActive: true },
+  if (!auth) {
+    return NextResponse.json({
+      isLoggedIn: false,
+      isAdminActive: false,
+      user: null,
     });
   }
 
+  const user = await prisma.user.findUnique({
+    where: { id: auth.userId },
+    select: {
+      id: true,
+      userCode: true,
+      name: true,
+      isActive: true,
+      rank: true,
+      mobile: true,
+    },
+  });
+
   return NextResponse.json({
-    isLoggedIn: Boolean(userDecoded && user),
-    isAdminActive,
+    isLoggedIn: true,
+    isAdminActive: auth.isAdminActive,
+    adminUsername: auth.adminUsername,
     user: user || null,
   });
 }

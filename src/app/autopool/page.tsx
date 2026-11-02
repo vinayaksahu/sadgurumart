@@ -1,38 +1,38 @@
 import React from 'react';
 import MemberNavbar from '@/components/MemberNavbar';
+import AdminViewBanner from '@/components/AdminViewBanner';
 import { prisma } from '@/lib/prisma';
-import { cookies } from 'next/headers';
-import { verifyUserToken } from '@/lib/auth/jwt';
+import { getEffectiveMemberAuth } from '@/lib/auth/session';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { Layers, ArrowLeft, CheckCircle2, Clock, Sparkles, TrendingUp, ShieldCheck } from 'lucide-react';
 
-export default async function AutoPoolPage() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get('sgm_user_token')?.value;
+interface AutoPoolPageProps {
+  searchParams?: Promise<{ user?: string; userId?: string }>;
+}
 
-  if (!token) {
-    redirect('/login');
-  }
+export default async function AutoPoolPage(props: AutoPoolPageProps) {
+  const resolvedSearchParams = props.searchParams ? await props.searchParams : {};
+  const userParam = resolvedSearchParams?.user || resolvedSearchParams?.userId;
 
-  const decoded = verifyUserToken(token);
-  if (!decoded) {
+  const auth = await getEffectiveMemberAuth(userParam);
+  if (!auth) {
     redirect('/login');
   }
 
   const [user, entries, autopoolTransactions] = await Promise.all([
     prisma.user.findUnique({
-      where: { id: decoded.id },
+      where: { id: auth.userId },
       include: { wallet: true },
     }),
     prisma.autoPoolEntry.findMany({
-      where: { userId: decoded.id },
+      where: { userId: auth.userId },
       include: { children: true },
       orderBy: { poolLevel: 'asc' },
     }),
     prisma.walletTransaction.findMany({
       where: {
-        wallet: { userId: decoded.id },
+        wallet: { userId: auth.userId },
         type: 'AUTOPOOL_INCOME',
       },
       orderBy: { createdAt: 'desc' },
@@ -58,6 +58,9 @@ export default async function AutoPoolPage() {
 
   return (
     <div className="min-h-screen bg-[#f8f6f0] text-[#1f2937] font-sans flex flex-col">
+      {auth.isAdminActive && (
+        <AdminViewBanner userCode={user.userCode} userName={user.name} />
+      )}
       <MemberNavbar user={user} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full space-y-8">

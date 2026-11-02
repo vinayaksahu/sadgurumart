@@ -1,20 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { verifyUserToken } from '@/lib/auth/jwt';
+import { getEffectiveMemberAuthApi } from '@/lib/auth/session';
 
 export async function GET(req: NextRequest) {
   try {
-    const token = req.cookies.get('sgm_user_token')?.value;
-    if (!token) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-    const decoded = verifyUserToken(token);
-    if (!decoded) {
+    const { searchParams } = new URL(req.url);
+    const userParam = searchParams.get('user') || searchParams.get('userId') || undefined;
+
+    const auth = await getEffectiveMemberAuthApi(req, userParam);
+    if (!auth) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
-      where: { id: decoded.id },
+      where: { id: auth.userId },
       select: {
         id: true,
         userCode: true,
@@ -54,6 +53,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       success: true,
       user,
+      isAdminActive: auth.isAdminActive,
     });
   } catch (error: any) {
     console.error('Error fetching profile:', error);

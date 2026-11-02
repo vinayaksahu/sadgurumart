@@ -30,18 +30,23 @@ import DashboardCopyBox from './DashboardCopyBox';
 import { getSystemSettings } from '@/lib/settings';
 import AdminNoticeBanner from '@/components/AdminNoticeBanner';
 import AdminPopupModal from '@/components/AdminPopupModal';
+import AdminViewBanner from '@/components/AdminViewBanner';
+import { getEffectiveMemberAuth } from '@/lib/auth/session';
 
-export default async function DashboardPage() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get('sgm_user_token')?.value;
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ user?: string; userId?: string }>;
+}) {
+  const resolvedSearchParams = searchParams ? await searchParams : {};
+  const requestedUser = resolvedSearchParams?.user || resolvedSearchParams?.userId;
 
-  if (!token) redirect('/login');
-  const decoded = verifyUserToken(token);
-  if (!decoded) redirect('/login');
+  const auth = await getEffectiveMemberAuth(requestedUser);
+  if (!auth) redirect('/login');
 
   const [user, settings] = await Promise.all([
     prisma.user.findUnique({
-      where: { id: decoded.id },
+      where: { id: auth.userId },
       include: {
         wallet: true,
         sponsor: { select: { userCode: true, name: true } },
@@ -129,6 +134,9 @@ export default async function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-[#f8f6f0] text-[#1f2937] font-sans flex flex-col">
+      {auth.isAdminActive && (
+        <AdminViewBanner userCode={user.userCode} userName={user.name} />
+      )}
       <MemberNavbar user={user} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex-1 w-full space-y-6 sm:space-y-8">

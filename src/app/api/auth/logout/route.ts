@@ -7,6 +7,7 @@ const ALL_AUTH_COOKIES = [
   'sgm_admin_mode',
   'sgm_user_token',
   'sgm_user_active',
+  'sgm_admin_view_user',
 ];
 
 const ADMIN_AUTH_COOKIES = [
@@ -20,6 +21,7 @@ const USER_AUTH_COOKIES = [
   'sgm_user_token',
   'sgm_user_active',
   'sgm_admin_mode',
+  'sgm_admin_view_user',
 ];
 
 function clearCookies(response: NextResponse, cookiesToClear: string[]) {
@@ -54,6 +56,10 @@ export async function GET(req: NextRequest) {
   } else if (target === 'superadmin') {
     defaultRedirect = '/superadminlogin';
     cookiesToClear = ALL_AUTH_COOKIES;
+  } else if (target === 'exit_member_view') {
+    defaultRedirect = '/admin/members';
+    // Clear only member token & view cookie, KEEP admin token intact
+    cookiesToClear = USER_AUTH_COOKIES;
   } else if (target === 'user') {
     defaultRedirect = '/login';
     cookiesToClear = USER_AUTH_COOKIES;

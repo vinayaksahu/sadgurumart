@@ -29,6 +29,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Default to authenticated user's own root if not searching
+    const adminViewCookie = req.cookies.get('sgm_admin_view_user')?.value;
     let rootUser;
     if (targetCode) {
       rootUser = await prisma.user.findUnique({
@@ -38,6 +39,13 @@ export async function GET(req: NextRequest) {
     } else if (authenticatedUserId) {
       rootUser = await prisma.user.findUnique({
         where: { id: authenticatedUserId },
+        include: { wallet: true },
+      });
+    } else if (adminViewCookie && isStaffOrSuper) {
+      rootUser = await prisma.user.findFirst({
+        where: {
+          OR: [{ id: adminViewCookie }, { userCode: adminViewCookie.toUpperCase() }],
+        },
         include: { wallet: true },
       });
     } else {

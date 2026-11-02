@@ -1,28 +1,33 @@
 import React from 'react';
 import MemberNavbar from '@/components/MemberNavbar';
+import AdminViewBanner from '@/components/AdminViewBanner';
 import { prisma } from '@/lib/prisma';
-import { cookies } from 'next/headers';
-import { verifyUserToken } from '@/lib/auth/jwt';
+import { getEffectiveMemberAuth } from '@/lib/auth/session';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { Smartphone, Tv, ArrowLeft, Sparkles, ShieldCheck, Zap } from 'lucide-react';
 import RechargeActionForm from './RechargeActionForm';
 
-export default async function RechargePage() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get('sgm_user_token')?.value;
+interface RechargePageProps {
+  searchParams?: Promise<{ user?: string; userId?: string }>;
+}
 
-  if (!token) redirect('/login');
-  const decoded = verifyUserToken(token);
-  if (!decoded) redirect('/login');
+export default async function RechargePage(props: RechargePageProps) {
+  const resolvedSearchParams = props.searchParams ? await props.searchParams : {};
+  const userParam = resolvedSearchParams?.user || resolvedSearchParams?.userId;
+
+  const auth = await getEffectiveMemberAuth(userParam);
+  if (!auth) {
+    redirect('/login');
+  }
 
   const [user, recharges] = await Promise.all([
     prisma.user.findUnique({
-      where: { id: decoded.id },
+      where: { id: auth.userId },
       include: { wallet: true },
     }),
     prisma.utilityRecharge.findMany({
-      where: { userId: decoded.id },
+      where: { userId: auth.userId },
       take: 10,
       orderBy: { createdAt: 'desc' },
     }),
@@ -32,6 +37,9 @@ export default async function RechargePage() {
 
   return (
     <div className="min-h-screen bg-[#f8f6f0] text-[#1f2937] font-sans flex flex-col">
+      {auth.isAdminActive && (
+        <AdminViewBanner userCode={user.userCode} userName={user.name} />
+      )}
       <MemberNavbar user={user} />
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full space-y-8">

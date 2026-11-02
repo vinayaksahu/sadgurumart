@@ -1,21 +1,24 @@
 import React from 'react';
 import MemberNavbar from '@/components/MemberNavbar';
+import AdminViewBanner from '@/components/AdminViewBanner';
 import { prisma } from '@/lib/prisma';
-import { cookies } from 'next/headers';
-import { verifyUserToken } from '@/lib/auth/jwt';
 import { redirect } from 'next/navigation';
+import { getEffectiveMemberAuth } from '@/lib/auth/session';
 import WalletView from './WalletView';
 
-export default async function WalletPage() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get('sgm_user_token')?.value;
+export default async function WalletPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ user?: string; userId?: string }>;
+}) {
+  const resolvedSearchParams = searchParams ? await searchParams : {};
+  const requestedUser = resolvedSearchParams?.user || resolvedSearchParams?.userId;
 
-  if (!token) redirect('/login');
-  const decoded = verifyUserToken(token);
-  if (!decoded) redirect('/login');
+  const auth = await getEffectiveMemberAuth(requestedUser);
+  if (!auth) redirect('/login');
 
   const user = await prisma.user.findUnique({
-    where: { id: decoded.id },
+    where: { id: auth.userId },
     include: {
       wallet: {
         include: {
@@ -125,6 +128,9 @@ export default async function WalletPage() {
 
   return (
     <div className="min-h-screen bg-[#f8f6f0] text-[#1f2937] font-sans flex flex-col">
+      {auth.isAdminActive && (
+        <AdminViewBanner userCode={user.userCode} userName={user.name} />
+      )}
       <MemberNavbar user={user} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
