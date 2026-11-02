@@ -59,6 +59,7 @@ model Admin {
 
   auditLogs     AdminAuditLog[]
   kycReviewed   KYCDetail[]
+  resolvedTickets SupportTicket[]
 
   @@map("admins")
 }
@@ -137,6 +138,7 @@ model User {
   utilityRecharges    UtilityRecharge[]
   withdrawalRequests  WithdrawalRequest[]
   fundRequests        FundRequest[]
+  supportTickets      SupportTicket[]
 
   createdAt           DateTime         @default(now())
   updatedAt           DateTime         @updatedAt
@@ -169,6 +171,7 @@ model KYCDetail {
   ifscCode            String
   accountHolderName   String
   passbookChequeUrl   String?
+  upiId               String?
 
   status              KYCStatus  @default(PENDING)
   rejectionReason     String?
@@ -585,5 +588,60 @@ model FundRequest {
   @@index([status])
   @@map("fund_requests")
 }
+
+// ==========================================
+// 15. SUPPORT TICKETS & COMPLAINTS
+// ==========================================
+enum TicketCategory {
+  KYC_ISSUE
+  WITHDRAWAL_PAYOUT
+  WALLET_TOPUP
+  ORDER_DELIVERY
+  AUTOPOOL_ISSUE
+  DOWNLINE_PLACEMENT
+  UTILITY_RECHARGE
+  GENERAL_QUERY
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+model SupportTicket {
+  id                String         @id @default(uuid())
+  ticketNumber      String         @unique // e.g. TKT-10023
+  userId            String
+  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category          TicketCategory @default(GENERAL_QUERY)
+  subject           String
+  description       String
+  attachmentUrl     String?
+  priority          TicketPriority @default(MEDIUM)
+  status            TicketStatus   @default(OPEN)
+  
+  adminReply        String?
+  resolvedByAdminId String?
+  resolvedBy        Admin?         @relation(fields: [resolvedByAdminId], references: [id])
+  resolvedAt        DateTime?
+
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  @@index([userId])
+  @@index([ticketNumber])
+  @@index([status])
+  @@map("support_tickets")
+}
+
 
 

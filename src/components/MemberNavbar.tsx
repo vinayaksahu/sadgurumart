@@ -13,6 +13,8 @@ import {
   Zap,
   Wallet,
   Users,
+  UserCheck,
+  GitFork,
   Layers,
   ShoppingBag,
   Smartphone,
@@ -21,7 +23,8 @@ import {
   ChevronRight,
   ShieldCheck,
   Building,
-  HelpCircle
+  HelpCircle,
+  FileText
 } from 'lucide-react';
 import { useCart } from '@/lib/cartContext';
 
@@ -80,15 +83,71 @@ export default function MemberNavbar({ user: initialUser }: MemberNavbarProps) {
 
   const registrationLink = `/register?ref=${encodeURIComponent(sessionUser.userCode || '')}`;
 
-  const navMenuItems = [
-    { label: 'Profile (प्रोफाइल व KYC)', href: '/kyc', icon: User },
-    { label: 'My Income (16 इनकम व पेआउट)', href: '/payout', icon: TrendingUp },
-    { label: 'Activation Fund (P2P फंड)', href: '/wallet', icon: Zap },
-    { label: 'E-Wallet (वॉलेट व विड्रॉल)', href: '/wallet', icon: Wallet },
-    { label: 'Genealogy (बाइनरी ट्री)', href: '/genealogy/binary', icon: Users },
-    { label: 'AutoPool (2x2 ऑटोपूल)', href: '/autopool', icon: Layers },
+  const [openSubmenu, setOpenSubmenu] = useState<string | null>(() => {
+    if (pathname?.startsWith('/team') || pathname?.startsWith('/genealogy')) {
+      return 'Team (टीम)';
+    }
+    if (pathname?.startsWith('/profile') || pathname === '/kyc') {
+      return 'Profile (प्रोफाइल)';
+    }
+    if (pathname?.startsWith('/payout') || pathname?.startsWith('/income') || pathname === '/autopool') {
+      return 'My Income (16 इनकम व पेआउट)';
+    }
+    return null;
+  });
+
+  useEffect(() => {
+    if (pathname?.startsWith('/team') || pathname?.startsWith('/genealogy')) {
+      setOpenSubmenu('Team (टीम)');
+    } else if (pathname?.startsWith('/profile') || pathname === '/kyc') {
+      setOpenSubmenu('Profile (प्रोफाइल)');
+    } else if (pathname?.startsWith('/payout') || pathname?.startsWith('/income') || pathname === '/autopool') {
+      setOpenSubmenu('My Income (16 इनकम व पेआउट)');
+    }
+  }, [pathname]);
+
+  interface NavMenuItem {
+    label: string;
+    href?: string;
+    icon: any;
+    children?: {
+      label: string;
+      href: string;
+      icon: any;
+    }[];
+  }
+
+  const navMenuItems: NavMenuItem[] = [
+    {
+      label: 'Profile (प्रोफाइल)',
+      icon: User,
+      children: [
+        { label: 'Edit Profile (ईमेल, फोन, पासवर्ड)', href: '/profile/edit', icon: User },
+        { label: 'KYC (केवाईसी सत्यापन)', href: '/kyc', icon: ShieldCheck },
+        { label: 'Bank & UPI Details (बैंक व UPI)', href: '/profile/bank', icon: Building },
+      ],
+    },
+    {
+      label: 'My Income (16 इनकम व पेआउट)',
+      icon: TrendingUp,
+      children: [
+        { label: 'All Incomes Summary (समस्त इनकम सारांश)', href: '/payout', icon: TrendingUp },
+        { label: 'Income Details & History (16 इनकम लेजर)', href: '/income/history', icon: FileText },
+        { label: 'AutoPool Matrix & History (2x2 ऑटोपूल)', href: '/autopool', icon: Layers },
+      ],
+    },
+    { label: 'Wallet', href: '/wallet', icon: Wallet },
+    {
+      label: 'Team (टीम)',
+      icon: Users,
+      children: [
+        { label: 'Direct Team (डायरेक्ट टीम)', href: '/team/direct', icon: UserCheck },
+        { label: 'Level Wise Team (लेवल वाइज टीम)', href: '/team/level', icon: Layers },
+        { label: 'Genealogy (बाइनरी ट्री)', href: '/genealogy/binary', icon: GitFork },
+      ],
+    },
     { label: 'My Orders (मेरे ऑर्डर्स)', href: '/orders', icon: ShoppingBag },
-    { label: 'Complaint (शिकायत / सहायता)', href: 'https://wa.me/916267392508?text=Support%20Ticket', icon: HelpCircle },
+    { label: 'Support Ticket (सहायता टिकट)', href: '/support', icon: HelpCircle },
     { label: 'Utility Recharge (रिचार्ज)', href: '/recharge', icon: Smartphone },
     { label: 'Shopping Store (स्टोर)', href: '/store', icon: ShoppingBag },
     { label: 'Main Website (वेबसाइट होम)', href: '/', icon: ExternalLink },
@@ -247,11 +306,100 @@ export default function MemberNavbar({ user: initialUser }: MemberNavbarProps) {
               <div className="px-3 divide-y divide-slate-100">
                 {navMenuItems.map((item) => {
                   const Icon = item.icon;
+
+                  // Submenu Accordion Parent
+                  if (item.children) {
+                    const isExpanded = openSubmenu === item.label;
+                    const isAnyChildActive = item.children.some(
+                      (child) => pathname === child.href
+                    );
+
+                    return (
+                      <div key={item.label} className="py-0.5">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setOpenSubmenu((prev) =>
+                              prev === item.label ? null : item.label
+                            )
+                          }
+                          className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                            isAnyChildActive || isExpanded
+                              ? 'bg-[#144732]/10 text-[#144732] font-black'
+                              : 'text-slate-700 hover:text-[#144732] hover:bg-slate-50'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div
+                              className={`w-7 h-7 rounded-lg flex items-center justify-center transition-colors ${
+                                isAnyChildActive || isExpanded
+                                  ? 'bg-[#144732] text-[#fef08a]'
+                                  : 'bg-slate-100 text-slate-600'
+                              }`}
+                            >
+                              <Icon className="w-4 h-4" />
+                            </div>
+                            <span>{item.label}</span>
+                          </div>
+                          <span
+                            className={`font-black text-sm transition-transform duration-200 ${
+                              isExpanded ? 'text-[#144732]' : 'text-slate-400'
+                            }`}
+                          >
+                            {isExpanded ? '−' : '+'}
+                          </span>
+                        </button>
+
+                        {/* Collapsible Submenu Items */}
+                        {isExpanded && (
+                          <div className="ml-5 pl-2.5 border-l-2 border-[#144732]/25 my-1.5 space-y-1 animate-in fade-in-50 duration-200">
+                            {item.children.map((child) => {
+                              const ChildIcon = child.icon;
+                              const isChildActive = pathname === child.href;
+
+                              return (
+                                <Link
+                                  key={child.label}
+                                  href={child.href}
+                                  onClick={() => setIsOpen(false)}
+                                  className={`flex items-center justify-between px-3 py-2.5 rounded-xl text-xs transition-all ${
+                                    isChildActive
+                                      ? 'bg-[#144732] text-white font-black shadow-sm'
+                                      : 'text-slate-600 hover:text-[#144732] hover:bg-slate-100 font-bold'
+                                  }`}
+                                >
+                                  <div className="flex items-center gap-2.5">
+                                    <ChildIcon
+                                      className={`w-3.5 h-3.5 shrink-0 ${
+                                        isChildActive
+                                          ? 'text-[#fef08a]'
+                                          : 'text-slate-500'
+                                      }`}
+                                    />
+                                    <span>{child.label}</span>
+                                  </div>
+                                  <ChevronRight
+                                    className={`w-3.5 h-3.5 shrink-0 ${
+                                      isChildActive
+                                        ? 'text-white'
+                                        : 'text-slate-300'
+                                    }`}
+                                  />
+                                </Link>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  }
+
+                  // Standard Menu Item
                   const isActive = pathname === item.href;
                   return (
                     <Link
                       key={item.label}
-                      href={item.href}
+                      href={item.href || '#'}
                       onClick={() => setIsOpen(false)}
                       className={`flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-bold transition-all ${
                         isActive

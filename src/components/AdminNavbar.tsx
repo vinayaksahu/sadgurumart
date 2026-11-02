@@ -19,7 +19,8 @@ import {
   Landmark,
   Sparkles,
   Megaphone,
-  ChevronDown
+  ChevronDown,
+  HelpCircle
 } from 'lucide-react';
 
 interface AdminNavbarProps {
@@ -56,23 +57,37 @@ export default function AdminNavbar({
   const [isOpen, setIsOpen] = useState(false);
   const [expandedGroup, setExpandedGroup] = useState<string | null>(null);
   const [pendingFundCount, setPendingFundCount] = useState<number>(0);
+  const [pendingTicketsCount, setPendingTicketsCount] = useState<number>(0);
 
-  // Fetch pending fund requests notification count
+  // Fetch pending fund requests & support tickets notification count
   useEffect(() => {
     let isMounted = true;
-    const fetchPendingFunds = async () => {
+    const fetchNotifications = async () => {
       try {
-        const res = await fetch('/api/admin/funds?countOnly=true');
-        const data = await res.json();
-        if (isMounted && data.success && typeof data.pendingCount === 'number') {
-          setPendingFundCount(data.pendingCount);
+        const [fundRes, ticketRes] = await Promise.all([
+          fetch('/api/admin/funds?countOnly=true'),
+          fetch('/api/admin/support?countOnly=true'),
+        ]);
+
+        if (isMounted && fundRes.ok) {
+          const fundData = await fundRes.json();
+          if (fundData.success && typeof fundData.pendingCount === 'number') {
+            setPendingFundCount(fundData.pendingCount);
+          }
+        }
+
+        if (isMounted && ticketRes.ok) {
+          const ticketData = await ticketRes.json();
+          if (ticketData.success && typeof ticketData.openCount === 'number') {
+            setPendingTicketsCount(ticketData.openCount);
+          }
         }
       } catch (err) {
         // Silently catch in navbar
       }
     };
-    fetchPendingFunds();
-    const interval = setInterval(fetchPendingFunds, 30000); // Poll every 30 seconds
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 20000); // Poll every 20 seconds
     return () => {
       isMounted = false;
       clearInterval(interval);
@@ -189,8 +204,20 @@ export default function AdminNavbar({
         { label: 'Banner List', href: '/admin/settings?tab=notice' },
         { label: 'Popup List', href: '/admin/settings?tab=popup' },
         { label: 'Send SMS', href: '/admin/settings?tab=general' },
-        { label: 'Complaint List', href: 'https://wa.me/916267392508?text=Admin%20Support%20Tickets', external: true },
+        { label: 'Support Tickets Desk', href: '/admin/support' },
         { label: 'Contact List', href: '/admin/settings?tab=general' },
+      ],
+    },
+    {
+      id: 'support-desk',
+      title: 'Support Tickets',
+      icon: HelpCircle,
+      badge: pendingTicketsCount > 0 ? `${pendingTicketsCount} Open` : undefined,
+      items: [
+        { label: 'All Support Tickets', href: '/admin/support' },
+        { label: 'Open Tickets', href: '/admin/support?status=OPEN' },
+        { label: 'In Progress Tickets', href: '/admin/support?status=IN_PROGRESS' },
+        { label: 'Resolved Tickets', href: '/admin/support?status=RESOLVED' },
       ],
     },
   ];

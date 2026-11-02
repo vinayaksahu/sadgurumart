@@ -20,7 +20,7 @@ export default async function AutoPoolPage() {
     redirect('/login');
   }
 
-  const [user, entries] = await Promise.all([
+  const [user, entries, autopoolTransactions] = await Promise.all([
     prisma.user.findUnique({
       where: { id: decoded.id },
       include: { wallet: true },
@@ -29,6 +29,14 @@ export default async function AutoPoolPage() {
       where: { userId: decoded.id },
       include: { children: true },
       orderBy: { poolLevel: 'asc' },
+    }),
+    prisma.walletTransaction.findMany({
+      where: {
+        wallet: { userId: decoded.id },
+        type: 'AUTOPOOL_INCOME',
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 50,
     }),
   ]);
 
@@ -151,6 +159,78 @@ export default async function AutoPoolPage() {
               ₹ 13,19,28,675 /- <span className="text-xs font-normal text-slate-300">(तेरह करोड़ उन्नीस लाख+)</span>
             </div>
           </div>
+        </div>
+
+        {/* AutoPool Received Income & Transactions History */}
+        <div className="bg-white border border-[#e8e3d5] rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+            <div>
+              <h2 className="text-lg font-black text-[#144732]">
+                AutoPool Credit History (ऑटोपूल आमदनी इतिहास)
+              </h2>
+              <p className="text-xs text-slate-500 mt-0.5">
+                ऑल-इंडिया स्पिलओवर द्वारा आपके वॉलेट में प्राप्त समस्त ऑटोपूल इनकम का विवरण।
+              </p>
+            </div>
+            <div className="text-xs font-bold text-[#144732] bg-[#eaf5ed] px-3 py-1.5 rounded-xl border border-[#144732]/20">
+              Total Credits: {autopoolTransactions.length}
+            </div>
+          </div>
+
+          {autopoolTransactions.length === 0 ? (
+            <div className="p-8 text-center bg-slate-50 rounded-2xl border border-slate-100">
+              <div className="w-12 h-12 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center mx-auto mb-2">
+                <Clock className="w-6 h-6" />
+              </div>
+              <div className="text-sm font-black text-slate-800">
+                No AutoPool Income Received Yet
+              </div>
+              <div className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+                जैसे ही राष्ट्रीय स्तर पर नए सदस्य आपके 2x2 मैट्रिक्स में जुड़ेंगे, ऑटोपूल राशि आपके वॉलेट में स्वतः क्रेडिट हो जाएगी।
+              </div>
+            </div>
+          ) : (
+            <div className="overflow-x-auto w-full">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50 border-b border-slate-200/80 text-slate-500 font-bold uppercase tracking-wider">
+                  <tr>
+                    <th className="py-3 px-4">#</th>
+                    <th className="py-3 px-4">Date</th>
+                    <th className="py-3 px-4">Description</th>
+                    <th className="py-3 px-4">Reference</th>
+                    <th className="py-3 px-4 text-right">Amount</th>
+                    <th className="py-3 px-4 text-right">Closing Balance</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {autopoolTransactions.map((tx, idx) => (
+                    <tr key={tx.id} className="hover:bg-slate-50">
+                      <td className="py-3 px-4 font-mono font-bold text-slate-400">{idx + 1}</td>
+                      <td className="py-3 px-4 text-slate-600">
+                        {new Date(tx.createdAt).toLocaleDateString('en-IN', {
+                          day: '2-digit',
+                          month: 'short',
+                          year: 'numeric',
+                        })}
+                      </td>
+                      <td className="py-3 px-4 font-bold text-slate-800">
+                        {tx.remarks || 'Universal AutoPool Spillover Income'}
+                      </td>
+                      <td className="py-3 px-4 font-mono text-[11px] text-slate-500">
+                        {tx.referenceId || 'N/A'}
+                      </td>
+                      <td className="py-3 px-4 text-right font-black text-emerald-600 font-mono text-sm">
+                        +₹{tx.amount.toLocaleString('en-IN')}
+                      </td>
+                      <td className="py-3 px-4 text-right font-mono font-bold text-slate-600">
+                        ₹{tx.closingBalance.toLocaleString('en-IN')}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </main>
     </div>
