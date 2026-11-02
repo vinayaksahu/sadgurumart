@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma';
 import { getEffectiveMemberAuth } from '@/lib/auth/session';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { Smartphone, Tv, ArrowLeft, Sparkles, ShieldCheck, Zap } from 'lucide-react';
+import { Smartphone, Tv, ArrowLeft, Sparkles, ShieldCheck, Zap, Clock, Lock } from 'lucide-react';
 import RechargeActionForm from './RechargeActionForm';
 
 interface RechargePageProps {
@@ -45,13 +45,16 @@ export default async function RechargePage(props: RechargePageProps) {
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full space-y-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white border border-[#e8e3d5] rounded-3xl p-6 shadow-sm">
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <Link href="/dashboard" className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-600">
                 <ArrowLeft className="w-4 h-4" />
               </Link>
               <h1 className="text-2xl font-black text-[#144732] tracking-tight">
                 यूटिलिटी रिचार्ज एवं 2.50% कैशबैक पोर्टल
               </h1>
+              <span className="px-3 py-1 rounded-full text-[11px] font-black bg-amber-100 text-amber-900 border border-amber-300 shadow-xs">
+                शीघ्र उपलब्ध (Coming Soon)
+              </span>
             </div>
             <p className="text-xs text-slate-500 mt-1">
               हर मोबाइल व डीटीएच रिचार्ज पर फ्लैट 2.50% तुरंत कैशबैक सीधे आपके वॉलेट में
@@ -63,6 +66,26 @@ export default async function RechargePage(props: RechargePageProps) {
             <div className="text-xl font-black text-[#92580a]">
               ₹{(user.wallet?.shoppingBalance || 0).toLocaleString('en-IN')}
             </div>
+          </div>
+        </div>
+
+        {/* Coming Soon Notice Banner */}
+        <div className="bg-gradient-to-r from-amber-500/15 via-amber-500/5 to-white border-2 border-dashed border-amber-400 rounded-3xl p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4 shadow-sm">
+          <div className="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-md">
+            <Clock className="w-6 h-6 animate-pulse" />
+          </div>
+          <div className="flex-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h2 className="text-base font-black text-amber-950">
+                यूटिलिटी व बिल पेमेंट्स सेवा शीघ्र लाइव होगी!
+              </h2>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-200 text-amber-900">
+                Under Integration
+              </span>
+            </div>
+            <p className="text-xs text-amber-900/80 mt-1 leading-relaxed font-medium">
+              प्रिय सदस्य, SGM Mart पर डायरेक्ट ऑपरेटर एवं BBPS (Bharat BillPay) गेटवे इंटीग्रेशन प्रक्रिया प्रगति पर है। बहुत जल्द आप अपने सभी मोबाइल, डीटीएच व बिल पेमेंट्स पर 2.50% फ्लैट कैशबैक सीधे वॉलेट में प्राप्त कर सकेंगे।
+            </p>
           </div>
         </div>
 

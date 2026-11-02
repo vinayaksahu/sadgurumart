@@ -113,10 +113,12 @@ export default function MemberNavbar({ user: initialUser, isAdminActive: initial
     label: string;
     href?: string;
     icon: any;
+    badge?: string;
     children?: {
       label: string;
       href: string;
       icon: any;
+      badge?: string;
     }[];
   }
 
@@ -151,7 +153,7 @@ export default function MemberNavbar({ user: initialUser, isAdminActive: initial
     },
     { label: 'My Orders (मेरे ऑर्डर्स)', href: '/orders', icon: ShoppingBag },
     { label: 'Support Ticket (सहायता टिकट)', href: '/support', icon: HelpCircle },
-    { label: 'Utility Recharge (रिचार्ज)', href: '/recharge', icon: Smartphone },
+    { label: 'Utility Recharge (रिचार्ज)', href: '/recharge', icon: Smartphone, badge: 'Coming Soon' },
     { label: 'Shopping Store (स्टोर)', href: '/store', icon: ShoppingBag },
     { label: 'Main Website (वेबसाइट होम)', href: '/', icon: ExternalLink },
   ];
@@ -456,6 +458,11 @@ export default function MemberNavbar({ user: initialUser, isAdminActive: initial
                           <Icon className="w-4 h-4" />
                         </div>
                         <span>{item.label}</span>
+                        {item.badge && (
+                          <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-300">
+                            {item.badge}
+                          </span>
+                        )}
                       </div>
                       <span className="text-slate-400 font-bold text-sm">+</span>
                     </Link>

@@ -341,7 +341,7 @@ export default async function DashboardPage({
               </div>
             </div>
             <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-[#92580a]">
-              <Link href="/recharge" className="text-emerald-700 hover:underline">Recharge →</Link>
+              <Link href="/recharge" className="text-emerald-700 hover:underline">Recharge (Coming Soon) →</Link>
               <Link href="/store" className="hover:underline">Shop (5% Off) →</Link>
             </div>
           </div>
@@ -431,9 +431,12 @@ export default async function DashboardPage({
             <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
               <Smartphone className="w-6 h-6" />
             </div>
-            <h3 className="font-black text-base text-emerald-900">Utility Recharge</h3>
+            <div className="flex items-center gap-2">
+              <h3 className="font-black text-base text-emerald-900">Utility Recharge</h3>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">शीघ्र उपलब्ध</span>
+            </div>
             <p className="text-xs text-slate-500 mt-1">
-              मोबाइल व टीवी रिचार्ज पर फ्लैट 2.50% इंस्टेंट कैशबैक।
+              मोबाइल व टीवी रिचार्ज सेवा शीघ्र प्रारंभ की जा रही है।
             </p>
           </Link>
 

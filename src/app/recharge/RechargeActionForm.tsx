@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Smartphone, Tv, ArrowRight, Zap, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Smartphone, Tv, ArrowRight, Zap, CheckCircle2, AlertCircle, Clock, Lock } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export default function RechargeActionForm() {
@@ -179,20 +179,22 @@ export default function RechargeActionForm() {
         </div>
       )}
 
-      <button
-        type="submit"
-        disabled={loading || numAmount <= 0 || !targetNumber}
-        className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-[#144732] to-[#0b2b1e] text-white font-black text-sm hover:opacity-95 transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#144732]/25 cursor-pointer disabled:opacity-50"
-      >
-        {loading ? (
-          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-        ) : (
-          <>
-            <Zap className="w-4 h-4 text-[#fef08a]" />
-            <span>रिचार्ज आगे बढ़ें (Proceed Recharge & Get 2.5% Cashback)</span>
-          </>
-        )}
-      </button>
+      {/* Coming Soon Notice and Disabled Button */}
+      <div className="space-y-3">
+        <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 text-xs font-bold flex items-center gap-2">
+          <Clock className="w-4 h-4 text-amber-600 shrink-0 animate-pulse" />
+          <span>यह सेवा शीघ्र उपलब्ध होगी (Recharge Gateway Integration in progress)</span>
+        </div>
+
+        <button
+          type="button"
+          disabled
+          className="w-full py-4 px-6 rounded-2xl bg-slate-200 border border-slate-300 text-slate-500 font-black text-sm flex items-center justify-center gap-2 cursor-not-allowed shadow-none"
+        >
+          <Lock className="w-4 h-4 text-slate-400" />
+          <span>🔒 सेवा शीघ्र उपलब्ध होगी (Coming Soon)</span>
+        </button>
+      </div>
     </form>
   );
 }

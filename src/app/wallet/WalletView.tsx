@@ -785,7 +785,7 @@ export default function WalletView({
                 className="w-full py-3 px-4 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-black text-xs flex items-center justify-center gap-2 transition-transform hover:scale-[1.02] cursor-pointer"
               >
                 <Zap className="w-4 h-4 text-[#fef08a]" />
-                <span>रिचार्ज (2.5%)</span>
+                <span>रिचार्ज (Coming Soon)</span>
               </Link>
             </div>
 
