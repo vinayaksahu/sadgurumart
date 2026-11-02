@@ -101,12 +101,10 @@ export default function AdminNavbar({
   // 7 Admin Accordion Groups synchronized with distinct, purpose-built admin pages
   const menuGroups: MenuGroup[] = [
     {
-      id: 'team',
-      title: 'Team',
+      id: 'geneology',
+      title: 'Genealogy',
       icon: GitFork,
       items: [
-        { label: 'Direct Members', href: '/admin/members?view=directs' },
-        { label: 'Levelwise Team', href: '/admin/members?view=downline' },
         { label: 'Genealogy', href: '/admin/genealogy' },
       ],
     },
