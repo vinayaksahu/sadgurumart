@@ -101,13 +101,13 @@ export default function AdminNavbar({
   // 7 Admin Accordion Groups synchronized with distinct, purpose-built admin pages
   const menuGroups: MenuGroup[] = [
     {
-      id: 'geneology',
-      title: 'Genealogy',
+      id: 'team',
+      title: 'Team',
       icon: GitFork,
       items: [
-        { label: 'Binary Tree', href: '/admin/genealogy' },
-        { label: 'Downline Tree', href: '/admin/members?view=downline' },
-        { label: 'Direct Referral List', href: '/admin/members?view=directs' },
+        { label: 'Direct Members', href: '/admin/members?view=directs' },
+        { label: 'Levelwise Team', href: '/admin/members?view=downline' },
+        { label: 'Genealogy', href: '/admin/genealogy' },
       ],
     },
     {
@@ -115,8 +115,6 @@ export default function AdminNavbar({
       title: 'Master',
       icon: Database,
       items: [
-        { label: 'Add Package', href: '/admin/settings?tab=plan' },
-        { label: 'Package List', href: '/admin/settings?tab=plan' },
         { label: 'Add Product', href: '/admin/inventory?action=add' },
         { label: 'Product List', href: '/admin/inventory' },
         { label: 'Orders & Dispatch', href: '/admin/orders' },
