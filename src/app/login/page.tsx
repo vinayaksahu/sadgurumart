@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User, Lock, ArrowRight, Eye, EyeOff, Sparkles, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
 
@@ -12,6 +12,16 @@ export default function UserLoginPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [matchedAccounts, setMatchedAccounts] = useState<Array<{ userCode: string; name: string; rank?: string }>>([]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const prefillId = params.get('id') || params.get('userCode') || '';
+      if (prefillId) {
+        setIdentifier(prefillId.toUpperCase());
+      }
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

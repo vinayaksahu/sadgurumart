@@ -107,42 +107,57 @@ function AdminGenealogyContent() {
         onClick={() => handleNodeClick(node)}
         className="flex flex-col items-center cursor-pointer group"
       >
-        <div className={`w-52 rounded-2xl p-4 text-center border-2 shadow-md transition-all duration-200 group-hover:scale-105 ${
+        <div className={`w-52 rounded-2xl p-4 text-center border-2 shadow-xl transition-all duration-200 group-hover:scale-105 ${
           isActive 
-            ? 'bg-white border-[#144732] shadow-[#144732]/10 ring-1 ring-[#144732]/20' 
-            : 'bg-slate-50 border-slate-300'
+            ? 'bg-gradient-to-br from-[#166534] via-[#15803d] to-[#14532d] text-white border-[#4ade80] shadow-emerald-950/20' 
+            : 'bg-gradient-to-br from-[#991b1b] via-[#b91c1c] to-[#7f1d1d] text-white border-[#f87171] shadow-rose-950/20'
         }`}>
-          {/* Active status pulse & position badge */}
+          {/* Active status badge & position badge */}
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/20 text-white font-mono">
               {node.placementPosition || positionLabel}
             </span>
-            <span className={`w-2.5 h-2.5 rounded-full ${isActive ? 'bg-[#22c55e] animate-pulse' : 'bg-slate-300'}`} />
+            <span className={`text-[9px] font-black px-2 py-0.5 rounded-full flex items-center gap-1 border ${
+              isActive 
+                ? 'bg-emerald-950/70 text-[#fef08a] border-[#4ade80]/40' 
+                : 'bg-rose-950/70 text-rose-200 border-[#f87171]/40'
+            }`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-[#4ade80] animate-pulse' : 'bg-rose-400'}`} />
+              <span>{isActive ? 'ACTIVE' : 'INACTIVE'}</span>
+            </span>
           </div>
 
-          <div className="w-12 h-12 rounded-full bg-[#144732] text-white font-black text-sm flex items-center justify-center mx-auto mb-2 border-2 border-[#d4a359]">
+          <div className={`w-12 h-12 rounded-full font-black text-base flex items-center justify-center mx-auto mb-2 border-2 shadow ${
+            isActive 
+              ? 'bg-white text-[#14532d] border-[#fef08a]' 
+              : 'bg-white text-[#991b1b] border-rose-200'
+          }`}>
             {node.name?.charAt(0).toUpperCase() || 'U'}
           </div>
 
-          <div className="font-mono text-xs font-black text-[#144732]">
+          <div className={`font-mono text-xs font-black tracking-wider ${isActive ? 'text-[#fef08a]' : 'text-white'}`}>
             {node.userCode}
           </div>
-          <div className="font-bold text-xs text-slate-800 truncate max-w-[170px] mx-auto">
+          <div className="font-bold text-xs text-white truncate max-w-[170px] mx-auto mt-0.5">
             {node.name}
           </div>
-          <div className="text-[10px] font-semibold text-[#92580a] mt-0.5">
+          <div className={`text-[10px] font-semibold mt-0.5 ${isActive ? 'text-emerald-200' : 'text-rose-200'}`}>
             {node.rank?.replace('_', ' ') || 'Distributor'}
           </div>
 
           {/* PV Volume Grid */}
-          <div className="grid grid-cols-2 gap-1.5 mt-3 pt-2 border-t border-slate-100 text-[10px]">
-            <div className="bg-[#eaf5ed] p-1 rounded-md text-[#144732]">
-              <div className="font-medium text-[9px] text-slate-500">Left PV</div>
-              <div className="font-black">{(node.leftVolumePV || 0) + (node.leftCarryForwardPV || 0)}</div>
+          <div className="grid grid-cols-2 gap-1.5 mt-3 pt-2 border-t border-white/20 text-[10px]">
+            <div className={`p-1.5 rounded-xl border text-white ${
+              isActive ? 'bg-emerald-950/60 border-emerald-400/30' : 'bg-rose-950/60 border-rose-400/30'
+            }`}>
+              <div className={`font-medium text-[9px] ${isActive ? 'text-emerald-200' : 'text-rose-200'}`}>Left PV</div>
+              <div className="font-black text-xs">{(node.leftVolumePV || 0) + (node.leftCarryForwardPV || 0)}</div>
             </div>
-            <div className="bg-[#fdfaf3] p-1 rounded-md text-[#92580a]">
-              <div className="font-medium text-[9px] text-slate-500">Right PV</div>
-              <div className="font-black">{(node.rightVolumePV || 0) + (node.rightCarryForwardPV || 0)}</div>
+            <div className={`p-1.5 rounded-xl border text-white ${
+              isActive ? 'bg-emerald-950/60 border-emerald-400/30' : 'bg-rose-950/60 border-rose-400/30'
+            }`}>
+              <div className={`font-medium text-[9px] ${isActive ? 'text-emerald-200' : 'text-rose-200'}`}>Right PV</div>
+              <div className="font-black text-xs">{(node.rightVolumePV || 0) + (node.rightCarryForwardPV || 0)}</div>
             </div>
           </div>
         </div>

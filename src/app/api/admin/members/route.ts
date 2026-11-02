@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { cookies } from 'next/headers';
-import { verifyAdminToken, verifySuperToken } from '@/lib/auth/jwt';
+import { verifyAdminToken, verifySuperToken, signUserToken } from '@/lib/auth/jwt';
 import bcrypt from 'bcryptjs';
 
 async function checkAdminAuth() {
@@ -280,9 +280,53 @@ export async function PATCH(req: NextRequest) {
       });
     }
 
+    // Action 4: Impersonate / Login as Member
+    if (action === 'IMPERSONATE' || action === 'LOGIN_AS') {
+      const token = signUserToken({
+        id: user.id,
+        userCode: user.userCode,
+        mobile: user.mobile,
+        role: 'USER',
+      });
+
+      const response = NextResponse.json({
+        success: true,
+        message: `मेंबर ID ${user.userCode} (${user.name}) के पोर्टल में लॉगिन तैयार है।`,
+        redirectUrl: '/dashboard',
+        user: {
+          id: user.id,
+          userCode: user.userCode,
+          name: user.name,
+        },
+      });
+
+      response.cookies.set('sgm_user_token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 7 * 24 * 60 * 60,
+      });
+
+      response.cookies.set('sgm_user_active', 'true', {
+        httpOnly: false,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 7 * 24 * 60 * 60,
+      });
+
+      return response;
+    }
+
     return NextResponse.json({ error: 'Invalid action specified' }, { status: 400 });
   } catch (err: any) {
     console.error('Admin member patch error:', err);
     return NextResponse.json({ error: err.message || 'Action failed' }, { status: 500 });
   }
+}
+
+// POST alias for members actions
+export async function POST(req: NextRequest) {
+  return PATCH(req);
 }

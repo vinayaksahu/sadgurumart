@@ -52,6 +52,34 @@ export default async function OrderConfirmationPage({ params }: OrderPageProps) 
           </p>
         </div>
 
+        {/* Successfully Activated Alert Banner (If this was an activation order) */}
+        {(order.isActivation || order.totalPV >= 100) && (
+          <div className="mb-8 p-5 sm:p-6 rounded-3xl bg-gradient-to-r from-[#144732] via-[#166534] to-[#0b2b1e] text-white shadow-xl border-2 border-[#d4a359] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-start sm:items-center gap-3.5">
+              <div className="w-12 h-12 rounded-2xl bg-white/10 border border-[#d4a359]/40 flex items-center justify-center shrink-0">
+                <Sparkles className="w-6 h-6 text-[#fef08a]" />
+              </div>
+              <div>
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/20 text-[#fef08a] font-black text-[10px] uppercase tracking-wider mb-1">
+                  ✓ ID Successfully Activated
+                </div>
+                <div className="text-base sm:text-lg font-black text-white leading-tight">
+                  बधाई हो! आईडी {order.totalPV} PV पैकेज के साथ सक्रिय (ACTIVE) हो चुकी है!
+                </div>
+                <div className="text-xs text-emerald-200 mt-0.5">
+                  अब आप सभी प्रकार की बाइनरी मैचिंग एवं टीम रॉयल्टी इनकम के लिए पात्र हैं।
+                </div>
+              </div>
+            </div>
+            <Link
+              href="/dashboard"
+              className="shrink-0 px-4 py-2.5 rounded-xl bg-[#d4a359] hover:bg-[#c39248] text-[#0b2b1e] font-black text-xs transition-colors shadow"
+            >
+              डैशबोर्ड देखें →
+            </Link>
+          </div>
+        )}
+
         {/* Printable Invoice Container */}
         <div id="invoice-printable" className="bg-white border-2 border-[#144732]/20 rounded-3xl p-6 sm:p-10 shadow-xl space-y-8">
           {/* Invoice Header */}

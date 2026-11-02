@@ -69,7 +69,7 @@ export default async function DashboardPage() {
   const isKYCApproved = user.kycDetail?.status === 'APPROVED';
 
   // Live Incomes & Team Analytics matching Member Portal Mobile View
-  const [walletTransactions, placementCount] = await Promise.all([
+  const [walletTransactions, placementCount, userPaidOrders] = await Promise.all([
     user.wallet?.id
       ? prisma.walletTransaction.findMany({
           where: { walletId: user.wallet.id },
@@ -81,7 +81,23 @@ export default async function DashboardPage() {
         OR: [{ sponsorId: user.id }, { placementParentId: user.id }],
       },
     }),
+    prisma.order.findMany({
+      where: {
+        OR: [
+          { userId: user.id },
+          { targetUserCode: user.userCode },
+        ],
+        paymentStatus: 'PAID',
+      },
+      select: { totalPV: true, isActivation: true },
+      orderBy: { createdAt: 'desc' },
+    }),
   ]);
+
+  // Compute active package PV bought
+  const activationOrder = userPaidOrders.find((o) => o.isActivation || o.totalPV >= 100);
+  const totalPersonalPV = userPaidOrders.reduce((sum, o) => sum + (o.totalPV || 0), 0);
+  const activePackagePV = activationOrder?.totalPV || (user.isActive ? Math.max(100, totalPersonalPV) : 0);
 
   const getSum = (typeList: string[]) => {
     return walletTransactions
@@ -93,6 +109,7 @@ export default async function DashboardPage() {
   const totalTeamCount = Math.max(placementCount, directTeamCount);
 
   const performanceCards = [
+    { label: 'Active Package', value: user.isActive ? `${activePackagePV} PV` : '0 PV (Inactive)', gradient: 'from-[#059669] to-[#047857]', icon: Award },
     { label: 'Total Team', value: String(totalTeamCount), gradient: 'from-[#06b6d4] to-[#2563eb]', icon: Users },
     { label: 'Total Direct Team', value: String(directTeamCount), gradient: 'from-[#f43f5e] to-[#e11d48]', icon: User },
     { label: 'Total Direct Income', value: `₹${getSum(['DIRECT_REFERRAL']).toFixed(2)}`, gradient: 'from-[#3b82f6] to-[#4f46e5]', icon: User },
@@ -170,6 +187,11 @@ export default async function DashboardPage() {
                   <span>Member ID: <strong className="text-[#fef08a] font-mono">{user.userCode}</strong></span>
                   <span>•</span>
                   <span>Rank: <strong className="text-emerald-300">{user.rank.replace('_', ' ')}</strong></span>
+                  <span>•</span>
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-white/10 text-[#fef08a] border border-[#d4a359]/30 font-bold">
+                    <span>Package:</span>
+                    <strong className="text-white font-mono font-black">{user.isActive ? `${activePackagePV} PV` : 'None (Inactive)'}</strong>
+                  </span>
                   <span>•</span>
                   <span>KYC: <strong className={isKYCApproved ? 'text-emerald-300' : 'text-amber-300'}>
                     {user.kycDetail?.status || 'NOT SUBMITTED'}

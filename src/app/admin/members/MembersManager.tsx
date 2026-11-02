@@ -28,7 +28,8 @@ import {
   Mail, 
   UserCheck, 
   ExternalLink,
-  Award
+  Award,
+  Sparkles
 } from 'lucide-react';
 
 interface MemberSummary {
@@ -97,7 +98,9 @@ export default function MembersManager() {
 
   // Quick Action States
   const [actionLoading, setActionLoading] = useState(false);
+  const [impersonatingId, setImpersonatingId] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [activationAlert, setActivationAlert] = useState<string | null>(null);
   const [resetPwdInput, setResetPwdInput] = useState('');
   const [walletAdjInput, setWalletAdjInput] = useState('');
   const [walletAdjReason, setWalletAdjReason] = useState('');
@@ -171,6 +174,9 @@ export default function MembersManager() {
       if (!res.ok) throw new Error(data.error || 'Failed');
       
       setMessage({ type: 'success', text: data.message });
+      if (!memberDetail.isActive) {
+        setActivationAlert(`सदस्य ${memberDetail.name} (${memberDetail.userCode}) की आईडी सफलतापूर्वक एक्टिवेट (ACTIVE) कर दी गई है! 🎉`);
+      }
       setMemberDetail((prev: any) => ({
         ...prev,
         isActive: !prev.isActive,
@@ -240,6 +246,9 @@ export default function MembersManager() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed');
       setMessage({ type: 'success', text: data.message });
+      if (!memberDetail.isActive) {
+        setActivationAlert(`सदस्य ${memberDetail.name} (${memberDetail.userCode}) की आईडी सफलतापूर्वक एक्टिवेट (ACTIVE) कर दी गई है! 🎉`);
+      }
       setMemberDetail((prev: any) => ({
         ...prev,
         wallet: {
@@ -254,6 +263,30 @@ export default function MembersManager() {
       setMessage({ type: 'error', text: err.message });
     } finally {
       setActionLoading(false);
+    }
+  };
+
+  // Login as Member (Impersonate & Open Member Portal)
+  const handleLoginAsMember = async (userId: string, userCode: string) => {
+    try {
+      setImpersonatingId(userId);
+      const res = await fetch('/api/admin/members', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          action: 'IMPERSONATE',
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'मेंबर पोर्टल में लॉगिन विफल रहा');
+      
+      // Open member dashboard in a new tab
+      window.open(data.redirectUrl || '/dashboard', '_blank');
+    } catch (err: any) {
+      alert(err.message || 'त्रुटि उत्पन्न हुई');
+    } finally {
+      setImpersonatingId(null);
     }
   };
 
@@ -355,10 +388,19 @@ export default function MembersManager() {
 
       {/* Members Main Table */}
       <div className="bg-white border border-[#e8e3d5] rounded-3xl p-6 sm:p-8 shadow-sm space-y-4">
-        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 gap-3">
           <h2 className="text-sm font-black text-[#144732]">
             मेंबर्स सूची ({members.length} परिणाम प्रदर्शित)
           </h2>
+          <Link
+            href="/dashboard"
+            target="_blank"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs shadow-xs transition-all w-fit cursor-pointer"
+            title="मेंबर पोर्टल (Dashboard) खोलें"
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+            <span>मेंबर पोर्टल (Member Portal)</span>
+          </Link>
         </div>
 
         {loading ? (
@@ -460,14 +502,29 @@ export default function MembersManager() {
                     </td>
 
                     <td className="py-3.5 px-3 text-center">
-                      <button
-                        onClick={() => openMemberDetail(m.id)}
-                        className="px-3 py-1.5 rounded-xl bg-[#144732] hover:bg-[#0b2b1e] text-[#fef08a] font-black text-xs shadow-sm transition-all flex items-center gap-1 mx-auto cursor-pointer"
-                        title="पूरा विवरण व टीम देखें"
-                      >
-                        <Eye className="w-3.5 h-3.5" />
-                        <span>विवरण</span>
-                      </button>
+                      <div className="flex items-center justify-center gap-1.5">
+                        <button
+                          onClick={() => openMemberDetail(m.id)}
+                          className="px-2.5 py-1.5 rounded-xl bg-[#144732] hover:bg-[#0b2b1e] text-[#fef08a] font-black text-xs shadow-sm transition-all flex items-center gap-1 cursor-pointer shrink-0"
+                          title="पूरा विवरण व टीम देखें"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          <span>विवरण</span>
+                        </button>
+                        <button
+                          onClick={() => handleLoginAsMember(m.id, m.userCode)}
+                          disabled={impersonatingId === m.id}
+                          className="px-2.5 py-1.5 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-bold text-xs shadow-sm transition-all flex items-center gap-1 cursor-pointer shrink-0"
+                          title={`${m.name} (${m.userCode}) के मेंबर पोर्टल में लॉगिन करें`}
+                        >
+                          {impersonatingId === m.id ? (
+                            <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <ExternalLink className="w-3.5 h-3.5" />
+                          )}
+                          <span>पोर्टल</span>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -516,12 +573,28 @@ export default function MembersManager() {
                     </div>
                   </div>
 
-                  <button
-                    onClick={() => setSelectedMemberId(null)}
-                    className="p-1.5 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 cursor-pointer"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleLoginAsMember(memberDetail.id, memberDetail.userCode)}
+                      disabled={impersonatingId === memberDetail.id}
+                      className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs shadow-sm transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
+                      title={`${memberDetail.name} (${memberDetail.userCode}) के मेंबर पोर्टल में लॉगिन करें`}
+                    >
+                      {impersonatingId === memberDetail.id ? (
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      )}
+                      <span>मेंबर पोर्टल खोलें</span>
+                    </button>
+
+                    <button
+                      onClick={() => setSelectedMemberId(null)}
+                      className="p-1.5 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 cursor-pointer"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
                 </div>
 
                 {/* Status Message Banner if any action occurred */}
@@ -967,6 +1040,33 @@ export default function MembersManager() {
                 बंद करें (Close)
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Successfully Activated Modal Popup for Admin */}
+      {activationAlert && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full shadow-2xl border-2 border-emerald-500 text-center relative animate-in zoom-in-95 duration-200">
+            <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-3 border-2 border-emerald-500 shadow-md">
+              <CheckCircle2 className="w-9 h-9 stroke-[2.5]" />
+            </div>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-[11px] font-black uppercase tracking-wider border border-emerald-200 mb-2">
+              <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+              <span>आईडी एक्टिवेशन सफल</span>
+            </div>
+            <h3 className="text-xl font-black text-[#144732] mb-2">
+              Successfully Activated!
+            </h3>
+            <p className="text-xs text-slate-600 mb-5 leading-relaxed">
+              {activationAlert}
+            </p>
+            <button
+              onClick={() => setActivationAlert(null)}
+              className="w-full py-3 rounded-xl bg-gradient-to-r from-[#144732] to-[#0b2b1e] hover:opacity-95 text-white font-black text-xs uppercase tracking-wider shadow-md cursor-pointer transition-all"
+            >
+              ठीक है (Close)
+            </button>
           </div>
         </div>
       )}

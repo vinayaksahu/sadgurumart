@@ -183,6 +183,14 @@ export default function WalletView({
   const [selectedPackageId, setSelectedPackageId] = useState(packages[0]?.id || '');
   const [activationLoading, setActivationLoading] = useState(false);
   const [activationMsg, setActivationMsg] = useState<{ type: 'success' | 'error'; text: string; orderNumber?: string } | null>(null);
+  const [activationSuccessPopup, setActivationSuccessPopup] = useState<{
+    targetCode: string;
+    targetName: string;
+    packageName: string;
+    pv: number;
+    dpPrice: number;
+    orderNumber: string;
+  } | null>(null);
 
   // Withdrawal Form
   const [withdrawAmount, setWithdrawAmount] = useState('');
@@ -376,6 +384,14 @@ export default function WalletView({
           type: 'success',
           text: data.message,
           orderNumber: data.orderNumber,
+        });
+        setActivationSuccessPopup({
+          targetCode: activationTarget === 'SELF' ? user.userCode : (verifiedTargetMember?.userCode || targetMemberCode.trim().toUpperCase()),
+          targetName: activationTarget === 'SELF' ? user.name : (verifiedTargetMember?.name || 'Distributor'),
+          packageName: selectedPackage?.title || 'Activation Package',
+          pv: selectedPackage?.pv || 100,
+          dpPrice: selectedPackage?.dpPrice || 0,
+          orderNumber: data.orderNumber || '',
         });
         setWallet((prev) => ({
           ...prev,
@@ -2027,6 +2043,80 @@ export default function WalletView({
                 बंद करें (Close)
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Successfully Activated Modal Popup */}
+      {activationSuccessPopup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border-2 border-emerald-500 text-center relative animate-in zoom-in-95 duration-200">
+            <button
+              onClick={() => setActivationSuccessPopup(null)}
+              className="absolute top-4 right-4 p-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-3 border-2 border-emerald-500 shadow-md">
+              <CheckCircle2 className="w-9 h-9 stroke-[2.5]" />
+            </div>
+
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-[11px] font-black uppercase tracking-wider border border-emerald-200 mb-2">
+              <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+              <span>सफलतापूर्वक एक्टिवेट (Successfully Activated)</span>
+            </div>
+
+            <h2 className="text-2xl font-black text-[#144732] tracking-tight">
+              बधाई हो! आईडी एक्टिवेट हो गई 🎉
+            </h2>
+            <p className="text-xs text-slate-500 mt-1 mb-5">
+              मेंबर आईडी सफलतापूर्वक एक्टिवेट हो चुकी है और अब सभी प्रकार की बाइनरी एवं नेटवर्क इनकम के लिए पात्र है।
+            </p>
+
+            {/* Details Box */}
+            <div className="bg-[#f8faf8] border border-emerald-200 rounded-2xl p-4 text-xs space-y-2.5 text-left mb-6">
+              <div className="flex justify-between items-center pb-2 border-b border-emerald-100">
+                <span className="text-slate-500 font-semibold">मेंबर आईडी:</span>
+                <span className="font-mono font-black text-sm text-[#144732]">{activationSuccessPopup.targetCode}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500 font-semibold">मेंबर का नाम:</span>
+                <span className="font-bold text-slate-800">{activationSuccessPopup.targetName}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500 font-semibold">पैकेज एवं PV:</span>
+                <span className="font-black text-emerald-700 bg-emerald-100/70 px-2 py-0.5 rounded-md">
+                  {activationSuccessPopup.packageName} ({activationSuccessPopup.pv} PV)
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500 font-semibold">वर्तमान स्थिति:</span>
+                <span className="font-bold text-emerald-600 flex items-center gap-1 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                  ACTIVE (सक्रिय)
+                </span>
+              </div>
+              {activationSuccessPopup.orderNumber && (
+                <div className="flex justify-between items-center pt-2 border-t border-emerald-100 text-[11px]">
+                  <span className="text-slate-500 font-semibold">ऑर्डर नंबर:</span>
+                  <Link
+                    href={`/orders/${activationSuccessPopup.orderNumber}`}
+                    className="font-mono font-bold text-[#144732] hover:underline flex items-center gap-1"
+                  >
+                    <span>{activationSuccessPopup.orderNumber}</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </Link>
+                </div>
+              )}
+            </div>
+
+            <button
+              onClick={() => setActivationSuccessPopup(null)}
+              className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-[#144732] to-[#0b2b1e] hover:opacity-95 text-white font-black text-xs uppercase tracking-wider shadow-lg cursor-pointer transition-all active:scale-95"
+            >
+              शानदार! ठीक है (Done)
+            </button>
           </div>
         </div>
       )}
