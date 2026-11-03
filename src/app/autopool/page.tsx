@@ -185,6 +185,10 @@ export default async function AutoPoolPage(props: AutoPoolPageProps) {
                             <Clock className="w-3.5 h-3.5" />
                             In Progress ({userEntry.children.length}/{lvl.req})
                           </span>
+                        ) : lvl.level === 1 ? (
+                          <span className="inline-block px-3 py-1 rounded-full text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200">
+                            प्रवेश प्रतीक्षित (₹100 आमदनी कटौती)
+                          </span>
                         ) : (
                           <span className="text-[10px] font-bold text-slate-400">
                             Queued for Upgrade
