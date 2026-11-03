@@ -23,7 +23,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60; // ISR: Ultra-fast cached responses, background revalidation every 60s
 
 export default async function HomePage() {
   let featuredProducts: any[] = [];
@@ -74,7 +74,7 @@ export default async function HomePage() {
       <Navbar />
 
       {/* Admin Broadcast Notice (If enabled) */}
-      {settings.noticeEnabled && (
+      {settings?.noticeEnabled && (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 w-full">
           <AdminNoticeBanner
             enabled={settings.noticeEnabled}
@@ -87,7 +87,7 @@ export default async function HomePage() {
       )}
 
       {/* Global Screen Popup Modal (If enabled for ALL or GUESTS) */}
-      {settings.popupEnabled && (settings.popupTarget === 'ALL' || settings.popupTarget === 'GUESTS') && (
+      {settings?.popupEnabled && (settings.popupTarget === 'ALL' || settings.popupTarget === 'GUESTS') && (
         <AdminPopupModal
           enabled={settings.popupEnabled}
           title={settings.popupTitle}

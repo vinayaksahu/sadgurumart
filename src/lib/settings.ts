@@ -61,7 +61,22 @@ export const DEFAULT_SYSTEM_SETTINGS = {
   companyQrImageUrl: '',
 };
 
+// In-memory cache for ultra-fast performance (<1ms)
+let cachedSettings: any = null;
+let cacheExpiry = 0;
+const SETTINGS_CACHE_TTL_MS = 60 * 1000; // 60 seconds
+
+export function invalidateSettingsCache() {
+  cachedSettings = null;
+  cacheExpiry = 0;
+}
+
 export async function getSystemSettings() {
+  const now = Date.now();
+  if (cachedSettings && now < cacheExpiry) {
+    return cachedSettings;
+  }
+
   try {
     let settings = await prisma.systemSetting.findFirst();
     if (!settings) {
@@ -69,9 +84,12 @@ export async function getSystemSettings() {
         data: DEFAULT_SYSTEM_SETTINGS,
       });
     }
+    cachedSettings = settings;
+    cacheExpiry = now + SETTINGS_CACHE_TTL_MS;
     return settings;
   } catch (error) {
     console.error('Failed to get system settings, using fallback default:', error);
+    if (cachedSettings) return cachedSettings;
     return DEFAULT_SYSTEM_SETTINGS as any;
   }
 }

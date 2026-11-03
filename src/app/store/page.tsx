@@ -14,6 +14,29 @@ interface StorePageProps {
 
 export const dynamic = 'force-dynamic';
 
+let cachedCategories: any[] = [];
+let categoriesExpiry = 0;
+async function getCategories() {
+  const now = Date.now();
+  if (cachedCategories.length > 0 && now < categoriesExpiry) {
+    return cachedCategories;
+  }
+  try {
+    const cList = await prisma.category.findMany({
+      include: {
+        _count: { select: { products: true } },
+      },
+      orderBy: { name: 'asc' },
+    });
+    cachedCategories = cList;
+    categoriesExpiry = now + 60 * 1000;
+    return cList;
+  } catch (err) {
+    console.error('Failed to load categories:', err);
+    return cachedCategories;
+  }
+}
+
 export default async function StorePage({ searchParams }: StorePageProps) {
   const { category, search } = await searchParams;
 
@@ -37,12 +60,7 @@ export default async function StorePage({ searchParams }: StorePageProps) {
         include: { category: true },
         orderBy: { createdAt: 'desc' },
       }),
-      prisma.category.findMany({
-        include: {
-          _count: { select: { products: true } },
-        },
-        orderBy: { name: 'asc' },
-      }),
+      getCategories(),
     ]);
     products = pList;
     categories = cList;

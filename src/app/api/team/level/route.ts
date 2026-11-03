@@ -56,8 +56,6 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    // BFS to gather levels up to 16
-    let currentParentIds = [rootUser.id];
     const levelStats: Array<{
       level: number;
       total: number;
@@ -67,51 +65,63 @@ export async function GET(req: NextRequest) {
 
     const allLevelMembers: Array<any> = [];
 
-    for (let lvl = 1; lvl <= 16; lvl++) {
-      if (currentParentIds.length === 0) break;
+    try {
+      // Fast single recursive query in PostgreSQL
+      const rows = await prisma.$queryRaw<Array<{
+        id: string;
+        userCode: string;
+        name: string;
+        mobile: string;
+        rank: string;
+        isActive: boolean;
+        activatedAt: Date | null;
+        placementPosition: string | null;
+        leftVolumePV: number;
+        rightVolumePV: number;
+        leftCarryForwardPV: number;
+        rightCarryForwardPV: number;
+        totalMatchingPaidPV: number;
+        createdAt: Date;
+        sponsorCode: string | null;
+        sponsorName: string | null;
+        lvl: number;
+      }>>`
+        WITH RECURSIVE level_tree AS (
+          SELECT 
+            u.id, u."userCode", u.name, u.mobile, u.rank::text, u."isActive", u."activatedAt",
+            u."placementPosition"::text, u."leftVolumePV", u."rightVolumePV", u."leftCarryForwardPV",
+            u."rightCarryForwardPV", u."totalMatchingPaidPV", u."createdAt", u."sponsorId",
+            s."userCode" AS "sponsorCode", s.name AS "sponsorName",
+            1 AS lvl
+          FROM "users" u
+          LEFT JOIN "users" s ON u."sponsorId" = s.id
+          WHERE u."sponsorId" = ${rootUser.id}
 
-      const levelUsers = await prisma.user.findMany({
-        where: {
-          sponsorId: { in: currentParentIds },
-        },
-        select: {
-          id: true,
-          userCode: true,
-          name: true,
-          mobile: true,
-          rank: true,
-          isActive: true,
-          activatedAt: true,
-          placementPosition: true,
-          leftVolumePV: true,
-          rightVolumePV: true,
-          leftCarryForwardPV: true,
-          rightCarryForwardPV: true,
-          totalMatchingPaidPV: true,
-          createdAt: true,
-          sponsor: {
-            select: {
-              userCode: true,
-              name: true,
-            },
-          },
-        },
-        orderBy: { createdAt: 'desc' },
-      });
+          UNION ALL
 
-      if (levelUsers.length === 0) {
-        break;
-      }
+          SELECT 
+            u.id, u."userCode", u.name, u.mobile, u.rank::text, u."isActive", u."activatedAt",
+            u."placementPosition"::text, u."leftVolumePV", u."rightVolumePV", u."leftCarryForwardPV",
+            u."rightCarryForwardPV", u."totalMatchingPaidPV", u."createdAt", u."sponsorId",
+            s."userCode" AS "sponsorCode", s.name AS "sponsorName",
+            lt.lvl + 1 AS lvl
+          FROM "users" u
+          JOIN level_tree lt ON u."sponsorId" = lt.id
+          LEFT JOIN "users" s ON u."sponsorId" = s.id
+          WHERE lt.lvl < 16
+        )
+        SELECT * FROM level_tree ORDER BY lvl ASC, "createdAt" DESC;
+      `;
 
-      const activeCount = levelUsers.filter((u) => u.isActive).length;
-      levelStats.push({
-        level: lvl,
-        total: levelUsers.length,
-        active: activeCount,
-        inactive: levelUsers.length - activeCount,
-      });
+      const statsMap = new Map<number, { total: number; active: number }>();
 
-      for (const u of levelUsers) {
+      for (const u of rows) {
+        const lvl = Number(u.lvl);
+        const curr = statsMap.get(lvl) || { total: 0, active: 0 };
+        curr.total += 1;
+        if (u.isActive) curr.active += 1;
+        statsMap.set(lvl, curr);
+
         const totalLeft = (u.leftVolumePV || 0) + (u.leftCarryForwardPV || 0) + (u.totalMatchingPaidPV || 0);
         const totalRight = (u.rightVolumePV || 0) + (u.rightCarryForwardPV || 0) + (u.totalMatchingPaidPV || 0);
 
@@ -123,17 +133,96 @@ export async function GET(req: NextRequest) {
           mobile: u.mobile ? `${u.mobile.slice(0, 3)}****${u.mobile.slice(-3)}` : 'N/A',
           rank: u.rank,
           isActive: u.isActive,
-          activatedAt: u.activatedAt,
+          activatedAt: u.activatedAt ? new Date(u.activatedAt).toISOString() : null,
           placementPosition: u.placementPosition,
           leftVolumePV: totalLeft,
           rightVolumePV: totalRight,
-          createdAt: u.createdAt,
-          sponsorCode: u.sponsor?.userCode || 'N/A',
-          sponsorName: u.sponsor?.name || 'N/A',
+          createdAt: u.createdAt ? new Date(u.createdAt).toISOString() : new Date().toISOString(),
+          sponsorCode: u.sponsorCode || 'N/A',
+          sponsorName: u.sponsorName || 'N/A',
         });
       }
 
-      currentParentIds = levelUsers.map((u) => u.id);
+      Array.from(statsMap.keys()).sort((a, b) => a - b).forEach((lvl) => {
+        const s = statsMap.get(lvl)!;
+        levelStats.push({
+          level: lvl,
+          total: s.total,
+          active: s.active,
+          inactive: s.total - s.active,
+        });
+      });
+    } catch (sqlErr) {
+      console.warn('Fast recursive level query failed, falling back to iterative:', sqlErr);
+
+      // Fallback to iterative BFS
+      let currentParentIds = [rootUser.id];
+      for (let lvl = 1; lvl <= 16; lvl++) {
+        if (currentParentIds.length === 0) break;
+
+        const levelUsers = await prisma.user.findMany({
+          where: {
+            sponsorId: { in: currentParentIds },
+          },
+          select: {
+            id: true,
+            userCode: true,
+            name: true,
+            mobile: true,
+            rank: true,
+            isActive: true,
+            activatedAt: true,
+            placementPosition: true,
+            leftVolumePV: true,
+            rightVolumePV: true,
+            leftCarryForwardPV: true,
+            rightCarryForwardPV: true,
+            totalMatchingPaidPV: true,
+            createdAt: true,
+            sponsor: {
+              select: {
+                userCode: true,
+                name: true,
+              },
+            },
+          },
+          orderBy: { createdAt: 'desc' },
+        });
+
+        if (levelUsers.length === 0) break;
+
+        const activeCount = levelUsers.filter((u) => u.isActive).length;
+        levelStats.push({
+          level: lvl,
+          total: levelUsers.length,
+          active: activeCount,
+          inactive: levelUsers.length - activeCount,
+        });
+
+        for (const u of levelUsers) {
+          const totalLeft = (u.leftVolumePV || 0) + (u.leftCarryForwardPV || 0) + (u.totalMatchingPaidPV || 0);
+          const totalRight = (u.rightVolumePV || 0) + (u.rightCarryForwardPV || 0) + (u.totalMatchingPaidPV || 0);
+
+          allLevelMembers.push({
+            level: lvl,
+            id: u.id,
+            userCode: u.userCode,
+            name: u.name,
+            mobile: u.mobile ? `${u.mobile.slice(0, 3)}****${u.mobile.slice(-3)}` : 'N/A',
+            rank: u.rank,
+            isActive: u.isActive,
+            activatedAt: u.activatedAt ? u.activatedAt.toISOString() : null,
+            placementPosition: u.placementPosition,
+            leftVolumePV: totalLeft,
+            rightVolumePV: totalRight,
+            createdAt: u.createdAt.toISOString(),
+            sponsorCode: u.sponsor?.userCode || 'N/A',
+            sponsorName: u.sponsor?.name || 'N/A',
+          });
+        }
+
+        currentParentIds = levelUsers.map((u) => u.id);
+      }
     }
 
     const totalTeam = allLevelMembers.length;

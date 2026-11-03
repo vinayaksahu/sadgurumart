@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyAdminToken, verifySuperToken } from '@/lib/auth/jwt';
-import { getSystemSettings } from '@/lib/settings';
+import { getSystemSettings, invalidateSettingsCache } from '@/lib/settings';
 
 function authenticateAdmin(req: NextRequest) {
   const adminToken = req.cookies.get('sgm_admin_token')?.value;
@@ -110,6 +110,8 @@ export async function POST(req: NextRequest) {
         companyQrImageUrl: body.companyQrImageUrl !== undefined ? body.companyQrImageUrl : (current as any).companyQrImageUrl,
       },
     });
+
+    invalidateSettingsCache();
 
     return NextResponse.json({
       success: true,

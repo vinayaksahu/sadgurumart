@@ -236,6 +236,10 @@ model Product {
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
 
+  @@index([categoryId])
+  @@index([isActive])
+  @@index([createdAt])
+  @@index([isActive, createdAt])
   @@map("products")
 }
 
@@ -287,6 +291,11 @@ model Order {
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
 
+  @@index([userId])
+  @@index([paymentStatus])
+  @@index([targetUserCode])
+  @@index([createdAt])
+  @@index([userId, paymentStatus])
   @@map("orders")
 }
 
@@ -438,6 +447,10 @@ model WithdrawalRequest {
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
 
+  @@index([userId])
+  @@index([status])
+  @@index([userId, status])
+  @@index([createdAt])
   @@map("withdrawal_requests")
 }
 
@@ -465,6 +478,8 @@ model UtilityRecharge {
 
   createdAt       DateTime    @default(now())
 
+  @@index([userId])
+  @@index([createdAt])
   @@map("utility_recharges")
 }
 
@@ -499,6 +514,8 @@ model GalleryItem {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  @@index([isActive, sortOrder])
+  @@index([createdAt])
   @@map("gallery_items")
 }
 
@@ -601,6 +618,7 @@ model FundRequest {
 
   @@index([userId, status])
   @@index([status])
+  @@index([createdAt])
   @@map("fund_requests")
 }
 

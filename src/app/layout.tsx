@@ -1,6 +1,20 @@
 import type { Metadata, Viewport } from 'next';
+import { Outfit, Noto_Sans_Devanagari } from 'next/font/google';
 import './globals.css';
 import { CartProvider } from '@/lib/cartContext';
+
+const outfit = Outfit({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-outfit',
+});
+
+const notoSansDevanagari = Noto_Sans_Devanagari({
+  subsets: ['devanagari'],
+  weight: ['400', '500', '600', '700', '800', '900'],
+  display: 'swap',
+  variable: '--font-devanagari',
+});
 
 export const metadata: Metadata = {
   title: 'SGM Mart | Business Overview & Online Shopping',
@@ -28,7 +42,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="hi" suppressHydrationWarning className="overflow-x-hidden max-w-full">
+    <html
+      lang="hi"
+      suppressHydrationWarning
+      className={`${outfit.variable} ${notoSansDevanagari.variable} overflow-x-hidden max-w-full`}
+    >
       <body className="min-h-screen flex flex-col antialiased selection:bg-[#d4a359] selection:text-[#0b2b1e] overflow-x-hidden w-full max-w-full">
         <CartProvider>
           {children}
