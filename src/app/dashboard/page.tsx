@@ -24,7 +24,8 @@ import {
   LogOut,
   Home,
   IndianRupee,
-  User
+  User,
+  GitFork
 } from 'lucide-react';
 import DashboardCopyBox from './DashboardCopyBox';
 import { getSystemSettings } from '@/lib/settings';
@@ -32,6 +33,7 @@ import AdminNoticeBanner from '@/components/AdminNoticeBanner';
 import AdminPopupModal from '@/components/AdminPopupModal';
 import AdminViewBanner from '@/components/AdminViewBanner';
 import { getEffectiveMemberAuth } from '@/lib/auth/session';
+import { getUserTeamCounts } from '@/lib/mlm/teamUtils';
 
 export default async function DashboardPage({
   searchParams,
@@ -74,18 +76,14 @@ export default async function DashboardPage({
   const isKYCApproved = user.kycDetail?.status === 'APPROVED';
 
   // Live Incomes & Team Analytics matching Member Portal Mobile View
-  const [walletTransactions, placementCount, userPaidOrders] = await Promise.all([
+  const [walletTransactions, teamCounts, userPaidOrders] = await Promise.all([
     user.wallet?.id
       ? prisma.walletTransaction.findMany({
           where: { walletId: user.wallet.id, walletScope: 'MAIN' },
           select: { type: true, amount: true },
         })
       : Promise.resolve([]),
-    prisma.user.count({
-      where: {
-        OR: [{ sponsorId: user.id }, { placementParentId: user.id }],
-      },
-    }),
+    getUserTeamCounts(user.id),
     prisma.order.findMany({
       where: {
         OR: [
@@ -110,13 +108,14 @@ export default async function DashboardPage({
       .reduce((sum, t) => sum + t.amount, 0);
   };
 
-  const directTeamCount = user.directReferrals.length;
-  const totalTeamCount = Math.max(placementCount, directTeamCount);
+  const directTeamCount = teamCounts.directTeamCount;
+  const totalTeamCount = teamCounts.totalTeamCount;
 
   const performanceCards = [
     { label: 'Active Package', value: user.isActive ? `${activePackagePV} PV` : '0 PV (Inactive)', gradient: 'from-[#059669] to-[#047857]', icon: Award },
     { label: 'Total Team', value: String(totalTeamCount), gradient: 'from-[#06b6d4] to-[#2563eb]', icon: Users },
-    { label: 'Total Direct Team', value: String(directTeamCount), gradient: 'from-[#f43f5e] to-[#e11d48]', icon: User },
+    { label: 'Total Direct Team', value: `${directTeamCount} (${teamCounts.activeDirectCount} Active)`, gradient: 'from-[#f43f5e] to-[#e11d48]', icon: User },
+    { label: 'Left Team / Right Team', value: `${teamCounts.leftTeamCount} L : ${teamCounts.rightTeamCount} R`, gradient: 'from-[#0d9488] to-[#0f766e]', icon: GitFork },
     { label: 'Total Direct Income', value: `₹${getSum(['DIRECT_REFERRAL']).toFixed(2)}`, gradient: 'from-[#3b82f6] to-[#4f46e5]', icon: User },
     { label: 'Matching Income', value: `₹${getSum(['BINARY_MATCHING']).toFixed(2)}`, gradient: 'from-[#6366f1] to-[#7c3aed]', icon: User },
     { label: 'Direct Sponsor Income', value: `₹${getSum(['SPONSOR_ROYALTY']).toFixed(2)}`, gradient: 'from-[#f43f5e] to-[#ea580c]', icon: TrendingUp },

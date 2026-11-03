@@ -30,6 +30,7 @@ interface DirectMember {
   isActive: boolean;
   activatedAt: string | null;
   placementPosition: 'LEFT' | 'RIGHT' | null;
+  personalPV?: number;
   leftVolumePV: number;
   rightVolumePV: number;
   createdAt: string;
@@ -472,8 +473,15 @@ export default function DirectTeamPage() {
                             })
                           : '—'}
                       </td>
-                      <td className="py-3.5 px-4 text-right font-mono font-bold text-slate-700">
-                        {member.leftVolumePV} / {member.rightVolumePV} PV
+                      <td className="py-3.5 px-4 text-right">
+                        <div className="font-mono font-bold text-[#144732]">
+                          {member.leftVolumePV} / {member.rightVolumePV} PV
+                        </div>
+                        {member.personalPV !== undefined && member.personalPV > 0 && (
+                          <div className="text-[10px] text-amber-700 font-bold">
+                            Pkg: {member.personalPV} PV
+                          </div>
+                        )}
                       </td>
                     </tr>
                   ))}

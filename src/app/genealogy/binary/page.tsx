@@ -96,6 +96,15 @@ export default function BinaryGenealogyPage() {
     }
 
     const isActive = node.isActive;
+    const carryLeft = (node.carryLeftPV !== undefined) 
+      ? node.carryLeftPV 
+      : ((node.leftVolumePV || 0) + (node.leftCarryForwardPV || 0));
+    const carryRight = (node.carryRightPV !== undefined) 
+      ? node.carryRightPV 
+      : ((node.rightVolumePV || 0) + (node.rightCarryForwardPV || 0));
+    const matchedPV = node.matchedPV ?? node.totalMatchingPaidPV ?? 0;
+    const totalLeft = node.totalLeftPV ?? (carryLeft + matchedPV);
+    const totalRight = node.totalRightPV ?? (carryRight + matchedPV);
 
     return (
       <div 
@@ -141,18 +150,27 @@ export default function BinaryGenealogyPage() {
           </div>
 
           {/* PV Volume Grid */}
-          <div className="grid grid-cols-2 gap-1.5 mt-3 pt-2 border-t border-white/20 text-[10px]">
-            <div className={`p-1.5 rounded-xl border text-white ${
-              isActive ? 'bg-emerald-950/60 border-emerald-400/30' : 'bg-rose-950/60 border-rose-400/30'
-            }`}>
-              <div className={`font-medium text-[9px] ${isActive ? 'text-emerald-200' : 'text-rose-200'}`}>Left PV</div>
-              <div className="font-black text-xs">{(node.leftVolumePV || 0) + (node.leftCarryForwardPV || 0)}</div>
+          <div className="mt-3 pt-2 border-t border-white/20 text-[10px] space-y-1.5">
+            {/* Total Lifetime Business PV */}
+            <div className="grid grid-cols-2 gap-1.5">
+              <div className={`p-1.5 rounded-xl border text-white ${
+                isActive ? 'bg-emerald-950/60 border-emerald-400/30' : 'bg-rose-950/60 border-rose-400/30'
+              }`}>
+                <div className={`font-semibold text-[8px] uppercase tracking-wider ${isActive ? 'text-emerald-200' : 'text-rose-200'}`}>Total Left PV</div>
+                <div className="font-black text-xs text-white">{totalLeft}</div>
+              </div>
+              <div className={`p-1.5 rounded-xl border text-white ${
+                isActive ? 'bg-emerald-950/60 border-emerald-400/30' : 'bg-rose-950/60 border-rose-400/30'
+              }`}>
+                <div className={`font-semibold text-[8px] uppercase tracking-wider ${isActive ? 'text-emerald-200' : 'text-rose-200'}`}>Total Right PV</div>
+                <div className="font-black text-xs text-white">{totalRight}</div>
+              </div>
             </div>
-            <div className={`p-1.5 rounded-xl border text-white ${
-              isActive ? 'bg-emerald-950/60 border-emerald-400/30' : 'bg-rose-950/60 border-rose-400/30'
-            }`}>
-              <div className={`font-medium text-[9px] ${isActive ? 'text-emerald-200' : 'text-rose-200'}`}>Right PV</div>
-              <div className="font-black text-xs">{(node.rightVolumePV || 0) + (node.rightCarryForwardPV || 0)}</div>
+
+            {/* Carry Forward & Matched Breakdown */}
+            <div className="flex items-center justify-between px-2 py-1 rounded-lg bg-black/35 border border-white/10 text-[9px] font-semibold text-white/90">
+              <span title="मैचिंग के बाद बचा हुआ शेष PV">Carry: <strong className="text-amber-300 font-mono">{carryLeft} : {carryRight}</strong></span>
+              <span title="1:1 में मैच हुआ PV (10% मैचिंग इनकम पेड)">Matched: <strong className="text-emerald-300 font-mono">{matchedPV}</strong></span>
             </div>
           </div>
         </div>
@@ -219,6 +237,37 @@ export default function BinaryGenealogyPage() {
             {error}
           </div>
         )}
+
+        {/* PV Explanation Guide Bar */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-white border border-[#e8e3d5] rounded-2xl p-4 shadow-xs text-xs">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-emerald-100 text-[#144732] flex items-center justify-center font-black shrink-0">
+              PV
+            </div>
+            <div>
+              <div className="font-bold text-slate-800">Total Left / Right PV</div>
+              <div className="text-[11px] text-slate-500">लेफ्ट व राइट टीम में हुआ कुल लाइफटाइम PV बिज़नेस</div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-black shrink-0">
+              1:1
+            </div>
+            <div>
+              <div className="font-bold text-slate-800">Matched PV (मैच हुआ)</div>
+              <div className="text-[11px] text-slate-500">1:1 में मैच हुआ वॉल्यूम (जिसकी 10% मैचिंग इनकम पेआउट हो चुकी है)</div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center font-black shrink-0">
+              CF
+            </div>
+            <div>
+              <div className="font-bold text-slate-800">Carry Forward (कैरी शेष)</div>
+              <div className="text-[11px] text-slate-500">मैचिंग के बाद बचा हुआ PV जो आगे नए बिज़नेस से मैच होगा</div>
+            </div>
+          </div>
+        </div>
 
         {loading ? (
           <div className="bg-white border border-[#e8e3d5] rounded-3xl p-24 text-center">

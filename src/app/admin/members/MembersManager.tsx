@@ -577,11 +577,11 @@ export default function MembersManager() {
                     </td>
 
                     <td className="py-3.5 px-3 text-right">
-                      <div className="font-mono font-bold text-[#92580a]">
-                        {m.leftVolumePV} : {m.rightVolumePV}
+                      <div className="font-mono font-bold text-[#144732]" title="Total Left PV : Total Right PV">
+                        {(m.leftVolumePV || 0) + (m.leftCarryForwardPV || 0) + (m.totalMatchingPaidPV || 0)} : {(m.rightVolumePV || 0) + (m.rightCarryForwardPV || 0) + (m.totalMatchingPaidPV || 0)} PV
                       </div>
-                      <div className="text-[9px] text-slate-400">
-                        Paid: {m.totalMatchingPaidPV} PV
+                      <div className="text-[9px] text-slate-500 font-semibold" title="Carry Forward (L:R)">
+                        Carry: {(m.leftVolumePV || 0) + (m.leftCarryForwardPV || 0)} : {(m.rightVolumePV || 0) + (m.rightCarryForwardPV || 0)} | Matched: {m.totalMatchingPaidPV || 0}
                       </div>
                     </td>
 
@@ -1205,27 +1205,31 @@ export default function MembersManager() {
                   <div className="space-y-4">
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                       <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl text-center">
-                        <div className="text-[10px] font-black uppercase tracking-wider text-emerald-800">Left Total PV</div>
-                        <div className="text-2xl font-black text-emerald-900 mt-1">{memberDetail.leftVolumePV}</div>
-                        <div className="text-[10px] text-emerald-700 mt-0.5">बायाँ लेग वॉल्यूम</div>
+                        <div className="text-[10px] font-black uppercase tracking-wider text-emerald-800">Total Left PV</div>
+                        <div className="text-2xl font-black text-emerald-900 mt-1">
+                          {(memberDetail.leftVolumePV || 0) + (memberDetail.leftCarryForwardPV || 0) + (memberDetail.totalMatchingPaidPV || 0)}
+                        </div>
+                        <div className="text-[10px] text-emerald-700 mt-0.5">कुल बायाँ लेग बिज़नेस</div>
                       </div>
 
                       <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl text-center">
-                        <div className="text-[10px] font-black uppercase tracking-wider text-emerald-800">Right Total PV</div>
-                        <div className="text-2xl font-black text-emerald-900 mt-1">{memberDetail.rightVolumePV}</div>
-                        <div className="text-[10px] text-emerald-700 mt-0.5">दायाँ लेग वॉल्यूम</div>
+                        <div className="text-[10px] font-black uppercase tracking-wider text-emerald-800">Total Right PV</div>
+                        <div className="text-2xl font-black text-emerald-900 mt-1">
+                          {(memberDetail.rightVolumePV || 0) + (memberDetail.rightCarryForwardPV || 0) + (memberDetail.totalMatchingPaidPV || 0)}
+                        </div>
+                        <div className="text-[10px] text-emerald-700 mt-0.5">कुल दायाँ लेग बिज़नेस</div>
                       </div>
 
                       <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl text-center">
                         <div className="text-[10px] font-black uppercase tracking-wider text-amber-800">Left Carry Forward</div>
-                        <div className="text-2xl font-black text-amber-900 mt-1">{memberDetail.leftCarryForwardPV}</div>
-                        <div className="text-[10px] text-amber-700 mt-0.5">अगले दिन हेतु शेष</div>
+                        <div className="text-2xl font-black text-amber-900 mt-1">{(memberDetail.leftVolumePV || 0) + (memberDetail.leftCarryForwardPV || 0)}</div>
+                        <div className="text-[10px] text-amber-700 mt-0.5">मैचिंग उपरांत शेष PV</div>
                       </div>
 
                       <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl text-center">
                         <div className="text-[10px] font-black uppercase tracking-wider text-amber-800">Right Carry Forward</div>
-                        <div className="text-2xl font-black text-amber-900 mt-1">{memberDetail.rightCarryForwardPV}</div>
-                        <div className="text-[10px] text-amber-700 mt-0.5">अगले दिन हेतु शेष</div>
+                        <div className="text-2xl font-black text-amber-900 mt-1">{(memberDetail.rightVolumePV || 0) + (memberDetail.rightCarryForwardPV || 0)}</div>
+                        <div className="text-[10px] text-amber-700 mt-0.5">मैचिंग उपरांत शेष PV</div>
                       </div>
                     </div>
 

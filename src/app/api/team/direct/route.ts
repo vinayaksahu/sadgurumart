@@ -69,8 +69,15 @@ export async function GET(req: NextRequest) {
         placementPosition: true,
         leftVolumePV: true,
         rightVolumePV: true,
+        leftCarryForwardPV: true,
+        rightCarryForwardPV: true,
+        totalMatchingPaidPV: true,
         directBusinessPV: true,
         createdAt: true,
+        orders: {
+          where: { paymentStatus: 'PAID' },
+          select: { totalPV: true },
+        },
         kycDetail: {
           select: { status: true },
         },
@@ -82,7 +89,10 @@ export async function GET(req: NextRequest) {
     const inactiveCount = directReferrals.length - activeCount;
     const leftCount = directReferrals.filter((d) => d.placementPosition === 'LEFT').length;
     const rightCount = directReferrals.filter((d) => d.placementPosition === 'RIGHT').length;
-    const totalPV = directReferrals.reduce((sum, d) => sum + (d.leftVolumePV + d.rightVolumePV), 0);
+    const totalPV = directReferrals.reduce(
+      (sum, d) => sum + d.orders.reduce((s, o) => s + (o.totalPV || 0), 0),
+      0
+    );
 
     return NextResponse.json({
       success: true,
@@ -98,20 +108,27 @@ export async function GET(req: NextRequest) {
         rightLeg: rightCount,
         directPV: totalPV,
       },
-      directs: directReferrals.map((d) => ({
-        id: d.id,
-        userCode: d.userCode,
-        name: d.name,
-        mobile: d.mobile ? `${d.mobile.slice(0, 3)}****${d.mobile.slice(-3)}` : 'N/A',
-        rank: d.rank,
-        isActive: d.isActive,
-        activatedAt: d.activatedAt,
-        placementPosition: d.placementPosition,
-        leftVolumePV: d.leftVolumePV,
-        rightVolumePV: d.rightVolumePV,
-        createdAt: d.createdAt,
-        kycStatus: d.kycDetail?.status || 'NOT_SUBMITTED',
-      })),
+      directs: directReferrals.map((d) => {
+        const personalPV = d.orders.reduce((sum, o) => sum + (o.totalPV || 0), 0);
+        const totalLeftPV = (d.leftVolumePV || 0) + (d.leftCarryForwardPV || 0) + (d.totalMatchingPaidPV || 0);
+        const totalRightPV = (d.rightVolumePV || 0) + (d.rightCarryForwardPV || 0) + (d.totalMatchingPaidPV || 0);
+
+        return {
+          id: d.id,
+          userCode: d.userCode,
+          name: d.name,
+          mobile: d.mobile ? `${d.mobile.slice(0, 3)}****${d.mobile.slice(-3)}` : 'N/A',
+          rank: d.rank,
+          isActive: d.isActive,
+          activatedAt: d.activatedAt,
+          placementPosition: d.placementPosition,
+          personalPV,
+          leftVolumePV: totalLeftPV,
+          rightVolumePV: totalRightPV,
+          createdAt: d.createdAt,
+          kycStatus: d.kycDetail?.status || 'NOT_SUBMITTED',
+        };
+      }),
     });
   } catch (error: any) {
     console.error('Error fetching direct team:', error);

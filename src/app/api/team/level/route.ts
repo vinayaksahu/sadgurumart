@@ -85,6 +85,9 @@ export async function GET(req: NextRequest) {
           placementPosition: true,
           leftVolumePV: true,
           rightVolumePV: true,
+          leftCarryForwardPV: true,
+          rightCarryForwardPV: true,
+          totalMatchingPaidPV: true,
           createdAt: true,
           sponsor: {
             select: {
@@ -109,6 +112,9 @@ export async function GET(req: NextRequest) {
       });
 
       for (const u of levelUsers) {
+        const totalLeft = (u.leftVolumePV || 0) + (u.leftCarryForwardPV || 0) + (u.totalMatchingPaidPV || 0);
+        const totalRight = (u.rightVolumePV || 0) + (u.rightCarryForwardPV || 0) + (u.totalMatchingPaidPV || 0);
+
         allLevelMembers.push({
           level: lvl,
           id: u.id,
@@ -119,8 +125,8 @@ export async function GET(req: NextRequest) {
           isActive: u.isActive,
           activatedAt: u.activatedAt,
           placementPosition: u.placementPosition,
-          leftVolumePV: u.leftVolumePV,
-          rightVolumePV: u.rightVolumePV,
+          leftVolumePV: totalLeft,
+          rightVolumePV: totalRight,
           createdAt: u.createdAt,
           sponsorCode: u.sponsor?.userCode || 'N/A',
           sponsorName: u.sponsor?.name || 'N/A',

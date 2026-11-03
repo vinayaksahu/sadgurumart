@@ -78,6 +78,7 @@ export async function GET(req: NextRequest) {
             rightVolumePV: true,
             leftCarryForwardPV: true,
             rightCarryForwardPV: true,
+            totalMatchingPaidPV: true,
             placementPosition: true,
             createdAt: true,
           },
@@ -94,27 +95,38 @@ export async function GET(req: NextRequest) {
             rightVolumePV: true,
             leftCarryForwardPV: true,
             rightCarryForwardPV: true,
+            totalMatchingPaidPV: true,
             placementPosition: true,
             createdAt: true,
           },
         }),
       ]);
 
+      const formatNode = async (node: any) => {
+        if (!node) return null;
+        const carryLeft = (node.leftVolumePV || 0) + (node.leftCarryForwardPV || 0);
+        const carryRight = (node.rightVolumePV || 0) + (node.rightCarryForwardPV || 0);
+        const matched = node.totalMatchingPaidPV || 0;
+        return {
+          ...node,
+          carryLeftPV: carryLeft,
+          carryRightPV: carryRight,
+          matchedPV: matched,
+          totalLeftPV: carryLeft + matched,
+          totalRightPV: carryRight + matched,
+          children: depth < 3 ? await buildSubTree(node.id, depth + 1) : null,
+        };
+      };
+
       return {
-        left: leftChild
-          ? {
-              ...leftChild,
-              children: depth < 3 ? await buildSubTree(leftChild.id, depth + 1) : null,
-            }
-          : null,
-        right: rightChild
-          ? {
-              ...rightChild,
-              children: depth < 3 ? await buildSubTree(rightChild.id, depth + 1) : null,
-            }
-          : null,
+        left: await formatNode(leftChild),
+        right: await formatNode(rightChild),
       };
     }
+
+    const rootCarryLeft = (rootUser.leftVolumePV || 0) + (rootUser.leftCarryForwardPV || 0);
+    const rootCarryRight = (rootUser.rightVolumePV || 0) + (rootUser.rightCarryForwardPV || 0);
+    const rootMatched = rootUser.totalMatchingPaidPV || 0;
 
     const tree = {
       id: rootUser.id,
@@ -126,6 +138,12 @@ export async function GET(req: NextRequest) {
       rightVolumePV: rootUser.rightVolumePV,
       leftCarryForwardPV: rootUser.leftCarryForwardPV,
       rightCarryForwardPV: rootUser.rightCarryForwardPV,
+      totalMatchingPaidPV: rootMatched,
+      carryLeftPV: rootCarryLeft,
+      carryRightPV: rootCarryRight,
+      matchedPV: rootMatched,
+      totalLeftPV: rootCarryLeft + rootMatched,
+      totalRightPV: rootCarryRight + rootMatched,
       placementParentId: rootUser.placementParentId,
       createdAt: rootUser.createdAt,
       children: await buildSubTree(rootUser.id, 1),

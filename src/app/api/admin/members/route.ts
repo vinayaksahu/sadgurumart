@@ -119,7 +119,7 @@ export async function GET(req: NextRequest) {
       where.isActive = false;
     }
 
-    const [members, totalCount, activeCount, totalOrdersCount, totalPVData] = await Promise.all([
+    const [members, totalCount, activeCount, totalOrdersCount, rootUserVolume, totalPVData] = await Promise.all([
       prisma.user.findMany({
         where,
         take: 100,
@@ -167,14 +167,30 @@ export async function GET(req: NextRequest) {
       prisma.user.count(),
       prisma.user.count({ where: { isActive: true } }),
       prisma.order.count(),
-      prisma.user.aggregate({
-        _sum: {
+      prisma.user.findFirst({
+        where: { OR: [{ userCode: 'SGM010001' }, { userCode: 'SGM10001' }] },
+        select: {
           leftVolumePV: true,
           rightVolumePV: true,
+          leftCarryForwardPV: true,
+          rightCarryForwardPV: true,
+          totalMatchingPaidPV: true,
+        },
+      }),
+      prisma.user.aggregate({
+        _sum: {
           totalMatchingPaidPV: true,
         },
       }),
     ]);
+
+    const rootAccount = rootUserVolume;
+    const networkLeft = rootAccount
+      ? (rootAccount.leftVolumePV || 0) + (rootAccount.leftCarryForwardPV || 0) + (rootAccount.totalMatchingPaidPV || 0)
+      : 0;
+    const networkRight = rootAccount
+      ? (rootAccount.rightVolumePV || 0) + (rootAccount.rightCarryForwardPV || 0) + (rootAccount.totalMatchingPaidPV || 0)
+      : 0;
 
     return NextResponse.json({
       success: true,
@@ -184,8 +200,8 @@ export async function GET(req: NextRequest) {
         activeMembers: activeCount,
         inactiveMembers: totalCount - activeCount,
         totalOrders: totalOrdersCount,
-        totalNetworkLeftPV: totalPVData._sum.leftVolumePV || 0,
-        totalNetworkRightPV: totalPVData._sum.rightVolumePV || 0,
+        totalNetworkLeftPV: networkLeft,
+        totalNetworkRightPV: networkRight,
         totalMatchingPaidPV: totalPVData._sum.totalMatchingPaidPV || 0,
       },
     });
