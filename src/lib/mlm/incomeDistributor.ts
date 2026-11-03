@@ -53,7 +53,7 @@ export async function creditIncomeWithAutoPoolCheck({
     return { grossAmount: amount, netCredited: 0, autoPoolDeduction: 0, enteredAutoPool: false };
   }
 
-  const isExempt = user.userCode === 'SGM10001'; // Master root account
+  const isExempt = user.userCode === 'SGM010001' || user.userCode === 'SGM10001'; // Master root account
   const needsDeduction = !isExempt && !user.autoPoolDeducted && user.autoPoolDeductionPaid < 100;
 
   if (!needsDeduction) {

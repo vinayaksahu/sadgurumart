@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
     // If not logged in, link to root distributor
     if (!userId) {
       const rootUser = await prisma.user.findFirst({
-        where: { userCode: 'SGM10001' },
+        where: { OR: [{ userCode: 'SGM010001' }, { userCode: 'SGM10001' }] },
       });
       userId = rootUser ? rootUser.id : (await prisma.user.findFirst())?.id || '';
     }

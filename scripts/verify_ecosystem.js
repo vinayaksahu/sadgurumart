@@ -29,7 +29,7 @@ async function runVerification() {
   // 2. Fetch or Create Root Account SGM10001
   console.log('🔍 Step 2: Fetching Root Account SGM10001...');
   const root = await prisma.user.findUnique({
-    where: { userCode: 'SGM10001' },
+    where: { userCode: 'SGM010001' },
     include: { wallet: true },
   });
   console.log(`   ✅ Root account verified: ${root.name} (${root.userCode}), Wallet Balance: ₹${root.wallet?.mainBalance || 0}\n`);

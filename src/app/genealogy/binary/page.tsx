@@ -85,7 +85,7 @@ export default function BinaryGenealogyPage() {
               {positionLabel} VACANT
             </div>
             <Link
-              href={`/register?ref=${parentId || treeData?.userCode || 'SGM10001'}&pos=${positionLabel}`}
+              href={`/register?ref=${parentId || treeData?.userCode || 'SGM010001'}&pos=${positionLabel}`}
               className="mt-2 inline-block px-3 py-1 rounded-lg bg-[#144732] text-white text-[10px] font-bold hover:bg-[#0b2b1e]"
             >
               + Place Member
@@ -187,7 +187,7 @@ export default function BinaryGenealogyPage() {
               type="text"
               value={searchCode}
               onChange={(e) => setSearchCode(e.target.value)}
-              placeholder="Search Member ID (e.g. SGM10001)"
+              placeholder="Search Member ID (e.g. SGM010001)"
               className="bg-[#faf8f4] border border-[#d8d0bf] focus:border-[#144732] rounded-xl px-4 py-2 text-xs font-bold uppercase focus:outline-none w-full md:w-64"
             />
             <button

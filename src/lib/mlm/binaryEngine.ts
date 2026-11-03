@@ -119,7 +119,7 @@ export async function calculateUserBinaryMatching(
 
   // Check 1:1 or First Pair qualification:
   // Must have at least 1 active direct referral on Left and 1 on Right (except root account)
-  const isRoot = user.userCode === 'SGM10001';
+  const isRoot = user.userCode === 'SGM010001' || user.userCode === 'SGM10001';
   const hasActiveLeft = user.directReferrals.some((d) => d.placementPosition === 'LEFT' && d.isActive);
   const hasActiveRight = user.directReferrals.some((d) => d.placementPosition === 'RIGHT' && d.isActive);
   const isQualified = isRoot || (hasActiveLeft && hasActiveRight);

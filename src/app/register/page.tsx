@@ -32,7 +32,7 @@ function RegisterForm() {
   const normalizedPos = queryPos.toUpperCase() === 'RIGHT' ? 'RIGHT' : queryPos.toUpperCase() === 'LEFT' ? 'LEFT' : null;
 
   const [formData, setFormData] = useState({
-    sponsorId: queryRef ? queryRef.toUpperCase() : 'SGM10001',
+    sponsorId: queryRef ? queryRef.toUpperCase() : 'SGM010001',
     placementPosition: normalizedPos || 'LEFT',
     name: '',
     mobile: '',
@@ -351,7 +351,7 @@ function RegisterForm() {
                       value={formData.sponsorId}
                       onChange={handleChange}
                       required
-                      placeholder="SGM10001"
+                      placeholder="SGM010001"
                       className="w-full bg-[#fdfaf3] border border-[#d8d0bf] focus:border-[#144732] rounded-xl px-4 py-2.5 text-sm text-slate-900 font-bold uppercase focus:outline-none focus:ring-1 focus:ring-[#144732]"
                     />
                     {sponsorName ? (

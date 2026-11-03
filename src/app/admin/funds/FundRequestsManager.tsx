@@ -756,7 +756,7 @@ export default function FundRequestsManager() {
               </label>
               <input
                 type="text"
-                placeholder="उदा. SGM54963"
+                placeholder="उदा. SGM054963"
                 value={manualUserCode}
                 onChange={(e) => handleSearchMember(e.target.value)}
                 required

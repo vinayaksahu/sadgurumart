@@ -50,7 +50,9 @@ export async function GET(req: NextRequest) {
       });
     } else {
       rootUser = await prisma.user.findFirst({
-        where: { userCode: 'SGM10001' },
+        where: {
+          OR: [{ userCode: 'SGM010001' }, { userCode: 'SGM10001' }],
+        },
         include: { wallet: true },
       });
     }

@@ -196,7 +196,7 @@ function AdminGenealogyContent() {
               type="text"
               value={searchCode}
               onChange={(e) => setSearchCode(e.target.value)}
-              placeholder="Search Member ID (e.g. SGM10001)"
+              placeholder="Search Member ID (e.g. SGM010001)"
               className="bg-[#faf8f4] border border-[#d8d0bf] focus:border-[#144732] rounded-xl px-4 py-2 text-xs font-bold uppercase focus:outline-none w-full md:w-64"
             />
             <button

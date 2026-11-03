@@ -194,10 +194,10 @@ async function main() {
   // 5. Create Company Root MLM Distributor (SGM10001)
   const rootPassword = await bcrypt.hash('SgmRoot@2026', 10);
   const rootUser = await prisma.user.upsert({
-    where: { userCode: 'SGM10001' },
+    where: { userCode: 'SGM010001' },
     update: {},
     create: {
-      userCode: 'SGM10001',
+      userCode: 'SGM010001',
       name: 'SGM Mart Master Account',
       email: 'root@sadgurumart.com',
       mobile: '6267392508',

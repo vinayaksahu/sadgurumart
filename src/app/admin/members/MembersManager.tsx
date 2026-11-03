@@ -457,7 +457,7 @@ export default function MembersManager() {
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="सर्च करें: ID (SGM10001), नाम, मोबाइल या PAN..."
+              placeholder="सर्च करें: ID (SGM010001), नाम, मोबाइल या PAN..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 text-xs font-bold focus:outline-none focus:border-[#144732]"

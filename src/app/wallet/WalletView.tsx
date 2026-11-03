@@ -1558,7 +1558,7 @@ export default function WalletView({
                     type="text"
                     value={p2pRecipientCode}
                     onChange={(e) => handleVerifyRecipient(e.target.value.toUpperCase())}
-                    placeholder="उदा. SGM10002"
+                    placeholder="उदा. SGM010002"
                     required
                     className="w-full uppercase font-mono px-3 py-2.5 rounded-xl border border-slate-300 text-sm font-bold focus:ring-2 focus:ring-[#144732] focus:outline-none"
                   />
@@ -1755,7 +1755,7 @@ export default function WalletView({
                       type="text"
                       value={targetMemberCode}
                       onChange={(e) => handleVerifyTargetMember(e.target.value.toUpperCase())}
-                      placeholder="उदा. SGM10003"
+                      placeholder="उदा. SGM010003"
                       required
                       className="w-full uppercase font-mono px-3 py-2.5 rounded-xl border border-slate-300 text-sm font-bold focus:ring-2 focus:ring-[#144732] focus:outline-none"
                     />
