@@ -327,6 +327,82 @@ export async function PATCH(req: NextRequest) {
       return response;
     }
 
+    // Action 5: Update Member Profile (Admin override)
+    if (action === 'UPDATE_PROFILE') {
+      const { name, mobile, email, pan, addressLine, city, state, pincode } = body;
+
+      const updateData: {
+        name?: string;
+        mobile?: string;
+        email?: string | null;
+        pan?: string | null;
+        addressLine?: string | null;
+        city?: string | null;
+        state?: string | null;
+        pincode?: string | null;
+      } = {};
+
+      if (name !== undefined) {
+        const trimmedName = String(name).trim();
+        if (!trimmedName) {
+          return NextResponse.json({ error: 'नाम दर्ज करना अनिवार्य है (Name is required)' }, { status: 400 });
+        }
+        updateData.name = trimmedName;
+      }
+
+      if (mobile !== undefined) {
+        const trimmedMobile = String(mobile).trim();
+        if (!/^\d{10}$/.test(trimmedMobile)) {
+          return NextResponse.json(
+            { error: 'मोबाइल नंबर 10 अंकों का होना अनिवार्य है (Mobile must be 10 digits)' },
+            { status: 400 }
+          );
+        }
+        updateData.mobile = trimmedMobile;
+      }
+
+      if (email !== undefined) {
+        const trimmedEmail = String(email).trim().toLowerCase();
+        if (trimmedEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+          return NextResponse.json({ error: 'अमान्य ईमेल पता (Invalid email address)' }, { status: 400 });
+        }
+        updateData.email = trimmedEmail || null;
+      }
+
+      if (pan !== undefined) {
+        const trimmedPan = String(pan).trim().toUpperCase();
+        if (trimmedPan && !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(trimmedPan)) {
+          return NextResponse.json(
+            { error: 'अमान्य पैन नंबर (PAN must be 10 alphanumeric characters e.g. ABCDE1234F)' },
+            { status: 400 }
+          );
+        }
+        updateData.pan = trimmedPan || null;
+      }
+
+      if (addressLine !== undefined) updateData.addressLine = addressLine ? String(addressLine).trim() : null;
+      if (city !== undefined) updateData.city = city ? String(city).trim() : null;
+      if (state !== undefined) updateData.state = state ? String(state).trim() : null;
+      if (pincode !== undefined) updateData.pincode = pincode ? String(pincode).trim() : null;
+
+      const updated = await prisma.user.update({
+        where: { id: userId },
+        data: updateData,
+        include: {
+          sponsor: { select: { userCode: true, name: true, mobile: true } },
+          placementParent: { select: { userCode: true, name: true } },
+          wallet: true,
+          kycDetail: true,
+        },
+      });
+
+      return NextResponse.json({
+        success: true,
+        message: `मेंबर ID ${user.userCode} (${updated.name}) की प्रोफ़ाइल सफलतापूर्वक अपडेट कर दी गई है।`,
+        member: updated,
+      });
+    }
+
     return NextResponse.json({ error: 'Invalid action specified' }, { status: 400 });
   } catch (err: any) {
     console.error('Admin member patch error:', err);

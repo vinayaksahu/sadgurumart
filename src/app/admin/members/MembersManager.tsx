@@ -29,7 +29,9 @@ import {
   UserCheck, 
   ExternalLink,
   Award,
-  Sparkles
+  Sparkles,
+  Edit3,
+  Save,
 } from 'lucide-react';
 
 interface MemberSummary {
@@ -105,6 +107,19 @@ export default function MembersManager() {
   const [walletAdjInput, setWalletAdjInput] = useState('');
   const [walletAdjReason, setWalletAdjReason] = useState('');
 
+  // Profile Edit States
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [editFormData, setEditFormData] = useState({
+    name: '',
+    mobile: '',
+    email: '',
+    pan: '',
+    addressLine: '',
+    city: '',
+    state: '',
+    pincode: '',
+  });
+
   const fetchMembers = async () => {
     setLoading(true);
     try {
@@ -141,17 +156,101 @@ export default function MembersManager() {
     setResetPwdInput('');
     setWalletAdjInput('');
     setWalletAdjReason('');
+    setIsEditingProfile(false);
+    setEditFormData({
+      name: '',
+      mobile: '',
+      email: '',
+      pan: '',
+      addressLine: '',
+      city: '',
+      state: '',
+      pincode: '',
+    });
 
     try {
       const res = await fetch(`/api/admin/members?id=${id}`);
       const data = await res.json();
       if (data.success) {
         setMemberDetail(data.member);
+        setEditFormData({
+          name: data.member.name || '',
+          mobile: data.member.mobile || '',
+          email: data.member.email || '',
+          pan: data.member.pan || '',
+          addressLine: data.member.addressLine || '',
+          city: data.member.city || '',
+          state: data.member.state || '',
+          pincode: data.member.pincode || '',
+        });
       }
     } catch (err) {
       console.error('Fetch member detail error:', err);
     } finally {
       setDetailLoading(false);
+    }
+  };
+
+  // Save Edited Profile Details
+  const handleSaveProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!memberDetail) return;
+
+    if (!editFormData.name.trim()) {
+      setMessage({ type: 'error', text: 'नाम दर्ज करना अनिवार्य है।' });
+      return;
+    }
+    if (!/^\d{10}$/.test(editFormData.mobile.trim())) {
+      setMessage({ type: 'error', text: 'मोबाइल नंबर 10 अंकों का होना अनिवार्य है।' });
+      return;
+    }
+
+    setActionLoading(true);
+    setMessage(null);
+
+    try {
+      const res = await fetch('/api/admin/members', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: memberDetail.id,
+          action: 'UPDATE_PROFILE',
+          ...editFormData,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to update profile');
+
+      setMessage({ type: 'success', text: data.message });
+      setIsEditingProfile(false);
+      setMemberDetail((prev: any) => ({
+        ...prev,
+        name: editFormData.name.trim(),
+        mobile: editFormData.mobile.trim(),
+        email: editFormData.email.trim() || null,
+        pan: editFormData.pan.trim().toUpperCase() || null,
+        addressLine: editFormData.addressLine.trim() || null,
+        city: editFormData.city.trim() || null,
+        state: editFormData.state.trim() || null,
+        pincode: editFormData.pincode.trim() || null,
+      }));
+      setMembers((prev) =>
+        prev.map((m) =>
+          m.id === memberDetail.id
+            ? {
+                ...m,
+                name: editFormData.name.trim(),
+                mobile: editFormData.mobile.trim(),
+                email: editFormData.email.trim() || null,
+                pan: editFormData.pan.trim().toUpperCase() || null,
+              }
+            : m
+        )
+      );
+    } catch (err: any) {
+      setMessage({ type: 'error', text: err.message });
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -575,6 +674,35 @@ export default function MembersManager() {
 
                   <div className="flex items-center gap-2">
                     <button
+                      type="button"
+                      onClick={() => {
+                        setIsEditingProfile(!isEditingProfile);
+                        setActiveTab('profile');
+                        if (!isEditingProfile && memberDetail) {
+                          setEditFormData({
+                            name: memberDetail.name || '',
+                            mobile: memberDetail.mobile || '',
+                            email: memberDetail.email || '',
+                            pan: memberDetail.pan || '',
+                            addressLine: memberDetail.addressLine || '',
+                            city: memberDetail.city || '',
+                            state: memberDetail.state || '',
+                            pincode: memberDetail.pincode || '',
+                          });
+                        }
+                      }}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm transition-all flex items-center gap-1.5 cursor-pointer shrink-0 border ${
+                        isEditingProfile
+                          ? 'bg-amber-100 text-amber-900 border-amber-300 hover:bg-amber-200'
+                          : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+                      }`}
+                      title="मेंबर प्रोफ़ाइल विवरण संपादित करें"
+                    >
+                      <Edit3 className="w-3.5 h-3.5 text-amber-600" />
+                      <span>{isEditingProfile ? 'एडिट बंद करें' : 'प्रोफ़ाइल एडिट करें'}</span>
+                    </button>
+
+                    <button
                       onClick={() => handleLoginAsMember(memberDetail.id, memberDetail.userCode)}
                       disabled={impersonatingId === memberDetail.id}
                       className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs shadow-sm transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
@@ -677,10 +805,180 @@ export default function MembersManager() {
                 {/* TAB 1: PROFILE & SETTINGS */}
                 {activeTab === 'profile' && (
                   <div className="space-y-6">
+                    {/* EDIT PROFILE FORM (Visible when isEditingProfile is true) */}
+                    {isEditingProfile && (
+                      <form onSubmit={handleSaveProfile} className="bg-amber-50/70 border-2 border-amber-300 rounded-2xl p-5 sm:p-6 space-y-4 shadow-sm animate-in fade-in duration-200">
+                        <div className="flex items-center justify-between pb-3 border-b border-amber-200">
+                          <div className="flex items-center gap-2.5">
+                            <div className="p-2 bg-amber-500 text-white rounded-xl shadow-xs">
+                              <Edit3 className="w-4 h-4" />
+                            </div>
+                            <div>
+                              <div className="text-sm font-black text-slate-800">
+                                सदस्य प्रोफ़ाइल विवरण संपादित करें (Edit Profile Details)
+                              </div>
+                              <div className="text-[11px] text-slate-500">
+                                नाम, मोबाइल, ईमेल, पैन एवं शिपिंग पता अपडेट करें।
+                              </div>
+                            </div>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => setIsEditingProfile(false)}
+                            className="text-xs text-slate-500 hover:text-slate-800 font-bold px-2.5 py-1 rounded-lg hover:bg-amber-100 transition-colors"
+                          >
+                            ✕ बंद करें
+                          </button>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-xs font-bold text-slate-700 mb-1">पूरा नाम (Full Name) *</label>
+                            <input
+                              type="text"
+                              required
+                              value={editFormData.name}
+                              onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
+                              className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#144732]"
+                              placeholder="उदा. Lalita kanwar"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-bold text-slate-700 mb-1">मोबाइल नंबर (10 Digit Mobile) *</label>
+                            <input
+                              type="tel"
+                              required
+                              maxLength={10}
+                              value={editFormData.mobile}
+                              onChange={(e) => setEditFormData({ ...editFormData, mobile: e.target.value })}
+                              className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white text-xs font-mono font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#144732]"
+                              placeholder="उदा. 9876543210"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-bold text-slate-700 mb-1">ईमेल पता (Email ID)</label>
+                            <input
+                              type="email"
+                              value={editFormData.email}
+                              onChange={(e) => setEditFormData({ ...editFormData, email: e.target.value })}
+                              className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#144732]"
+                              placeholder="उदा. name@example.com"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-bold text-slate-700 mb-1">पैन कार्ड (PAN Number)</label>
+                            <input
+                              type="text"
+                              maxLength={10}
+                              value={editFormData.pan}
+                              onChange={(e) => setEditFormData({ ...editFormData, pan: e.target.value.toUpperCase() })}
+                              className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white text-xs font-mono font-bold uppercase text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#144732]"
+                              placeholder="उदा. ABCDE1234F"
+                            />
+                          </div>
+
+                          <div className="sm:col-span-2">
+                            <label className="block text-xs font-bold text-slate-700 mb-1">पूरा पता (Address / Village / Ward)</label>
+                            <input
+                              type="text"
+                              value={editFormData.addressLine}
+                              onChange={(e) => setEditFormData({ ...editFormData, addressLine: e.target.value })}
+                              className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#144732]"
+                              placeholder="मकान नं., गली, वार्ड, गांव या कॉलोनी का नाम"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-bold text-slate-700 mb-1">शहर / जिला (City / District)</label>
+                            <input
+                              type="text"
+                              value={editFormData.city}
+                              onChange={(e) => setEditFormData({ ...editFormData, city: e.target.value })}
+                              className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#144732]"
+                              placeholder="उदा. Korba / Raipur"
+                            />
+                          </div>
+
+                          <div>
+                            <div className="grid grid-cols-2 gap-2">
+                              <div>
+                                <label className="block text-xs font-bold text-slate-700 mb-1">राज्य (State)</label>
+                                <input
+                                  type="text"
+                                  value={editFormData.state}
+                                  onChange={(e) => setEditFormData({ ...editFormData, state: e.target.value })}
+                                  className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#144732]"
+                                  placeholder="उदा. Chhattisgarh"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-xs font-bold text-slate-700 mb-1">पिनकोड (Pincode)</label>
+                                <input
+                                  type="text"
+                                  maxLength={6}
+                                  value={editFormData.pincode}
+                                  onChange={(e) => setEditFormData({ ...editFormData, pincode: e.target.value })}
+                                  className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white text-xs font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#144732]"
+                                  placeholder="495677"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-end gap-3 pt-3 border-t border-amber-200">
+                          <button
+                            type="button"
+                            onClick={() => setIsEditingProfile(false)}
+                            disabled={actionLoading}
+                            className="px-4 py-2 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-100 text-xs font-bold transition-all cursor-pointer"
+                          >
+                            रद्द करें (Cancel)
+                          </button>
+                          <button
+                            type="submit"
+                            disabled={actionLoading}
+                            className="px-5 py-2 rounded-xl bg-[#144732] hover:bg-[#0b2b1e] text-[#fef08a] text-xs font-black shadow-md flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
+                          >
+                            {actionLoading ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                            <span>बदलाव सुरक्षित करें (Save Profile)</span>
+                          </button>
+                        </div>
+                      </form>
+                    )}
+
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="bg-[#faf8f4] border border-[#e8e3d5] rounded-2xl p-4 space-y-2 text-xs">
-                        <div className="font-black text-[#144732] pb-1 border-b border-slate-200">
-                          संपर्क एवं व्यक्तिगत जानकारी
+                        <div className="flex items-center justify-between font-black text-[#144732] pb-1 border-b border-slate-200">
+                          <span>संपर्क एवं व्यक्तिगत जानकारी</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsEditingProfile(true);
+                              setEditFormData({
+                                name: memberDetail.name || '',
+                                mobile: memberDetail.mobile || '',
+                                email: memberDetail.email || '',
+                                pan: memberDetail.pan || '',
+                                addressLine: memberDetail.addressLine || '',
+                                city: memberDetail.city || '',
+                                state: memberDetail.state || '',
+                                pincode: memberDetail.pincode || '',
+                              });
+                            }}
+                            className="text-amber-700 hover:text-amber-800 font-bold text-xs flex items-center gap-1 hover:underline cursor-pointer"
+                          >
+                            <Edit3 className="w-3 h-3" />
+                            <span>एडिट करें</span>
+                          </button>
+                        </div>
+                        <div className="flex justify-between py-1 border-b border-slate-100">
+                          <span className="text-slate-500">सदस्य का नाम:</span>
+                          <span className="font-bold text-slate-800">{memberDetail.name}</span>
                         </div>
                         <div className="flex justify-between py-1 border-b border-slate-100">
                           <span className="text-slate-500">मोबाइल नंबर:</span>
@@ -693,6 +991,12 @@ export default function MembersManager() {
                         <div className="flex justify-between py-1 border-b border-slate-100">
                           <span className="text-slate-500">पैन नंबर:</span>
                           <span className="font-mono font-bold text-slate-800">{memberDetail.pan || 'उपलब्ध नहीं'}</span>
+                        </div>
+                        <div className="flex justify-between py-1 border-b border-slate-100">
+                          <span className="text-slate-500">पता (Address):</span>
+                          <span className="font-medium text-slate-800 text-right max-w-[65%]">
+                            {[memberDetail.addressLine, memberDetail.city, memberDetail.state, memberDetail.pincode].filter(Boolean).join(', ') || 'उपलब्ध नहीं'}
+                          </span>
                         </div>
                         <div className="flex justify-between py-1 border-b border-slate-100">
                           <span className="text-slate-500">पंजीकरण तिथि:</span>
@@ -737,13 +1041,48 @@ export default function MembersManager() {
                         एडमिन त्वरित एक्शन (Administrative Controls)
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        {/* Edit Profile Action Card */}
+                        <div className="p-4 bg-white border border-slate-200 rounded-xl space-y-2 flex flex-col justify-between">
+                          <div>
+                            <div className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                              <Edit3 className="w-3.5 h-3.5 text-amber-600" />
+                              <span>प्रोफ़ाइल विवरण संपादित करें</span>
+                            </div>
+                            <p className="text-[11px] text-slate-500 mt-1">
+                              नाम, मोबाइल नंबर, ईमेल, पैन एवं पूरा पता अपडेट करें।
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsEditingProfile(true);
+                              setEditFormData({
+                                name: memberDetail.name || '',
+                                mobile: memberDetail.mobile || '',
+                                email: memberDetail.email || '',
+                                pan: memberDetail.pan || '',
+                                addressLine: memberDetail.addressLine || '',
+                                city: memberDetail.city || '',
+                                state: memberDetail.state || '',
+                                pincode: memberDetail.pincode || '',
+                              });
+                            }}
+                            className="w-full py-2 px-3 rounded-lg text-xs font-black transition-colors cursor-pointer bg-amber-500 hover:bg-amber-600 text-white flex items-center justify-center gap-1.5 shadow-xs"
+                          >
+                            <Edit3 className="w-3.5 h-3.5" />
+                            <span>प्रोफ़ाइल एडिट करें</span>
+                          </button>
+                        </div>
+
                         {/* Toggle Status */}
-                        <div className="p-4 bg-white border border-slate-200 rounded-xl space-y-2">
-                          <div className="text-xs font-bold text-slate-700">आईडी स्थिति बदलें</div>
-                          <p className="text-[11px] text-slate-500">
-                            आईडी को एक्टिव या इनएक्टिव करें।
-                          </p>
+                        <div className="p-4 bg-white border border-slate-200 rounded-xl space-y-2 flex flex-col justify-between">
+                          <div>
+                            <div className="text-xs font-bold text-slate-700">आईडी स्थिति बदलें</div>
+                            <p className="text-[11px] text-slate-500 mt-1">
+                              आईडी को एक्टिव या इनएक्टिव करें।
+                            </p>
+                          </div>
                           <button
                             type="button"
                             onClick={handleToggleStatus}
@@ -759,12 +1098,17 @@ export default function MembersManager() {
                         </div>
 
                         {/* Reset Password Form */}
-                        <form onSubmit={handleResetPassword} className="p-4 bg-white border border-slate-200 rounded-xl space-y-2">
-                          <div className="text-xs font-bold text-slate-700">पासवर्ड रीसेट करें</div>
+                        <form onSubmit={handleResetPassword} className="p-4 bg-white border border-slate-200 rounded-xl space-y-2 flex flex-col justify-between">
+                          <div>
+                            <div className="text-xs font-bold text-slate-700">पासवर्ड रीसेट करें</div>
+                            <p className="text-[11px] text-slate-500 mt-1">
+                              सदस्य का लॉगिन पासवर्ड नया सेट करें।
+                            </p>
+                          </div>
                           <div className="flex items-center gap-2">
                             <input
                               type="text"
-                              placeholder="नया पासवर्ड (उदा. 123456)"
+                              placeholder="नया पासवर्ड"
                               value={resetPwdInput}
                               onChange={(e) => setResetPwdInput(e.target.value)}
                               className="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-mono"
