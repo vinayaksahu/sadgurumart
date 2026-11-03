@@ -77,7 +77,7 @@ export default async function DashboardPage({
   const [walletTransactions, placementCount, userPaidOrders] = await Promise.all([
     user.wallet?.id
       ? prisma.walletTransaction.findMany({
-          where: { walletId: user.wallet.id },
+          where: { walletId: user.wallet.id, walletScope: 'MAIN' },
           select: { type: true, amount: true },
         })
       : Promise.resolve([]),
@@ -122,7 +122,7 @@ export default async function DashboardPage({
     { label: 'Direct Sponsor Income', value: `₹${getSum(['SPONSOR_ROYALTY']).toFixed(2)}`, gradient: 'from-[#f43f5e] to-[#ea580c]', icon: TrendingUp },
     { label: 'Autopool Income', value: `₹${getSum(['AUTOPOOL_INCOME']).toFixed(2)}`, gradient: 'from-[#f43f5e] to-[#ec4899]', icon: TrendingUp },
     { label: 'Leadership Income', value: `₹${getSum(['LEADERSHIP_CTO']).toFixed(2)}`, gradient: 'from-[#6366f1] to-[#7c3aed]', icon: IndianRupee },
-    { label: 'Repurchase Income', value: `₹${getSum(['PURCHASE_CASHBACK', 'REPURCHASE_TEAM']).toFixed(2)}`, gradient: 'from-[#6366f1] to-[#7c3aed]', icon: IndianRupee },
+    { label: 'Repurchase Income', value: `₹${getSum(['REPURCHASE_TEAM']).toFixed(2)}`, gradient: 'from-[#6366f1] to-[#7c3aed]', icon: IndianRupee },
     { label: 'Repurchase Matching Income', value: '₹0.00', gradient: 'from-[#6366f1] to-[#7c3aed]', icon: IndianRupee },
     { label: 'CTO Income', value: `₹${getSum(['COMPANY_CTO']).toFixed(2)}`, gradient: 'from-[#6366f1] to-[#7c3aed]', icon: IndianRupee },
     { label: 'Bike Fund', value: `₹${getSum(['BIKE_FUND']).toFixed(2)}`, gradient: 'from-[#6366f1] to-[#7c3aed]', icon: IndianRupee },

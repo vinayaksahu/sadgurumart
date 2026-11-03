@@ -200,7 +200,6 @@ export async function POST(req: NextRequest) {
             where: { id: targetW.id },
             data: {
               shoppingBalance: { increment: activationAmount },
-              totalEarned: { increment: activationAmount },
             },
           });
           await tx.walletTransaction.create({

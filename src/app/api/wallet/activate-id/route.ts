@@ -175,7 +175,6 @@ export async function POST(req: NextRequest) {
           where: { id: targetWallet.id },
           data: {
             shoppingBalance: { increment: cashbackAmount },
-            totalEarned: { increment: cashbackAmount },
           },
         });
 

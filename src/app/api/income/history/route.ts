@@ -45,10 +45,11 @@ export async function GET(req: NextRequest) {
       'DTH_RECHARGE_CASHBACK',
     ];
 
-    // Fetch all income transactions for this wallet
+    // Fetch all income transactions for this wallet (MAIN cash wallet incomes only)
     const transactions = await prisma.walletTransaction.findMany({
       where: {
         walletId: user.wallet.id,
+        walletScope: 'MAIN',
         type: selectedType && incomeTypes.includes(selectedType)
           ? (selectedType as any)
           : { in: incomeTypes as any },
@@ -61,6 +62,7 @@ export async function GET(req: NextRequest) {
     const allIncomeTransactions = await prisma.walletTransaction.findMany({
       where: {
         walletId: user.wallet.id,
+        walletScope: 'MAIN',
         type: { in: incomeTypes as any },
       },
       select: {

@@ -28,11 +28,19 @@ export async function placeInAutoPool(
 ): Promise<any> {
   if (poolLevel > 7) return null;
 
-  // Check if user already has an active entry in this level
-  const existing = await prisma.autoPoolEntry.findFirst({
-    where: { userId, poolLevel, isCompleted: false },
+  // Check if user already has an entry in this level (active or completed)
+  const existingInLevel = await prisma.autoPoolEntry.findFirst({
+    where: { userId, poolLevel },
   });
-  if (existing) return existing;
+  if (existingInLevel) return existingInLevel;
+
+  // When entering Level 1, make sure user is not already in any higher level
+  if (poolLevel === 1) {
+    const higherLevelEntry = await prisma.autoPoolEntry.findFirst({
+      where: { userId, poolLevel: { gt: 1 } },
+    });
+    if (higherLevelEntry) return higherLevelEntry;
+  }
 
   // Find the oldest incomplete entry in this level to attach as child
   const openParent = await prisma.autoPoolEntry.findFirst({

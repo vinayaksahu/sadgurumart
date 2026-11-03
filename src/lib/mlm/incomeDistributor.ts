@@ -141,12 +141,17 @@ export async function creditIncomeWithAutoPoolCheck({
     },
   });
 
-  // 5. If ₹100 target reached, place user in AutoPool Level 1
+  // 5. If ₹100 target reached, place user in AutoPool Level 1 (if not already placed)
   let entered = false;
   if (isCompleted) {
     try {
-      await placeInAutoPool(user.id, 1);
-      entered = true;
+      const alreadyInPool = await db.autoPoolEntry.findFirst({
+        where: { userId: user.id },
+      });
+      if (!alreadyInPool) {
+        await placeInAutoPool(user.id, 1);
+        entered = true;
+      }
     } catch (poolErr) {
       console.error('AutoPool placement error after 1st income deduction:', poolErr);
     }

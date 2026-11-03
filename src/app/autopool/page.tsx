@@ -54,7 +54,13 @@ export default async function AutoPoolPage(props: AutoPoolPageProps) {
     { level: 7, formula: '128 × ₹10,00,000', gross: '₹ 12,80,00,000', upgrade: 'NIL (0)', net: '₹ 12,80,00,000', req: 128 },
   ];
 
-  const entryMap = new Map(entries.map((e) => [e.poolLevel, e]));
+  const entryMap = new Map<number, (typeof entries)[0]>();
+  for (const e of entries) {
+    const current = entryMap.get(e.poolLevel);
+    if (!current || (e.isCompleted && !current.isCompleted)) {
+      entryMap.set(e.poolLevel, e);
+    }
+  }
 
   return (
     <div className="min-h-screen bg-[#f8f6f0] text-[#1f2937] font-sans flex flex-col">
