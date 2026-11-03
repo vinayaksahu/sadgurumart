@@ -18,7 +18,9 @@ import {
   Building,
   Sliders,
   Database,
-  Megaphone
+  Megaphone,
+  Layers,
+  GitFork
 } from 'lucide-react';
 
 export default async function AdminDashboardPage() {
@@ -236,6 +238,38 @@ export default async function AdminDashboardPage() {
               <div>
                 <h3 className="font-black text-sm text-emerald-800">Payout Settlements</h3>
                 <p className="text-[11px] text-slate-500 mt-0.5">बैंक ट्रांसफर UTR प्रविष्टि</p>
+              </div>
+            </div>
+            <ArrowRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform shrink-0" />
+          </Link>
+
+          <Link
+            href="/admin/autopool"
+            className="p-6 rounded-3xl bg-white border-2 border-[#144732]/30 hover:border-[#144732] shadow-sm hover:shadow-md transition-all flex items-center justify-between group"
+          >
+            <div className="flex items-center gap-3.5">
+              <div className="w-12 h-12 rounded-2xl bg-[#144732] text-[#fef08a] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                <Layers className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="font-black text-sm text-[#144732]">2x2 यूनिवर्सल ऑटोपूल</h3>
+                <p className="text-[11px] text-slate-500 mt-0.5">₹100 कटौती आवक, मैट्रिक्स ट्री व वितरण</p>
+              </div>
+            </div>
+            <ArrowRight className="w-4 h-4 text-[#144732] group-hover:translate-x-1 transition-transform shrink-0" />
+          </Link>
+
+          <Link
+            href="/admin/genealogy"
+            className="p-6 rounded-3xl bg-white border border-[#e8e3d5] hover:border-[#144732] shadow-sm hover:shadow-md transition-all flex items-center justify-between group"
+          >
+            <div className="flex items-center gap-3.5">
+              <div className="w-12 h-12 rounded-2xl bg-[#eaf5ed] text-[#144732] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                <GitFork className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="font-black text-sm text-[#144732]">Genealogy ट्री</h3>
+                <p className="text-[11px] text-slate-500 mt-0.5">2:1 बाइनरी PV नेटवर्क ट्री व्यू</p>
               </div>
             </div>
             <ArrowRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform shrink-0" />

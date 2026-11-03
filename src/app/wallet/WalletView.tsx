@@ -1049,7 +1049,17 @@ export default function WalletView({
                       </td>
 
                       <td className="py-3.5 px-3 whitespace-nowrap font-bold text-slate-800">
-                        {tx.type.replace(/_/g, ' ')}
+                        {tx.type === 'AUTOPOOL_ENTRY_DEDUCTION' ? (
+                          <span className="inline-flex items-center gap-1 text-red-700 bg-red-50 border border-red-200 px-2 py-0.5 rounded-lg text-xs font-black">
+                            ऑटोपूल ₹100 कटौती
+                          </span>
+                        ) : tx.type === 'AUTOPOOL_INCOME' ? (
+                          <span className="inline-flex items-center gap-1 text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-lg text-xs font-black">
+                            ऑटोपूल आय (AutoPool)
+                          </span>
+                        ) : (
+                          tx.type.replace(/_/g, ' ')
+                        )}
                       </td>
 
                       <td className="py-3.5 px-3 whitespace-nowrap">

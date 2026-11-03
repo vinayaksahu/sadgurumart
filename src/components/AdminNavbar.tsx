@@ -117,10 +117,11 @@ export default function AdminNavbar({
   const menuGroups: MenuGroup[] = [
     {
       id: 'geneology',
-      title: 'Genealogy',
+      title: 'Genealogy & AutoPool',
       icon: GitFork,
       items: [
-        { label: 'Genealogy', href: '/admin/genealogy' },
+        { label: 'Genealogy (Binary Tree)', href: '/admin/genealogy' },
+        { label: '2x2 Universal AutoPool Matrix', href: '/admin/autopool' },
       ],
     },
     {
@@ -156,6 +157,7 @@ export default function AdminNavbar({
         { label: 'Pending Withdrawals', href: '/admin/withdrawals?status=pending' },
         { label: 'Approved Withdrawals', href: '/admin/withdrawals?status=approved' },
         { label: 'Daily Closing & Payout', href: '/admin/withdrawals?view=closing' },
+        { label: 'AutoPool Payouts & Inflow', href: '/admin/autopool' },
         { label: 'TDS Deductions Report', href: '/admin/withdrawals?view=tds' },
       ],
     },
