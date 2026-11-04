@@ -580,13 +580,13 @@ model SystemSetting {
   googleDriveFolderId     String?  @default("1m48lvsU628rR8nhL4i-24GWdJe_4w5Hn")
 
   // Company Official Bank & UPI Details for Fund Requests
-  companyBankName         String?  @default("State Bank of India (SBI)")
-  companyAccountName      String?  @default("SADGURU MART ONLINE SERVICE PRIVATE LIMITED")
-  companyAccountNumber    String?  @default("41589632145")
-  companyIfscCode         String?  @default("SBIN0001234")
-  companyBranch           String?  @default("Bilaspur Main Branch")
-  companyUpiId            String?  @default("6267392508@upi")
-  companyQrImageUrl       String?  @default("")
+  companyBankName         String?  @default("State Bank of India")
+  companyAccountName      String?  @default("Daluram sahu")
+  companyAccountNumber    String?  @default("45402311868")
+  companyIfscCode         String?  @default("SBIN0002880")
+  companyBranch           String?  @default("State Bank of India")
+  companyUpiId            String?  @default("6267392508-1@nyes")
+  companyQrImageUrl       String?  @default("/payment-qr.jpg")
 
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt

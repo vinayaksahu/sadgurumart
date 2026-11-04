@@ -107,13 +107,13 @@ export default function FundRequestsManager() {
 
   // Settings State
   const [companySettings, setCompanySettings] = useState<CompanyBankSettings>({
-    companyBankName: 'State Bank of India (SBI)',
-    companyAccountName: 'SADGURU MART ONLINE SERVICE PRIVATE LIMITED',
-    companyAccountNumber: '41589632145',
-    companyIfscCode: 'SBIN0001234',
-    companyBranch: 'Bilaspur Main Branch',
-    companyUpiId: '6267392508@upi',
-    companyQrImageUrl: '',
+    companyBankName: 'State Bank of India',
+    companyAccountName: 'Daluram sahu',
+    companyAccountNumber: '45402311868',
+    companyIfscCode: 'SBIN0002880',
+    companyBranch: 'State Bank of India',
+    companyUpiId: '6267392508-1@nyes',
+    companyQrImageUrl: '/payment-qr.jpg',
   });
   const [settingsLoading, setSettingsLoading] = useState(false);
   const [settingsMsg, setSettingsMsg] = useState<string | null>(null);
@@ -144,13 +144,13 @@ export default function FundRequestsManager() {
       const data = await res.json();
       if (data.settings) {
         setCompanySettings({
-          companyBankName: data.settings.companyBankName || 'State Bank of India (SBI)',
-          companyAccountName: data.settings.companyAccountName || 'SADGURU MART ONLINE SERVICE PRIVATE LIMITED',
-          companyAccountNumber: data.settings.companyAccountNumber || '41589632145',
-          companyIfscCode: data.settings.companyIfscCode || 'SBIN0001234',
-          companyBranch: data.settings.companyBranch || 'Bilaspur Main Branch',
-          companyUpiId: data.settings.companyUpiId || '6267392508@upi',
-          companyQrImageUrl: data.settings.companyQrImageUrl || '',
+          companyBankName: data.settings.companyBankName || 'State Bank of India',
+          companyAccountName: data.settings.companyAccountName || 'Daluram sahu',
+          companyAccountNumber: data.settings.companyAccountNumber || '45402311868',
+          companyIfscCode: data.settings.companyIfscCode || 'SBIN0002880',
+          companyBranch: data.settings.companyBranch || 'State Bank of India',
+          companyUpiId: data.settings.companyUpiId || '6267392508-1@nyes',
+          companyQrImageUrl: data.settings.companyQrImageUrl || '/payment-qr.jpg',
         });
       }
     } catch (e) {
@@ -893,7 +893,7 @@ export default function FundRequestsManager() {
                 </label>
                 <input
                   type="text"
-                  placeholder="उदा. 41589632145"
+                  placeholder="उदा. 45402311868"
                   value={companySettings.companyAccountNumber}
                   onChange={(e) => setCompanySettings({ ...companySettings, companyAccountNumber: e.target.value })}
                   required
@@ -907,7 +907,7 @@ export default function FundRequestsManager() {
                 </label>
                 <input
                   type="text"
-                  placeholder="उदा. SBIN0001234"
+                  placeholder="उदा. SBIN0002880"
                   value={companySettings.companyIfscCode}
                   onChange={(e) => setCompanySettings({ ...companySettings, companyIfscCode: e.target.value.toUpperCase() })}
                   required

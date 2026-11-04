@@ -36,13 +36,13 @@ export async function GET() {
         popupTarget: settings.popupTarget,
 
         // Company Bank & UPI for Fund Deposits
-        companyBankName: (settings as any).companyBankName || 'State Bank of India (SBI)',
-        companyAccountName: (settings as any).companyAccountName || 'SADGURU MART ONLINE SERVICE PRIVATE LIMITED',
-        companyAccountNumber: (settings as any).companyAccountNumber || '41589632145',
-        companyIfscCode: (settings as any).companyIfscCode || 'SBIN0001234',
-        companyBranch: (settings as any).companyBranch || 'Bilaspur Main Branch',
-        companyUpiId: (settings as any).companyUpiId || '6267392508@upi',
-        companyQrImageUrl: (settings as any).companyQrImageUrl || '',
+        companyBankName: (settings as any).companyBankName || 'State Bank of India',
+        companyAccountName: (settings as any).companyAccountName || 'Daluram sahu',
+        companyAccountNumber: (settings as any).companyAccountNumber || '45402311868',
+        companyIfscCode: (settings as any).companyIfscCode || 'SBIN0002880',
+        companyBranch: (settings as any).companyBranch || 'State Bank of India',
+        companyUpiId: (settings as any).companyUpiId || '6267392508-1@nyes',
+        companyQrImageUrl: (settings as any).companyQrImageUrl || '/payment-qr.jpg',
 
         updatedAt: settings.updatedAt,
       },

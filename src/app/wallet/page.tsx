@@ -117,13 +117,13 @@ export default async function WalletPage({
   }));
 
   const companyPaymentDetails = {
-    companyBankName: systemSettings?.companyBankName || 'State Bank of India (SBI)',
-    companyAccountName: systemSettings?.companyAccountName || 'SADGURU MART ONLINE SERVICE PRIVATE LIMITED',
-    companyAccountNumber: systemSettings?.companyAccountNumber || '41589632145',
-    companyIfscCode: systemSettings?.companyIfscCode || 'SBIN0001234',
-    companyBranch: systemSettings?.companyBranch || 'Bilaspur Main Branch',
-    companyUpiId: systemSettings?.companyUpiId || '6267392508@upi',
-    companyQrImageUrl: systemSettings?.companyQrImageUrl || '',
+    companyBankName: systemSettings?.companyBankName || 'State Bank of India',
+    companyAccountName: systemSettings?.companyAccountName || 'Daluram sahu',
+    companyAccountNumber: systemSettings?.companyAccountNumber || '45402311868',
+    companyIfscCode: systemSettings?.companyIfscCode || 'SBIN0002880',
+    companyBranch: systemSettings?.companyBranch || 'State Bank of India',
+    companyUpiId: systemSettings?.companyUpiId || '6267392508-1@nyes',
+    companyQrImageUrl: systemSettings?.companyQrImageUrl || '/payment-qr.jpg',
   };
 
   return (

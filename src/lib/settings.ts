@@ -55,13 +55,13 @@ export const DEFAULT_SYSTEM_SETTINGS = {
   googleDriveFolderId: '1m48lvsU628rR8nhL4i-24GWdJe_4w5Hn',
 
   // Company Official Bank & UPI Details for Fund Requests
-  companyBankName: 'State Bank of India (SBI)',
-  companyAccountName: 'SADGURU MART ONLINE SERVICE PRIVATE LIMITED',
-  companyAccountNumber: '41589632145',
-  companyIfscCode: 'SBIN0001234',
-  companyBranch: 'Bilaspur Main Branch',
-  companyUpiId: '6267392508@upi',
-  companyQrImageUrl: '',
+  companyBankName: 'State Bank of India',
+  companyAccountName: 'Daluram sahu',
+  companyAccountNumber: '45402311868',
+  companyIfscCode: 'SBIN0002880',
+  companyBranch: 'State Bank of India',
+  companyUpiId: '6267392508-1@nyes',
+  companyQrImageUrl: '/payment-qr.jpg',
 };
 
 // In-memory cache for ultra-fast performance (<1ms)

@@ -123,13 +123,13 @@ export default function WalletView({
   initialTransactions,
   initialFundRequests = [],
   companyPaymentDetails = {
-    companyBankName: 'State Bank of India (SBI)',
-    companyAccountName: 'SADGURU MART ONLINE SERVICE PRIVATE LIMITED',
-    companyAccountNumber: '41589632145',
-    companyIfscCode: 'SBIN0001234',
-    companyBranch: 'Bilaspur Main Branch',
-    companyUpiId: '6267392508@upi',
-    companyQrImageUrl: '',
+    companyBankName: 'State Bank of India',
+    companyAccountName: 'Daluram sahu',
+    companyAccountNumber: '45402311868',
+    companyIfscCode: 'SBIN0002880',
+    companyBranch: 'State Bank of India',
+    companyUpiId: '6267392508-1@nyes',
+    companyQrImageUrl: '/payment-qr.jpg',
   },
   packages,
 }: Props) {
@@ -1173,12 +1173,21 @@ export default function WalletView({
                         )}`
                       }
                       alt="UPI QR Code"
-                      className="w-36 h-36 mx-auto object-contain"
+                      className="w-44 h-44 mx-auto object-contain rounded-lg"
                     />
                   </div>
 
-                  <div className="text-[10px] text-slate-500 font-medium">
-                    Google Pay • PhonePe • Paytm • BHIM
+                  <div className="flex flex-col items-center gap-1.5">
+                    <div className="text-[10px] text-slate-500 font-medium">
+                      Google Pay • PhonePe • Paytm • BHIM
+                    </div>
+                    <a
+                      href={`upi://pay?pa=${companyPaymentDetails.companyUpiId}&pn=${encodeURIComponent(companyPaymentDetails.companyAccountName || 'Daluram Sahu')}${depositAmount ? `&am=${depositAmount}` : ''}&cu=INR`}
+                      className="inline-flex items-center gap-1 text-[11px] font-black text-emerald-800 bg-white hover:bg-emerald-100 px-3 py-1 rounded-full border border-emerald-300 shadow-xs transition-colors"
+                    >
+                      <Sparkles className="w-3 h-3 text-emerald-600" />
+                      <span>UPI ऐप में खोलें (Pay via UPI App)</span>
+                    </a>
                   </div>
 
                   {/* UPI ID Field with Copy */}
