@@ -45,7 +45,7 @@ export function calculateRankProgress(user: {
     Math.min(leftVol, rightVol)
   );
 
-  // Find user's highest qualified rank based on matchedRP
+  // Find user's highest qualified rank strictly based on matchedRP
   let qualifiedRankDef: RankDefinition | null = null;
   for (let i = RANK_DEFINITIONS.length - 1; i >= 0; i--) {
     if (matchedRP >= RANK_DEFINITIONS[i].requiredRP) {
@@ -54,15 +54,11 @@ export function calculateRankProgress(user: {
     }
   }
 
-  // Also check if user was manually assigned a rank higher than matchedRP
-  const assignedRankDef = RANK_DEFINITIONS.find((r) => r.id === user.rank) || null;
-  const currentRank = (assignedRankDef && (!qualifiedRankDef || assignedRankDef.level >= qualifiedRankDef.level))
-    ? assignedRankDef
-    : qualifiedRankDef;
-
+  // The true earned rank is based on actual matching RP
+  const currentRank = qualifiedRankDef;
   const currentLevel = currentRank ? currentRank.level : 0;
 
-  // Next rank
+  // Next rank is the immediate next milestone
   const nextRank = RANK_DEFINITIONS.find((r) => r.level === currentLevel + 1) || null;
 
   let progressPercent = 0;
@@ -72,7 +68,7 @@ export function calculateRankProgress(user: {
     const prevRequired = currentRank ? currentRank.requiredRP : 0;
     const interval = nextRank.requiredRP - prevRequired;
     const progressInInterval = Math.max(0, matchedRP - prevRequired);
-    progressPercent = Math.min(100, Math.round((progressInInterval / interval) * 100));
+    progressPercent = Math.min(99, Math.round((progressInInterval / interval) * 100));
     rpNeededForNext = Math.max(0, nextRank.requiredRP - matchedRP);
   } else if (currentRank && currentRank.level === 15) {
     progressPercent = 100;
@@ -84,18 +80,22 @@ export function calculateRankProgress(user: {
     let rankProgress = 0;
     let rpNeeded = Math.max(0, r.requiredRP - matchedRP);
 
-    if (currentRank && r.level === currentRank.level) {
-      status = 'CURRENT';
+    // CRITICAL: Qualification for each rank reward is strictly determined
+    // by whether user's matched RP meets or exceeds the required RP
+    if (matchedRP >= r.requiredRP) {
+      if (currentRank && r.level === currentRank.level) {
+        status = 'CURRENT';
+      } else {
+        status = 'ACHIEVED';
+      }
       rankProgress = 100;
-    } else if (currentRank && r.level < currentRank.level) {
-      status = 'ACHIEVED';
-      rankProgress = 100;
+      rpNeeded = 0;
     } else if (nextRank && r.level === nextRank.level) {
       status = 'NEXT';
       rankProgress = progressPercent;
     } else {
       status = 'LOCKED';
-      rankProgress = Math.min(100, Math.round((matchedRP / r.requiredRP) * 100));
+      rankProgress = Math.min(99, Math.round((matchedRP / r.requiredRP) * 100));
     }
 
     return {
@@ -108,7 +108,7 @@ export function calculateRankProgress(user: {
 
   return {
     currentRank,
-    rankEnum: user.rank,
+    rankEnum: currentRank ? currentRank.id : 'DISTRIBUTOR',
     rankName: currentRank ? currentRank.name : 'Distributor',
     rankHindiName: currentRank ? currentRank.hindiName : 'डिस्ट्रिब्यूटर (शुरुआती)',
     rankLevel: currentLevel,
@@ -123,7 +123,7 @@ export function calculateRankProgress(user: {
 }
 
 /**
- * Re-evaluates a single user's rank from DB and upgrades user.rank if qualified
+ * Re-evaluates a single user's rank from DB and upgrades/syncs user.rank to matchedRP
  */
 export async function syncUserRank(userId: string): Promise<UserRankStatus | null> {
   const user = await prisma.user.findUnique({
@@ -143,22 +143,16 @@ export async function syncUserRank(userId: string): Promise<UserRankStatus | nul
   if (!user) return null;
 
   const status = calculateRankProgress(user);
+  const correctRank = status.currentRank ? status.currentRank.id : 'DISTRIBUTOR';
 
-  // If calculated rank enum is higher than currently saved in DB, update DB
-  if (status.currentRank && status.currentRank.id !== user.rank) {
-    // Only upgrade (do not downgrade automatically unless admin overrides)
-    const currentDbDef = RANK_DEFINITIONS.find((r) => r.id === user.rank);
-    const currentDbLevel = currentDbDef ? currentDbDef.level : 0;
-
-    if (status.currentRank.level > currentDbLevel) {
-      await prisma.user.update({
-        where: { id: userId },
-        data: {
-          rank: status.currentRank.id,
-          rewardPointsRP: status.matchedRP,
-        },
-      });
-    }
+  if (user.rank !== correctRank || user.rewardPointsRP !== status.matchedRP) {
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        rank: correctRank,
+        rewardPointsRP: status.matchedRP,
+      },
+    });
   }
 
   return status;
@@ -188,20 +182,17 @@ export async function syncAllUsersRanks(): Promise<{
 
   for (const u of users) {
     const status = calculateRankProgress(u);
-    if (status.currentRank && status.currentRank.id !== u.rank) {
-      const currentDbDef = RANK_DEFINITIONS.find((r) => r.id === u.rank);
-      const currentDbLevel = currentDbDef ? currentDbDef.level : 0;
+    const correctRank = status.currentRank ? status.currentRank.id : 'DISTRIBUTOR';
 
-      if (status.currentRank.level > currentDbLevel) {
-        await prisma.user.update({
-          where: { id: u.id },
-          data: {
-            rank: status.currentRank.id,
-            rewardPointsRP: status.matchedRP,
-          },
-        });
-        upgradedCount++;
-      }
+    if (u.rank !== correctRank || u.rewardPointsRP !== status.matchedRP) {
+      await prisma.user.update({
+        where: { id: u.id },
+        data: {
+          rank: correctRank,
+          rewardPointsRP: status.matchedRP,
+        },
+      });
+      upgradedCount++;
     }
   }
 

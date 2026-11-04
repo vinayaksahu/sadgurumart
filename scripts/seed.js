@@ -204,7 +204,7 @@ async function main() {
       passwordHash: rootPassword,
       isActive: true,
       activatedAt: new Date(),
-      rank: 'CROWN_AMBASSADOR',
+      rank: 'DISTRIBUTOR',
       wallet: {
         create: {
           mainBalance: 0,
