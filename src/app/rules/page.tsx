@@ -5,7 +5,6 @@ import {
   ShieldCheck, 
   FileText, 
   Download, 
-  ExternalLink, 
   CheckCircle2, 
   Scale, 
   Building2, 
@@ -31,7 +30,6 @@ const legalDocs = [
     date: '28/10/2026',
     thumb: '/legal/gst_thumb.png',
     pdfUrl: '/legal/SGM_Mart_GST_Certificate.pdf',
-    driveUrl: 'https://drive.google.com/file/d/1HUBucbz5FEgibIbUZGvHOQKTIoGtw5ag/view?usp=drivesdk',
     badge: 'Form GST REG-06',
     color: 'emerald',
   },
@@ -45,7 +43,6 @@ const legalDocs = [
     date: 'मान्य (Active)',
     thumb: '/legal/fssai_thumb.png',
     pdfUrl: '/legal/SGM_Mart_FSSAI_Certificate.pdf',
-    driveUrl: 'https://drive.google.com/file/d/1oF0wR7gBaDUNZyHX0IN74a2nyvgc5Tll/view?usp=drivesdk',
     badge: 'FSS Act 2006 Compliant',
     color: 'amber',
   },
@@ -59,7 +56,6 @@ const legalDocs = [
     date: '15/10/2026',
     thumb: '/legal/pan_thumb.png',
     pdfUrl: '/legal/SGM_Mart_PAN_Card.pdf',
-    driveUrl: 'https://drive.google.com/file/d/1Qt9vwjQedKOelTeCJt-ymByCNoQRfmPM/view?usp=drivesdk',
     badge: 'e-PAN Digitally Verified',
     color: 'blue',
   },
@@ -73,7 +69,6 @@ const legalDocs = [
     date: '02/11/2026',
     thumb: '/legal/udyam_thumb.png',
     pdfUrl: '/legal/SGM_Mart_Udyam_Registration.pdf',
-    driveUrl: 'https://drive.google.com/file/d/17FJscizxEeCDNONVzzhzalcO3wUSauDx/view?usp=drivesdk',
     badge: 'Micro Enterprise (Govt. of India)',
     color: 'purple',
   },
@@ -87,7 +82,6 @@ const legalDocs = [
     date: 'अक्टूबर 2026',
     thumb: '/legal/deed_thumb.png',
     pdfUrl: '/legal/SGM_Mart_Partnership_Deed.pdf',
-    driveUrl: 'https://drive.google.com/file/d/1IqthKGtOrXVzayVW6YZoRTxnDHNoZOTc/view?usp=drivesdk',
     badge: 'Registered Entity Deed',
     color: 'teal',
   },
@@ -186,15 +180,6 @@ export default function RulesAndLegalPage() {
                 सद्गुरु मार्ट के सभी सरकारी पंजीकरण दस्तावेज़ पूर्ण पारदर्शिता के साथ यहाँ उपलब्ध हैं। आप प्रत्येक प्रमाणपत्र को देख व डाउनलोड कर सकते हैं।
               </p>
             </div>
-            <a
-              href="https://drive.google.com/drive/folders/1SPTSkz7LEJjCy1R9Zuu6-R5t14w26lbf"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#144732] hover:bg-[#0b2b1e] text-[#fef08a] text-xs font-black shadow transition-all shrink-0"
-            >
-              <span>Google Drive फोल्डर में सभी देखें</span>
-              <ExternalLink className="w-3.5 h-3.5" />
-            </a>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -258,19 +243,11 @@ export default function RulesAndLegalPage() {
                   <a
                     href={doc.pdfUrl}
                     download
-                    className="py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold text-center transition-colors flex items-center justify-center gap-1"
+                    className="py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold text-center transition-colors flex items-center justify-center gap-1.5 shadow-sm"
                     title="PDF डाउनलोड करें"
                   >
                     <Download className="w-3.5 h-3.5" />
-                  </a>
-                  <a
-                    href={doc.driveUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="py-2.5 px-3 rounded-xl bg-[#faf8f4] border border-[#d4a359]/40 hover:bg-[#f3ede0] text-[#92580a] text-xs font-bold text-center transition-colors flex items-center justify-center"
-                    title="Google Drive में खोलें"
-                  >
-                    <ExternalLink className="w-3.5 h-3.5" />
+                    <span>डाउनलोड</span>
                   </a>
                 </div>
               </div>

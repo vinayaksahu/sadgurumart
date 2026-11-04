@@ -42,13 +42,10 @@ export default async function AdminRewardsPage() {
   });
 
   const mappedUsers = users.map((u) => {
-    const leftRP = (u.leftVolumePV || 0) + (u.leftCarryForwardPV || 0) + (u.totalMatchingPaidPV || 0);
-    const rightRP = (u.rightVolumePV || 0) + (u.rightCarryForwardPV || 0) + (u.totalMatchingPaidPV || 0);
-    const matchedRP = Math.max(
-      u.rewardPointsRP || 0,
-      u.totalMatchingPaidPV || 0,
-      Math.min(leftRP, rightRP)
-    );
+    // Rule: 100 PV = 1 RP (Repurchase BV is NOT included)
+    const leftRP = Math.floor(((u.leftVolumePV || 0) + (u.leftCarryForwardPV || 0) + (u.totalMatchingPaidPV || 0)) / 100);
+    const rightRP = Math.floor(((u.rightVolumePV || 0) + (u.rightCarryForwardPV || 0) + (u.totalMatchingPaidPV || 0)) / 100);
+    const matchedRP = Math.floor((u.totalMatchingPaidPV || 0) / 100);
 
     const rankDef = RANK_DEFINITIONS.find((r) => r.id === u.rank) || null;
 

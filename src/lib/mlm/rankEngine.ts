@@ -35,15 +35,16 @@ export function calculateRankProgress(user: {
   totalMatchingPaidPV?: number;
   rewardPointsRP?: number;
 }): UserRankStatus {
-  const leftVol = (user.leftVolumePV || 0) + (user.leftCarryForwardPV || 0) + (user.totalMatchingPaidPV || 0);
-  const rightVol = (user.rightVolumePV || 0) + (user.rightCarryForwardPV || 0) + (user.totalMatchingPaidPV || 0);
+  // Activation PV volume (Repurchase BV is NOT included in RP or Binary Matching)
+  const leftVolPV = (user.leftVolumePV || 0) + (user.leftCarryForwardPV || 0) + (user.totalMatchingPaidPV || 0);
+  const rightVolPV = (user.rightVolumePV || 0) + (user.rightCarryForwardPV || 0) + (user.totalMatchingPaidPV || 0);
   
-  // RP is accumulated based on 1:1 Left & Right Matching
-  const matchedRP = Math.max(
-    user.rewardPointsRP || 0,
-    user.totalMatchingPaidPV || 0,
-    Math.min(leftVol, rightVol)
-  );
+  // Rule: 100 PV = 1 RP (1:1 Left & Right Matching)
+  const leftRP = Math.floor(leftVolPV / 100);
+  const rightRP = Math.floor(rightVolPV / 100);
+
+  // RP is strictly earned from 1:1 Left & Right Matching (100 PV matched = 1 RP)
+  const matchedRP = Math.floor((user.totalMatchingPaidPV || 0) / 100);
 
   // Find user's highest qualified rank strictly based on matchedRP
   let qualifiedRankDef: RankDefinition | null = null;
@@ -112,8 +113,8 @@ export function calculateRankProgress(user: {
     rankName: currentRank ? currentRank.name : 'Distributor',
     rankHindiName: currentRank ? currentRank.hindiName : 'डिस्ट्रिब्यूटर (शुरुआती)',
     rankLevel: currentLevel,
-    leftRP: leftVol,
-    rightRP: rightVol,
+    leftRP,
+    rightRP,
     matchedRP,
     nextRank,
     progressPercent,

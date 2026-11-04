@@ -57,13 +57,16 @@ export default function RewardsView({ rankStatus, userName, userCode }: RewardsV
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           {/* Left: Current Rank & User Overview */}
           <div className="space-y-3">
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <span className="px-3 py-1 rounded-full text-xs font-black bg-[#d4a359] text-slate-900 uppercase tracking-wider flex items-center gap-1.5 shadow-sm">
                 <Award className="w-3.5 h-3.5" />
                 <span>3% Lifestyle Reward Pool</span>
               </span>
               <span className="text-xs text-[#fef08a] font-bold">
-                • 1:1 Matching RP Basis
+                • 100 PV = 1 RP
+              </span>
+              <span className="text-[11px] text-emerald-200 font-medium bg-white/10 px-2.5 py-0.5 rounded-lg border border-white/15">
+                (रीपरचेस BV सम्मिलित नहीं)
               </span>
             </div>
 
@@ -117,7 +120,7 @@ export default function RewardsView({ rankStatus, userName, userCode }: RewardsV
               <div className="text-lg sm:text-2xl font-black text-[#fef08a] mt-0.5">
                 {matchedRP.toLocaleString('en-IN')}
               </div>
-              <div className="text-[10px] text-emerald-300 font-bold">1:1 मैचिंग RP</div>
+              <div className="text-[10px] text-emerald-300 font-bold">1:1 मैचिंग RP (100 PV = 1 RP)</div>
             </div>
           </div>
         </div>

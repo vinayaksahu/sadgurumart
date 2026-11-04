@@ -55,15 +55,11 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: 'desc' },
     });
 
-    // Map each user with computed RP & current reward details
+    // Map each user with computed RP & current reward details (100 PV = 1 RP, BV excluded)
     const mappedUsers = users.map((u) => {
-      const leftRP = (u.leftVolumePV || 0) + (u.leftCarryForwardPV || 0) + (u.totalMatchingPaidPV || 0);
-      const rightRP = (u.rightVolumePV || 0) + (u.rightCarryForwardPV || 0) + (u.totalMatchingPaidPV || 0);
-      const matchedRP = Math.max(
-        u.rewardPointsRP || 0,
-        u.totalMatchingPaidPV || 0,
-        Math.min(leftRP, rightRP)
-      );
+      const leftRP = Math.floor(((u.leftVolumePV || 0) + (u.leftCarryForwardPV || 0) + (u.totalMatchingPaidPV || 0)) / 100);
+      const rightRP = Math.floor(((u.rightVolumePV || 0) + (u.rightCarryForwardPV || 0) + (u.totalMatchingPaidPV || 0)) / 100);
+      const matchedRP = Math.floor((u.totalMatchingPaidPV || 0) / 100);
 
       const rankDef = RANK_DEFINITIONS.find((r) => r.id === u.rank) || null;
 

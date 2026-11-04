@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Bell, AlertTriangle, CheckCircle, Info, X, ExternalLink } from 'lucide-react';
 
 interface NoticeProps {
@@ -9,6 +9,7 @@ interface NoticeProps {
   title?: string;
   text?: string;
   link?: string | null;
+  requireMemberLogin?: boolean;
 }
 
 export default function AdminNoticeBanner({
@@ -17,10 +18,39 @@ export default function AdminNoticeBanner({
   title = 'महत्वपूर्ण सूचना (Important Notice)',
   text = '',
   link = '',
+  requireMemberLogin = false,
 }: NoticeProps) {
   const [dismissed, setDismissed] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authChecked, setAuthChecked] = useState(!requireMemberLogin);
+
+  useEffect(() => {
+    if (!requireMemberLogin) return;
+
+    if (typeof document !== 'undefined') {
+      const hasCookie =
+        document.cookie.includes('sgm_user_active=true') ||
+        document.cookie.includes('sgm_admin_active=true');
+      if (hasCookie) {
+        setIsAuthenticated(true);
+        setAuthChecked(true);
+        return;
+      }
+    }
+
+    fetch('/api/auth/me')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data && (data.isLoggedIn || data.isAdminActive)) {
+          setIsAuthenticated(true);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setAuthChecked(true));
+  }, [requireMemberLogin]);
 
   if (!enabled || !text || dismissed) return null;
+  if (requireMemberLogin && (!authChecked || !isAuthenticated)) return null;
 
   const styleConfig = {
     INFO: {

@@ -55,6 +55,7 @@ export async function POST(req: NextRequest) {
     let totalDp = 0;
     let totalPV = 0;
     let totalBV = 0;
+    let activationPV = 0;
 
     const orderItemsData = items.map((item: any) => {
       const p = productMap.get(item.id);
@@ -65,6 +66,12 @@ export async function POST(req: NextRequest) {
       totalDp += p.dpPrice * qty;
       totalPV += p.pv * qty;
       totalBV += p.bv * qty;
+
+      // Only Activation products generate Binary PV and Reward Points (RP)
+      // Repurchase (BV) does NOT add to Binary Matching PV or Reward Points (RP)
+      if (p.isActivation) {
+        activationPV += p.pv * qty;
+      }
 
       return {
         productId: p.id,
@@ -234,10 +241,11 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Propagate Binary PV points up the tree
-    if (totalPV > 0) {
+    // Propagate Binary PV points up the tree ONLY for Activation packages/products
+    // Repurchase (BV) does NOT add to Binary matching PV or Reward Points (RP)!
+    if (activationPV > 0) {
       try {
-        await propagateBinaryVolume(userId, totalPV);
+        await propagateBinaryVolume(userId, activationPV);
       } catch (err) {
         console.error('Binary volume propagation warning:', err);
       }

@@ -241,6 +241,9 @@ export async function calculateUserBinaryMatching(
   const payablePV = cappingPV > 0 ? Math.min(matchedPV, cappingPV) : matchedPV;
   const matchingIncome = payablePV * (matchingPercent / 100);
 
+  // Rule: 100 PV = 1 RP (Repurchase BV is NOT included)
+  const earnedRP = Math.floor(payablePV / 100);
+
   // Update user volume & matching record
   await prisma.user.update({
     where: { id: userId },
@@ -251,7 +254,7 @@ export async function calculateUserBinaryMatching(
       rightVolumePV: 0,
       totalMatchingPaidPV: { increment: matchedPV },
       ...(isNewFirstPairCompleted ? { firstBinaryPairDone: true } : {}),
-      rewardPointsRP: { increment: payablePV }, // RP accumulates for Awards & Rewards
+      rewardPointsRP: { increment: earnedRP }, // 100 PV matched = 1 RP
     },
   });
 

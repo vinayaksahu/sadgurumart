@@ -73,7 +73,7 @@ export default async function HomePage() {
     <div className="min-h-screen bg-[#f8f6f0] text-[#1f2937] font-sans flex flex-col selection:bg-[#d4a359] selection:text-[#0b2b1e]">
       <Navbar />
 
-      {/* Admin Broadcast Notice (If enabled) */}
+      {/* Admin Broadcast Notice (Only visible to logged-in members as requested) */}
       {settings?.noticeEnabled && (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 w-full">
           <AdminNoticeBanner
@@ -82,6 +82,7 @@ export default async function HomePage() {
             title={settings.noticeTitle}
             text={settings.noticeText}
             link={settings.noticeLink}
+            requireMemberLogin={true}
           />
         </div>
       )}
@@ -104,21 +105,8 @@ export default async function HomePage() {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             <div className="lg:col-span-7 space-y-6">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#144732]/10 border border-[#144732]/20 text-[#144732] text-xs font-black tracking-wide uppercase">
-                <span className="w-2 h-2 rounded-full bg-[#22c55e] animate-pulse" />
-                उत्पादों के साथ आत्मनिर्भर व्यापार का अवसर
-              </div>
-
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-[#144732] tracking-tight leading-[1.15]">
-                मार्केट रेट पर उपयोगी उत्पाद,{' '}
-                <span className="text-[#92580a]">16 प्रकार की महा इनकम!</span>
-              </h1>
-
-              <p className="text-lg text-slate-600 font-medium leading-relaxed max-w-2xl">
-                किचन, पर्सनल केयर, और स्वास्थ्यवर्धक आयुर्वेदिक उत्पादों की सीधी खरीदारी करें और भारत के सबसे पारदर्शी डायरेक्ट सेलिंग एवं 2x2 ऑटोपूल नेटवर्क का हिस्सा बनें।
-              </p>
-
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 pt-2 w-full sm:w-auto">
+              {/* Member Registration & Distributor Login Buttons */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full sm:w-auto">
                 <Link
                   href="/register"
                   className="w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl bg-gradient-to-r from-[#d4a359] via-[#fef08a] to-[#bc853c] text-[#0b2b1e] font-black text-sm sm:text-base shadow-xl shadow-[#d4a359]/25 hover:opacity-95 transition-all flex items-center justify-center gap-3 cursor-pointer text-center"
@@ -134,6 +122,20 @@ export default async function HomePage() {
                   <span>डिस्ट्रीब्यूटर लॉगिन</span>
                 </Link>
               </div>
+
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#144732]/10 border border-[#144732]/20 text-[#144732] text-xs font-black tracking-wide uppercase">
+                <span className="w-2 h-2 rounded-full bg-[#22c55e] animate-pulse" />
+                उत्पादों के साथ आत्मनिर्भर व्यापार का अवसर
+              </div>
+
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-[#144732] tracking-tight leading-[1.15]">
+                मार्केट रेट पर उपयोगी उत्पाद,{' '}
+                <span className="text-[#92580a]">16 प्रकार की महा इनकम!</span>
+              </h1>
+
+              <p className="text-lg text-slate-600 font-medium leading-relaxed max-w-2xl">
+                किचन, पर्सनल केयर, और स्वास्थ्यवर्धक आयुर्वेदिक उत्पादों की सीधी खरीदारी करें और भारत के सबसे पारदर्शी डायरेक्ट सेलिंग एवं 2x2 ऑटोपूल नेटवर्क का हिस्सा बनें।
+              </p>
 
               {/* 4 Feature Badges */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-6 border-t border-[#d8d0bf]/60">
