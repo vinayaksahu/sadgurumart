@@ -193,7 +193,14 @@ export default async function DashboardPage({
                 <div className="text-xs text-slate-300 font-semibold mt-1.5 flex flex-wrap items-center gap-2 sm:gap-3">
                   <span>Member ID: <strong className="text-[#fef08a] font-mono">{user.userCode}</strong></span>
                   <span>•</span>
-                  <span>Rank: <strong className="text-emerald-300">{user.rank.replace('_', ' ')}</strong></span>
+                  <Link
+                    href="/rewards"
+                    className="inline-flex items-center gap-1 hover:underline text-emerald-300 group font-bold"
+                    title="View Rank & Lifestyle Rewards"
+                  >
+                    <Award className="w-3.5 h-3.5 text-[#fef08a]" />
+                    <span>Rank: <strong className="text-[#fef08a]">{user.rank.replace('_', ' ')}</strong> (रिवार्ड्स देखें →)</span>
+                  </Link>
                   <span>•</span>
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-white/10 text-[#fef08a] border border-[#d4a359]/30 font-bold">
                     <span>Package:</span>
@@ -395,8 +402,24 @@ export default async function DashboardPage({
           </div>
         </div>
 
-        {/* 4 Feature Action Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* 5 Feature Action Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+          <Link
+            href="/rewards"
+            className="p-6 rounded-3xl bg-gradient-to-br from-white to-amber-50/40 border-2 border-amber-300 hover:border-[#92580a] shadow-sm hover:shadow-md transition-all group block"
+          >
+            <div className="w-12 h-12 rounded-2xl bg-amber-100 text-[#92580a] flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <Award className="w-6 h-6" />
+            </div>
+            <div className="flex items-center gap-1.5">
+              <h3 className="font-black text-base text-slate-900">Rank & Rewards</h3>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-[#d4a359] text-slate-950">3% Pool</span>
+            </div>
+            <p className="text-xs text-slate-500 mt-1">
+              15 रैंक पदनाम, कार, बाइक, टूर, नकद व 4 लाइफस्टाइल फंड्स।
+            </p>
+          </Link>
+
           <Link
             href="/genealogy/binary"
             className="p-6 rounded-3xl bg-white border border-[#e8e3d5] hover:border-[#144732] shadow-sm hover:shadow-md transition-all group block"
@@ -424,22 +447,6 @@ export default async function DashboardPage({
           </Link>
 
           <Link
-            href="/recharge"
-            className="p-6 rounded-3xl bg-white border border-[#e8e3d5] hover:border-emerald-600 shadow-sm hover:shadow-md transition-all group block"
-          >
-            <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-              <Smartphone className="w-6 h-6" />
-            </div>
-            <div className="flex items-center gap-2">
-              <h3 className="font-black text-base text-emerald-900">Utility Recharge</h3>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">शीघ्र उपलब्ध</span>
-            </div>
-            <p className="text-xs text-slate-500 mt-1">
-              मोबाइल व टीवी रिचार्ज सेवा शीघ्र प्रारंभ की जा रही है।
-            </p>
-          </Link>
-
-          <Link
             href="/payout"
             className="p-6 rounded-3xl bg-white border border-[#e8e3d5] hover:border-[#92580a] shadow-sm hover:shadow-md transition-all group block"
           >
@@ -449,6 +456,22 @@ export default async function DashboardPage({
             <h3 className="font-black text-base text-[#92580a]">Payout & Ledger</h3>
             <p className="text-xs text-slate-500 mt-1">
               बैंक विड्रॉल अनुरोध, 5% + 5% कटौती एवं पूरा लेजर।
+            </p>
+          </Link>
+
+          <Link
+            href="/recharge"
+            className="p-6 rounded-3xl bg-white border border-[#e8e3d5] hover:border-emerald-600 shadow-sm hover:shadow-md transition-all group block"
+          >
+            <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <Smartphone className="w-6 h-6" />
+            </div>
+            <div className="flex items-center gap-2">
+              <h3 className="font-black text-base text-emerald-900">Utility Recharge</h3>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">शीघ्र</span>
+            </div>
+            <p className="text-xs text-slate-500 mt-1">
+              मोबाइल व टीवी रिचार्ज सेवा शीघ्र प्रारंभ की जा रही है।
             </p>
           </Link>
         </div>

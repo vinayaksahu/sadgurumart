@@ -14,7 +14,8 @@ import {
   ShieldCheck, 
   Building, 
   FileText,
-  TrendingDown
+  TrendingDown,
+  Award
 } from 'lucide-react';
 import WithdrawalActionForm from './WithdrawalActionForm';
 
@@ -85,12 +86,21 @@ export default async function PayoutPage({
             </p>
           </div>
 
-          <Link
-            href="/kyc"
-            className="px-4 py-2 rounded-xl border-2 border-[#144732] text-[#144732] font-bold text-xs hover:bg-[#144732] hover:text-white transition-colors"
-          >
-            {hasKYC ? '✓ Bank Details Updated' : '⚠️ Update Bank & KYC'}
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/rewards"
+              className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs transition-colors flex items-center gap-1.5 shadow-xs"
+            >
+              <Award className="w-3.5 h-3.5" />
+              <span>Rank & Rewards</span>
+            </Link>
+            <Link
+              href="/kyc"
+              className="px-4 py-2 rounded-xl border-2 border-[#144732] text-[#144732] font-bold text-xs hover:bg-[#144732] hover:text-white transition-colors"
+            >
+              {hasKYC ? '✓ Bank Details Updated' : '⚠️ Update Bank & KYC'}
+            </Link>
+          </div>
         </div>
 
         {/* Withdrawal Section & Bank Card */}

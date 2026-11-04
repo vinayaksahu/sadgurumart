@@ -24,7 +24,8 @@ import {
   ShieldCheck,
   Building,
   HelpCircle,
-  FileText
+  FileText,
+  Award
 } from 'lucide-react';
 import { useCart } from '@/lib/cartContext';
 
@@ -47,10 +48,12 @@ export default function MemberNavbar({ user: initialUser, isAdminActive: initial
     name: string;
     userCode: string;
     isActive: boolean;
+    rank?: string;
   }>({
     name: initialUser?.name || 'Member',
     userCode: initialUser?.userCode || 'SGM Member',
     isActive: initialUser?.isActive ?? true,
+    rank: initialUser?.rank || 'DISTRIBUTOR',
   });
 
   // Sync with /api/auth/me if not passed via props or to check admin mode
@@ -66,6 +69,7 @@ export default function MemberNavbar({ user: initialUser, isAdminActive: initial
             name: data.user.name || 'Member',
             userCode: data.user.userCode || 'SGM Member',
             isActive: data.user.isActive ?? true,
+            rank: data.user.rank || 'DISTRIBUTOR',
           });
         }
       })
@@ -93,7 +97,7 @@ export default function MemberNavbar({ user: initialUser, isAdminActive: initial
     if (pathname?.startsWith('/profile') || pathname === '/kyc') {
       return 'Profile (प्रोफाइल)';
     }
-    if (pathname?.startsWith('/payout') || pathname?.startsWith('/income') || pathname === '/autopool') {
+    if (pathname?.startsWith('/payout') || pathname?.startsWith('/income') || pathname === '/autopool' || pathname === '/rewards') {
       return 'My Income (16 इनकम व पेआउट)';
     }
     return null;
@@ -104,7 +108,7 @@ export default function MemberNavbar({ user: initialUser, isAdminActive: initial
       setOpenSubmenu('Team (टीम)');
     } else if (pathname?.startsWith('/profile') || pathname === '/kyc') {
       setOpenSubmenu('Profile (प्रोफाइल)');
-    } else if (pathname?.startsWith('/payout') || pathname?.startsWith('/income') || pathname === '/autopool') {
+    } else if (pathname?.startsWith('/payout') || pathname?.startsWith('/income') || pathname === '/autopool' || pathname === '/rewards') {
       setOpenSubmenu('My Income (16 इनकम व पेआउट)');
     }
   }, [pathname]);
@@ -138,9 +142,11 @@ export default function MemberNavbar({ user: initialUser, isAdminActive: initial
       children: [
         { label: 'All Incomes Summary (समस्त इनकम सारांश)', href: '/payout', icon: TrendingUp },
         { label: 'Income Details & History (16 इनकम लेजर)', href: '/income/history', icon: FileText },
+        { label: 'Rank & Lifestyle Rewards (रैंक एवं रिवार्ड्स)', href: '/rewards', icon: Award },
         { label: 'AutoPool Matrix & History (2x2 ऑटोपूल)', href: '/autopool', icon: Layers },
       ],
     },
+    { label: 'Rank & Rewards (रैंक व रिवार्ड्स)', href: '/rewards', icon: Award },
     { label: 'Wallet', href: '/wallet', icon: Wallet },
     {
       label: 'Team (टीम)',
@@ -283,6 +289,14 @@ export default function MemberNavbar({ user: initialUser, isAdminActive: initial
                   }`}>
                     {sessionUser.isActive ? 'Active Member' : 'Pending Activation'}
                   </span>
+                  <Link
+                    href="/rewards"
+                    onClick={() => setIsOpen(false)}
+                    className="inline-flex items-center gap-1.5 mt-2 px-3 py-1 rounded-full text-[11px] font-black bg-[#d4a359] text-slate-950 shadow-sm hover:scale-105 transition-all"
+                  >
+                    <Award className="w-3.5 h-3.5 text-slate-950" />
+                    <span>Rank: {sessionUser.rank ? sessionUser.rank.replace('_', ' ') : 'Distributor'}</span>
+                  </Link>
                 </div>
               </div>
 

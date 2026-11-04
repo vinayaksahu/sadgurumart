@@ -20,7 +20,8 @@ import {
   Sparkles,
   Megaphone,
   ChevronDown,
-  HelpCircle
+  HelpCircle,
+  Award
 } from 'lucide-react';
 
 interface AdminNavbarProps {
@@ -140,6 +141,7 @@ export default function AdminNavbar({
       icon: Users,
       items: [
         { label: 'Search Members', href: '/admin/members' },
+        { label: 'Rank & Rewards Achievers', href: '/admin/rewards' },
         { label: 'Red Members List (Inactive)', href: '/admin/members?status=inactive' },
         { label: 'Green Members List (Active)', href: '/admin/members?status=active' },
         { label: 'Downline Members', href: '/admin/members?view=downline' },
@@ -150,12 +152,25 @@ export default function AdminNavbar({
       ],
     },
     {
+      id: 'rewards',
+      title: 'Rank & Lifestyle Rewards',
+      icon: Award,
+      items: [
+        { label: 'All Rank Achievers', href: '/admin/rewards' },
+        { label: 'Star Club (Ranks 1-5)', href: '/admin/rewards?club=STAR' },
+        { label: 'Leadership Club (Ranks 6-10)', href: '/admin/rewards?club=LEADERSHIP' },
+        { label: 'Crorepati Club (Ranks 11-15)', href: '/admin/rewards?club=CROREPATI' },
+        { label: '4 Lifestyle Funds (2% CTO)', href: '/admin/rewards?tab=funds' },
+      ],
+    },
+    {
       id: 'payouts',
       title: 'Payouts',
       icon: CreditCard,
       items: [
         { label: 'Pending Withdrawals', href: '/admin/withdrawals?status=pending' },
         { label: 'Approved Withdrawals', href: '/admin/withdrawals?status=approved' },
+        { label: 'Rank & Lifestyle Rewards', href: '/admin/rewards' },
         { label: 'Daily Closing & Payout', href: '/admin/withdrawals?view=closing' },
         { label: 'AutoPool Payouts & Inflow', href: '/admin/autopool' },
         { label: 'TDS Deductions Report', href: '/admin/withdrawals?view=tds' },
