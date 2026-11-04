@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { cookies } from 'next/headers';
 import { verifyAdminToken, verifySuperToken } from '@/lib/auth/jwt';
 import { formatGoogleDriveUrl, generateSlug } from '@/lib/imageUtils';
+import { ensureGoogleDriveUrl } from '@/lib/googleDriveUpload';
 
 async function checkAdminAuth() {
   const cookieStore = await cookies();
@@ -77,8 +78,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Title, category, MRP and DP Price are required' }, { status: 400 });
     }
 
-    // Process image URL with Google Drive converter
-    const formattedImage = imageUrl ? formatGoogleDriveUrl(imageUrl) : '';
+    // Ensure image is saved to Google Drive and not stored as raw base64
+    const driveImageUrl = await ensureGoogleDriveUrl(imageUrl, 'products', title);
+    const formattedImage = driveImageUrl ? formatGoogleDriveUrl(driveImageUrl) : '';
     const imagesArray = formattedImage ? [formattedImage] : [];
 
     // Ensure unique slug
@@ -162,7 +164,8 @@ export async function PUT(req: Request) {
     if (isActive !== undefined) updateData.isActive = Boolean(isActive);
 
     if (imageUrl !== undefined) {
-      const formatted = imageUrl ? formatGoogleDriveUrl(imageUrl) : '';
+      const driveImageUrl = await ensureGoogleDriveUrl(imageUrl, 'products', existing.title);
+      const formatted = driveImageUrl ? formatGoogleDriveUrl(driveImageUrl) : '';
       updateData.images = formatted ? [formatted] : [];
     }
 

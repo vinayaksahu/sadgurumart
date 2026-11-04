@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyUserToken } from '@/lib/auth/jwt';
+import { ensureGoogleDriveUrl } from '@/lib/googleDriveUpload';
 
 export async function GET(req: NextRequest) {
   try {
@@ -100,6 +101,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Ensure all KYC documents are stored in Google Drive and never as base64 in Neon DB
+    const [finalPanUrl, finalAadhaarFrontUrl, finalAadhaarBackUrl, finalPassbookUrl] = await Promise.all([
+      ensureGoogleDriveUrl(panPhotoUrl, 'kyc', `pan_${cleanPAN}`),
+      ensureGoogleDriveUrl(aadhaarFrontUrl, 'kyc', `aadhaar_front_${cleanAadhaar}`),
+      ensureGoogleDriveUrl(aadhaarBackUrl, 'kyc', `aadhaar_back_${cleanAadhaar}`),
+      ensureGoogleDriveUrl(passbookChequeUrl, 'kyc', `bank_${cleanPAN}`),
+    ]);
+
     // Upsert KYC details and sync user.pan
     const [kyc] = await prisma.$transaction([
       prisma.kYCDetail.upsert({
@@ -111,10 +120,10 @@ export async function POST(req: NextRequest) {
           bankAccountNumber: bankAccountNumber.trim(),
           ifscCode: ifscCode.trim().toUpperCase(),
           accountHolderName: accountHolderName.trim(),
-          panPhotoUrl: panPhotoUrl || undefined,
-          aadhaarFrontUrl: aadhaarFrontUrl || undefined,
-          aadhaarBackUrl: aadhaarBackUrl || undefined,
-          passbookChequeUrl: passbookChequeUrl || undefined,
+          panPhotoUrl: finalPanUrl || undefined,
+          aadhaarFrontUrl: finalAadhaarFrontUrl || undefined,
+          aadhaarBackUrl: finalAadhaarBackUrl || undefined,
+          passbookChequeUrl: finalPassbookUrl || undefined,
           status: 'PENDING', // Awaiting admin review
           rejectionReason: null,
         },
@@ -126,10 +135,10 @@ export async function POST(req: NextRequest) {
           bankAccountNumber: bankAccountNumber.trim(),
           ifscCode: ifscCode.trim().toUpperCase(),
           accountHolderName: accountHolderName.trim(),
-          panPhotoUrl: panPhotoUrl || null,
-          aadhaarFrontUrl: aadhaarFrontUrl || null,
-          aadhaarBackUrl: aadhaarBackUrl || null,
-          passbookChequeUrl: passbookChequeUrl || null,
+          panPhotoUrl: finalPanUrl || null,
+          aadhaarFrontUrl: finalAadhaarFrontUrl || null,
+          aadhaarBackUrl: finalAadhaarBackUrl || null,
+          passbookChequeUrl: finalPassbookUrl || null,
           status: 'PENDING',
         },
       }),

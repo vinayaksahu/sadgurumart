@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { cookies } from 'next/headers';
 import { verifyAdminToken, verifySuperToken } from '@/lib/auth/jwt';
 import { formatGoogleDriveUrl } from '@/lib/imageUtils';
+import { ensureGoogleDriveUrl } from '@/lib/googleDriveUpload';
 
 async function checkAdminAuth() {
   const cookieStore = await cookies();
@@ -47,7 +48,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Title and image URL are required' }, { status: 400 });
     }
 
-    const formattedImage = formatGoogleDriveUrl(imageUrl);
+    const driveImage = await ensureGoogleDriveUrl(imageUrl, 'gallery', title);
+    const formattedImage = formatGoogleDriveUrl(driveImage);
 
     const item = await prisma.galleryItem.create({
       data: {

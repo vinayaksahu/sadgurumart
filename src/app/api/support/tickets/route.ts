@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyUserToken } from '@/lib/auth/jwt';
+import { ensureGoogleDriveUrl } from '@/lib/googleDriveUpload';
 
 export async function GET(req: NextRequest) {
   try {
@@ -89,6 +90,9 @@ export async function POST(req: NextRequest) {
     const validPriorities = ['LOW', 'MEDIUM', 'HIGH', 'URGENT'];
     const finalPriority = validPriorities.includes(priority) ? priority : 'MEDIUM';
 
+    // Ensure attachment (image or PDF) is saved to Google Drive
+    const finalAttachment = attachmentUrl ? await ensureGoogleDriveUrl(attachmentUrl, 'support', ticketNumber) : null;
+
     const ticket = await prisma.supportTicket.create({
       data: {
         ticketNumber,
@@ -97,7 +101,7 @@ export async function POST(req: NextRequest) {
         subject: subject.trim(),
         description: description.trim(),
         priority: finalPriority as any,
-        attachmentUrl: attachmentUrl || null,
+        attachmentUrl: finalAttachment,
         status: 'OPEN',
       },
     });

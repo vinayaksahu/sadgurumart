@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyAdminToken, verifySuperToken } from '@/lib/auth/jwt';
 import { getSystemSettings, invalidateSettingsCache } from '@/lib/settings';
+import { ensureGoogleDriveUrl } from '@/lib/googleDriveUpload';
 
 function authenticateAdmin(req: NextRequest) {
   const adminToken = req.cookies.get('sgm_admin_token')?.value;
@@ -48,6 +49,9 @@ export async function POST(req: NextRequest) {
     // Ensure system setting exists or update
     const current = await getSystemSettings();
 
+    const finalPopupImage = body.popupImageUrl ? await ensureGoogleDriveUrl(body.popupImageUrl, 'banners', 'popup') : current.popupImageUrl;
+    const finalQrImage = body.companyQrImageUrl ? await ensureGoogleDriveUrl(body.companyQrImageUrl, 'banners', 'company_qr') : (current as any).companyQrImageUrl;
+
     const updated = await prisma.systemSetting.update({
       where: { id: current.id },
       data: {
@@ -80,7 +84,7 @@ export async function POST(req: NextRequest) {
         popupEnabled: Boolean(body.popupEnabled),
         popupTitle: body.popupTitle ?? current.popupTitle,
         popupContent: body.popupContent ?? current.popupContent,
-        popupImageUrl: body.popupImageUrl ?? current.popupImageUrl,
+        popupImageUrl: finalPopupImage,
         popupButtonText: body.popupButtonText ?? current.popupButtonText,
         popupButtonLink: body.popupButtonLink ?? current.popupButtonLink,
         popupTarget: body.popupTarget ?? current.popupTarget,
@@ -107,7 +111,7 @@ export async function POST(req: NextRequest) {
         companyIfscCode: body.companyIfscCode !== undefined ? body.companyIfscCode : (current as any).companyIfscCode,
         companyBranch: body.companyBranch !== undefined ? body.companyBranch : (current as any).companyBranch,
         companyUpiId: body.companyUpiId !== undefined ? body.companyUpiId : (current as any).companyUpiId,
-        companyQrImageUrl: body.companyQrImageUrl !== undefined ? body.companyQrImageUrl : (current as any).companyQrImageUrl,
+        companyQrImageUrl: finalQrImage,
       },
     });
 

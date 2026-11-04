@@ -5,15 +5,15 @@ export interface DriveUploadResult {
   url: string;
   fileId?: string;
   driveUrl?: string;
-  provider: 'google_drive' | 'local_fallback';
+  provider: 'google_drive';
   message?: string;
   error?: string;
 }
 
-export const DEFAULT_DRIVE_FOLDER_ID = '1m48lvsU628rR8nhL4i-24GWdJe_4w5Hn';
+export const DEFAULT_DRIVE_FOLDER_ID = '1SPTSkz7LEJjCy1R9Zuu6-R5t14w26lbf';
 
 /**
- * Uploads a base64 or buffer image directly to the configured Google Drive folder.
+ * Uploads a base64 or buffer media file (images, PDFs, documents) directly to the configured Google Drive folder.
  * Uses Google Apps Script Web App webhook configured in SystemSetting or GOOGLE_DRIVE_UPLOAD_URL env.
  */
 export async function uploadToGoogleDrive({
@@ -54,7 +54,8 @@ export async function uploadToGoogleDrive({
       ? base64Data.split('base64,')[1]
       : base64Data;
 
-    const safeFilename = filename || `${folder}_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.jpg`;
+    const ext = mimeType === 'application/pdf' ? '.pdf' : '.jpg';
+    const safeFilename = filename || `${folder}_${Date.now()}_${Math.random().toString(36).substring(2, 7)}${ext}`;
 
     // 2. If Google Drive Webhook URL is configured, upload to Google Drive
     if (uploadUrl && uploadUrl.startsWith('http')) {
@@ -96,30 +97,72 @@ export async function uploadToGoogleDrive({
         };
       } else {
         console.warn('Google Drive script returned error:', data);
-        // Fallback to dataUrl so app continues working seamlessly
         return {
-          success: true,
-          url: base64Data,
-          provider: 'local_fallback',
-          message: data.error || 'Google Drive वेबहुक से त्रुटि मिली, स्थानीय रूप से सेव किया गया।',
+          success: false,
+          url: '',
+          provider: 'google_drive',
+          error: data?.error || 'Google Drive में फ़ाइल सेव नहीं हो सकी।',
         };
       }
     }
 
-    // 3. Fallback when Google Drive webhook is not yet entered
     return {
-      success: true,
-      url: base64Data,
-      provider: 'local_fallback',
-      message: 'गूगल ड्राइव ऑटो-अपलोड वेबहुक URL अभी एडमिन सेटिंग्स में दर्ज नहीं है। फोटो लोकली सुरक्षित सेव हुई।',
+      success: false,
+      url: '',
+      provider: 'google_drive',
+      error: 'Google Drive Webhook URL कॉन्फ़िगर नहीं है।',
     };
   } catch (error: any) {
     console.error('Error uploading to Google Drive:', error);
     return {
-      success: true,
-      url: base64Data,
-      provider: 'local_fallback',
+      success: false,
+      url: '',
+      provider: 'google_drive',
       error: error.message || 'Drive upload failed',
     };
   }
+}
+
+/**
+ * Ensures media (image or PDF) is stored on Google Drive and NEVER as raw Base64 in Neon database.
+ * If input is already an HTTP URL, returns as-is.
+ * If input is Base64 data, uploads to Google Drive and returns the direct Google Drive URL.
+ */
+export async function ensureGoogleDriveUrl(
+  input: string | undefined | null,
+  folder: string = 'media',
+  filenamePrefix: string = 'file'
+): Promise<string> {
+  if (!input) return '';
+  const trimmed = input.trim();
+  if (!trimmed) return '';
+
+  // Already a cloud/web link
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+    return trimmed;
+  }
+
+  // If base64 data, upload to Google Drive
+  if (trimmed.startsWith('data:')) {
+    const mimeMatch = trimmed.match(/^data:([^;]+);base64,/);
+    const mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
+    const ext = mimeType === 'application/pdf' ? '.pdf' : '.jpg';
+    const filename = `${folder}_${filenamePrefix.replace(/[^a-zA-Z0-9_-]/g, '_')}_${Date.now()}${ext}`;
+
+    const res = await uploadToGoogleDrive({
+      base64Data: trimmed,
+      filename,
+      mimeType,
+      folder,
+    });
+
+    if (res.success && res.url) {
+      return res.url;
+    }
+
+    console.error('Failed to upload base64 to Google Drive:', res.error || res.message);
+    throw new Error('Google Drive में फ़ाइल अपलोड असफल रहा। कृपया पुनः प्रयास करें।');
+  }
+
+  return trimmed;
 }

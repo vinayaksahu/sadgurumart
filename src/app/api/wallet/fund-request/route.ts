@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyUserToken } from '@/lib/auth/jwt';
+import { ensureGoogleDriveUrl } from '@/lib/googleDriveUpload';
 
 export async function POST(req: NextRequest) {
   try {
@@ -54,13 +55,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Ensure payment slip/screenshot is stored in Google Drive and never as base64 in DB
+    const finalScreenshotUrl = await ensureGoogleDriveUrl(screenshotUrl, 'funds', `slip_${cleanUtr}`);
+
     const newRequest = await prisma.fundRequest.create({
       data: {
         userId: decoded.id,
         amount: parsedAmount,
         paymentMode: paymentMode || 'UPI',
         utrNumber: cleanUtr,
-        screenshotUrl: screenshotUrl?.trim() || null,
+        screenshotUrl: finalScreenshotUrl || null,
         remarks: remarks?.trim() || null,
         status: 'PENDING',
       },

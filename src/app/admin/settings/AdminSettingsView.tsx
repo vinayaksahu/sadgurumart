@@ -743,7 +743,9 @@ export default function AdminSettingsView({ initialSettings, isSuperAdmin }: Pro
     );
 
     var file = folder.createFile(blob);
-    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    try {
+      file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    } catch(shareErr) {}
 
     var fileId = file.getId();
     var viewUrl = "https://lh3.googleusercontent.com/d/" + fileId;
@@ -830,7 +832,9 @@ export default function AdminSettingsView({ initialSettings, isSuperAdmin }: Pro
     );
 
     var file = folder.createFile(blob);
-    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    try {
+      file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    } catch(shareErr) {}
 
     var fileId = file.getId();
     var viewUrl = "https://lh3.googleusercontent.com/d/" + fileId;
