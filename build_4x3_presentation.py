@@ -35,7 +35,7 @@ img_pan = get_base64_img("public/legal/pan_thumb.png")
 img_udyam = get_base64_img("public/legal/udyam_thumb.png")
 img_deed = get_base64_img("public/legal/deed_thumb.png")
 
-TOTAL_PAGES = 32
+TOTAL_PAGES = 34
 
 def slide_header(cat_num, cat_title, main_hi, main_en, sub_hi, sub_en):
     return f"""
@@ -1693,102 +1693,130 @@ s29 = f"""
 slides_html.append(s29)
 
 # ==============================================================================
+# LEGAL DOC CARD HELPER
+# ==============================================================================
+def make_doc_card(badge_text, badge_color, title_hi, title_en, img_data, reg_label, reg_val, authority, val_color="#144732", border_color="#144732"):
+    return f"""
+    <div style="flex:1; background:#ffffff; border:2.5px solid {border_color}; border-radius:24px; padding:18px 22px; display:flex; flex-direction:column; justify-content:space-between; box-shadow:0 8px 24px rgba(0,0,0,0.06); height:100%; box-sizing:border-box;">
+      <!-- Card Header -->
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1.5px solid #f1f5f9; padding-bottom:10px;">
+        <div>
+          <div style="font-size:21px; font-weight:900; color:#0f172a; line-height:1.2;">{title_hi}</div>
+          <div style="font-size:12.5px; font-weight:700; color:#64748b; margin-top:2px;">{title_en}</div>
+        </div>
+        <span style="font-size:11px; font-weight:800; font-family:monospace; background:{badge_color}18; color:{badge_color}; border:1.5px solid {badge_color}55; padding:4px 10px; border-radius:8px; text-transform:uppercase;">
+          {badge_text}
+        </span>
+      </div>
+
+      <!-- Large Certificate Image Preview (Fits comfortably with clear border) -->
+      <div style="flex:1; margin:12px 0; background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:16px; overflow:hidden; display:flex; align-items:center; justify-content:center; padding:10px; box-shadow:inset 0 2px 6px rgba(0,0,0,0.04);">
+        <img src="{img_data}" style="max-height:380px; max-width:100%; width:auto; height:auto; object-fit:contain; border-radius:8px; box-shadow:0 4px 18px rgba(0,0,0,0.15);" />
+      </div>
+
+      <!-- Registration Value Box -->
+      <div style="background:#faf8f4; border:1.5px solid #e2e8f0; border-radius:14px; padding:10px 16px; display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <div style="font-size:10.5px; font-weight:800; text-transform:uppercase; color:#64748b; letter-spacing:0.5px;">{reg_label}</div>
+          <div style="font-family:monospace; font-size:19px; font-weight:900; color:{val_color}; margin-top:2px;">{reg_val}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:10px; font-weight:800; text-transform:uppercase; color:#64748b;">सत्यापित प्राधिकरण</div>
+          <div style="font-size:12.5px; font-weight:800; color:#0f172a; margin-top:2px;">{authority}</div>
+        </div>
+      </div>
+    </div>
+"""
 
 # ==============================================================================
-# SLIDE 30: LEGAL CERTIFICATES & GOVERNMENT COMPLIANCE
+# SLIDE 30: LEGAL DOCS PART 1 (GST & FSSAI - MAX 2 DOCS)
 # ==============================================================================
-s30_legal = f"""
+s30 = f"""
 <div class="slide">
-  {slide_header("16.A", "वैधानिक दस्तावेज", "कंपनी के कानूनी रजिस्ट्रेशन प्रमाणपत्र", "Official Government Certificates & Legal Licenses", "100% भारत सरकार के प्रत्यक्ष बिक्री नियम 2021 के अनुरूप पंजीकृत", "Fully Compliant with Direct Selling Rules 2021, GST, FSSAI & MSME")}
+  {slide_header("16.A", "वैधानिक दस्तावेज (भाग-1)", "जीएसटी एवं खाद्य सुरक्षा प्रमाणपत्र", "GST & FSSAI Central Registration Certificates", "100% भारत सरकार एवं खाद्य संरक्षा मानक अधिनियम 2006 के तहत पंजीकृत", "Officially Registered Under Form GST REG-06 and Food Safety Act 2006")}
   
-  <div class="slide-body" style="padding:18px 40px; justify-content:space-between;">
-    <!-- Top Row: 3 Documents (GST, FSSAI, PAN) -->
-    <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:16px;">
-      <!-- Doc 1: GST -->
-      <div class="card-white" style="border:2px solid #144732; border-radius:16px; padding:12px; display:flex; gap:12px; align-items:center;">
-        <img src="{img_gst}" style="width:75px; height:95px; object-fit:contain; border-radius:6px; border:1px solid #cbd5e1; background:#fff; flex-shrink:0;" />
-        <div style="flex:1; min-width:0;">
-          <div style="font-size:11px; font-weight:800; color:#144732; text-transform:uppercase;">FORM GST REG-06</div>
-          <div style="font-size:16px; font-weight:900; color:#0f172a; line-height:1.2;">GST रजिस्ट्रेशन</div>
-          <div style="font-family:monospace; font-size:12.5px; font-weight:900; color:#0b2b1e; background:#f0fdf4; padding:3px 6px; border-radius:6px; margin:4px 0; border:1px solid #bbf7d0;">
-            22AGCFS2395A1ZC
+  <div class="slide-body" style="padding:16px 36px; display:flex; gap:22px; height:680px; box-sizing:border-box;">
+    {make_doc_card("GST CERTIFIED", "#144732", "GST रजिस्ट्रेशन प्रमाणपत्र", "Form GST REG-06 • Government of India", img_gst, "GSTIN रजिस्ट्रेशन नंबर", "22AGCFS2395A1ZC", "भारत सरकार (Govt. of India)", "#144732", "#144732")}
+    {make_doc_card("FSSAI FOOD SAFETY", "#92580a", "FSSAI खाद्य सुरक्षा प्रमाणपत्र", "Food Safety and Standards Act, 2006", img_fssai, "FSSAI पंजीकरण संख्या", "20526059000322", "छ.ग. खाद्य एवं औषधि प्रशासन", "#92580a", "#d4a359")}
+  </div>
+
+  {slide_footer(30)}
+</div>
+"""
+slides_html.append(s30)
+
+# ==============================================================================
+# SLIDE 31: LEGAL DOCS PART 2 (PAN & MSME UDYAM - MAX 2 DOCS)
+# ==============================================================================
+s31 = f"""
+<div class="slide">
+  {slide_header("16.B", "वैधानिक दस्तावेज (भाग-2)", "कंपनी पैन कार्ड एवं उद्यम रजिस्ट्रेशन", "Income Tax PAN Card & MSME Udyam Certificate", "आयकर विभाग भारत सरकार एवं सूक्ष्म, लघु व मध्यम उद्यम मंत्रालय द्वारा प्रमाणित", "Certified by Income Tax Dept. and Ministry of MSME, Govt. of India")}
+  
+  <div class="slide-body" style="padding:16px 36px; display:flex; gap:22px; height:680px; box-sizing:border-box;">
+    {make_doc_card("INCOME TAX DEPT", "#144732", "आयकर पैन कार्ड (e-PAN)", "Permanent Account Number • Govt. of India", img_pan, "पैन कार्ड नंबर (PAN)", "AGCFS2395A", "आयकर विभाग (Income Tax)", "#144732", "#144732")}
+    {make_doc_card("MSME UDYAM", "#92580a", "एमएसएमई उद्यम रजिस्ट्रेशन", "Ministry of MSME, Government of India", img_udyam, "उद्यम रजिस्ट्रेशन संख्या", "UDYAM-CG-09-0021023", "सूक्ष्म एवं लघु उद्योग मंत्रालय", "#92580a", "#d4a359")}
+  </div>
+
+  {slide_footer(31)}
+</div>
+"""
+slides_html.append(s31)
+
+# ==============================================================================
+# SLIDE 32: LEGAL DOCS PART 3 (PARTNERSHIP DEED & COMPLIANCE - MAX 2 ITEMS)
+# ==============================================================================
+s32 = f"""
+<div class="slide">
+  {slide_header("16.C", "वैधानिक दस्तावेज (भाग-3)", "पार्टनरशिप डीड एवं वैधानिक अनुपालन", "Registered Partnership Deed & Direct Selling 2021 Compliance", "कानूनी पंजीकृत व्यावसायिक इकाई एवं उपभोक्ता संरक्षण नियमों का 100% अनुपालन", "Legally Formed Partnership Firm & Consumer Protection Direct Selling Compliance")}
+  
+  <div class="slide-body" style="padding:16px 36px; display:flex; gap:22px; height:680px; box-sizing:border-box;">
+    {make_doc_card("REGISTERED ENTITY", "#144732", "पार्टनरशिप डीड (Deed)", "Registered Legal Partnership Document", img_deed, "पंजीकृत व्यावसायिक नाम", "S G M MART ONLINE SERVICE", "छ.ग. राज्य क्षेत्राधिकार", "#144732", "#144732")}
+
+    <!-- Compliance Checklist Card -->
+    <div style="flex:1; background:#ffffff; border:2.5px solid #d4a359; border-radius:24px; padding:22px 24px; display:flex; flex-direction:column; justify-content:space-between; box-shadow:0 8px 24px rgba(0,0,0,0.06); height:100%; box-sizing:border-box;">
+      <div>
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1.5px solid #f1f5f9; padding-bottom:12px; margin-bottom:16px;">
+          <div>
+            <div style="font-size:22px; font-weight:900; color:#144732;">100% लीगल डायरेक्ट सेलिंग</div>
+            <div style="font-size:12px; font-weight:700; color:#64748b; margin-top:2px;">Direct Selling Rules 2021 Compliant</div>
           </div>
-          <div style="font-size:11px; color:#64748b; font-weight:600;">Government of India</div>
+          <span style="font-size:11px; font-weight:800; font-family:monospace; background:#14473215; color:#144732; border:1.5px solid #14473255; padding:4px 10px; border-radius:8px;">
+            100% VERIFIED
+          </span>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <div style="background:#f0fdf4; border-left:5px solid #144732; border-radius:10px; padding:11px 14px;">
+            <div style="font-size:15px; font-weight:800; color:#144732;">✔ 100% उत्पाद-आधारित प्रत्यक्ष बिक्री मॉडल</div>
+            <div style="font-size:12px; color:#475569; font-weight:600; margin-top:2px;">प्रत्येक खरीद पर वास्तविक गुणवत्तायुक्त प्रोडक्ट, नो मनी सर्कुलेशन।</div>
+          </div>
+
+          <div style="background:#fefce8; border-left:5px solid #92580a; border-radius:10px; padding:11px 14px;">
+            <div style="font-size:15px; font-weight:800; color:#92580a;">✔ 5% TDS + 5% Admin Charge विधिवत कटौती</div>
+            <div style="font-size:12px; color:#475569; font-weight:600; margin-top:2px;">पैन कार्ड आधारित सरकारी टैक्स भुगतान एवं पारदर्शी लेजर।</div>
+          </div>
+
+          <div style="background:#f0fdf4; border-left:5px solid #144732; border-radius:10px; padding:11px 14px;">
+            <div style="font-size:15px; font-weight:800; color:#144732;">✔ बैंक खाता व पैन आधारित अनिवार्य KYC</div>
+            <div style="font-size:12px; color:#475569; font-weight:600; margin-top:2px;">1 पैन पर अधिकतम 3 आईडी नियम, सुरक्षित डायरेक्ट बैंक ट्रांसफर।</div>
+          </div>
+
+          <div style="background:#fefce8; border-left:5px solid #92580a; border-radius:10px; padding:11px 14px;">
+            <div style="font-size:15px; font-weight:800; color:#92580a;">✔ 24×7 उपभोक्ता संरक्षण एवं शिकायत निवारण</div>
+            <div style="font-size:12px; color:#475569; font-weight:600; margin-top:2px;">ऑनलाइन टिकट सपोर्ट, समर्पित शिकायत अधिकारी एवं पारदर्शी नीतियां।</div>
+          </div>
         </div>
       </div>
 
-      <!-- Doc 2: FSSAI -->
-      <div class="card-white" style="border:2px solid #d4a359; border-radius:16px; padding:12px; display:flex; gap:12px; align-items:center;">
-        <img src="{img_fssai}" style="width:75px; height:95px; object-fit:contain; border-radius:6px; border:1px solid #cbd5e1; background:#fff; flex-shrink:0;" />
-        <div style="flex:1; min-width:0;">
-          <div style="font-size:11px; font-weight:800; color:#92580a; text-transform:uppercase;">FSS ACT, 2006</div>
-          <div style="font-size:16px; font-weight:900; color:#0f172a; line-height:1.2;">FSSAI खाद्य सुरक्षा</div>
-          <div style="font-family:monospace; font-size:13px; font-weight:900; color:#92580a; background:#fefce8; padding:3px 6px; border-radius:6px; margin:4px 0; border:1px solid #fef08a;">
-            20526059000322
-          </div>
-          <div style="font-size:11px; color:#64748b; font-weight:600;">Govt. of Chhattisgarh</div>
+      <!-- Trust Stamp Box -->
+      <div style="background:#0b2b1e; border-radius:14px; padding:14px 18px; display:flex; justify-content:space-between; align-items:center; color:#ffffff;">
+        <div>
+          <div style="font-size:14px; font-weight:800; color:#fef08a;">सद्गुरु मार्ट: भरोसा • गुणवत्ता • आत्मनिर्भरता</div>
+          <div style="font-size:11px; color:#cbd5e1; font-weight:600;">S G M MART ONLINE SERVICE • Bilaspur & Kabirdham, CG</div>
         </div>
-      </div>
-
-      <!-- Doc 3: PAN -->
-      <div class="card-white" style="border:2px solid #144732; border-radius:16px; padding:12px; display:flex; gap:12px; align-items:center;">
-        <img src="{img_pan}" style="width:75px; height:95px; object-fit:contain; border-radius:6px; border:1px solid #cbd5e1; background:#fff; flex-shrink:0;" />
-        <div style="flex:1; min-width:0;">
-          <div style="font-size:11px; font-weight:800; color:#144732; text-transform:uppercase;">INCOME TAX DEPT</div>
-          <div style="font-size:16px; font-weight:900; color:#0f172a; line-height:1.2;">आयकर पैन कार्ड</div>
-          <div style="font-family:monospace; font-size:14px; font-weight:900; color:#0b2b1e; background:#f0fdf4; padding:3px 6px; border-radius:6px; margin:4px 0; border:1px solid #bbf7d0;">
-            AGCFS2395A
-          </div>
-          <div style="font-size:11px; color:#64748b; font-weight:600;">Govt. of India</div>
+        <div style="font-family:monospace; font-size:13px; font-weight:900; color:#a3e635;">
+          sadgurumart.com
         </div>
-      </div>
-    </div>
-
-    <!-- Bottom Row: 2 Wider Cards (MSME + Partnership Deed) -->
-    <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:16px; margin-top:14px;">
-      <!-- Doc 4: MSME Udyam -->
-      <div class="card-white" style="border:2px solid #92580a; border-radius:16px; padding:12px 18px; display:flex; gap:16px; align-items:center;">
-        <img src="{img_udyam}" style="width:80px; height:100px; object-fit:contain; border-radius:6px; border:1px solid #cbd5e1; background:#fff; flex-shrink:0;" />
-        <div style="flex:1; min-width:0;">
-          <div style="display:inline-block; font-size:10px; font-weight:800; color:#92580a; text-transform:uppercase; background:#fefce8; padding:2px 8px; border-radius:4px; margin-bottom:3px;">
-            MINISTRY OF MSME, GOVT. OF INDIA
-          </div>
-          <div style="font-size:17px; font-weight:900; color:#0f172a;">उद्यम रजिस्ट्रेशन प्रमाणपत्र (Udyam)</div>
-          <div style="font-family:monospace; font-size:13px; font-weight:900; color:#144732; background:#f8fafc; padding:3px 8px; border-radius:6px; margin:4px 0; border:1px solid #e2e8f0;">
-            UDYAM-CG-09-0021023
-          </div>
-          <div style="font-size:11px; color:#475569; font-weight:700;">
-            Enterprise Type: <strong>Micro</strong> • Manufacturing & Direct Services
-          </div>
-        </div>
-      </div>
-
-      <!-- Doc 5: Partnership Deed -->
-      <div class="card-white" style="border:2px solid #144732; border-radius:16px; padding:12px 18px; display:flex; gap:16px; align-items:center;">
-        <img src="{img_deed}" style="width:80px; height:100px; object-fit:contain; border-radius:6px; border:1px solid #cbd5e1; background:#fff; flex-shrink:0;" />
-        <div style="flex:1; min-width:0;">
-          <div style="display:inline-block; font-size:10px; font-weight:800; color:#144732; text-transform:uppercase; background:#f0fdf4; padding:2px 8px; border-radius:4px; margin-bottom:3px;">
-            REGISTERED LEGAL FIRM
-          </div>
-          <div style="font-size:17px; font-weight:900; color:#0f172a;">पार्टनरशिप डीड (Partnership Deed)</div>
-          <div style="font-family:monospace; font-size:13px; font-weight:900; color:#0b2b1e; background:#f8fafc; padding:3px 8px; border-radius:6px; margin:4px 0; border:1px solid #e2e8f0;">
-            S G M MART ONLINE SERVICE
-          </div>
-          <div style="font-size:11px; color:#475569; font-weight:700;">
-            पंजीकृत व्यावसायिक फर्म • छ.ग. शासन क्षेत्राधिकार • 100% पारदर्शी
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Assurance Banner -->
-    <div style="margin-top:14px; background:#144732; border-radius:16px; padding:12px 24px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 8px 20px rgba(20,71,50,0.25);">
-      <div style="font-size:17px; font-weight:900; color:#fef08a; display:flex; align-items:center; gap:8px;">
-        <span>🛡️</span>
-        <span>उपभोक्ता संरक्षण (प्रत्यक्ष बिक्री) नियम 2021 के तहत 100% अनुपालन एवं सरकारी टैक्स (TDS/GST) भुगतान</span>
-      </div>
-      <div style="font-size:14px; font-weight:700; color:#ffffff; font-family:monospace;">
-        www.sadgurumart.com
       </div>
     </div>
   </div>
@@ -1796,13 +1824,14 @@ s30_legal = f"""
   {slide_footer(32)}
 </div>
 """
-slides_html.append(s30_legal)
+slides_html.append(s32)
 
-# SLIDE 31: TERMS & CONDITIONS (THE USER'S 3 KEY TERMS PROMINENTLY HIGHLIGHTED)
 # ==============================================================================
-s30 = f"""
+# SLIDE 33: TERMS & CONDITIONS
+# ==============================================================================
+s33 = f"""
 <div class="slide">
-  {slide_header("16.B", "नियम एवं शर्तें", "नियम व शर्तें (Terms & Conditions)", "System Rules, Weekly Withdrawal & Deductions", "100% पारदर्शी, सुरक्षित और समय पर भुगतान व्यवस्था", "Transparent, Safe and On-Time Banking Settlements")}
+  {slide_header("17", "नियम एवं शर्तें", "नियम व शर्तें (Terms & Conditions)", "System Rules, Weekly Withdrawal & Deductions", "100% पारदर्शी, सुरक्षित और समय पर भुगतान व्यवस्था", "Transparent, Safe and On-Time Banking Settlements")}
   
   <div class="slide-body" style="justify-content:center;">
     <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:22px;">
@@ -1890,15 +1919,15 @@ s30 = f"""
     </div>
   </div>
 
-  {slide_footer(32)}
+  {slide_footer(33)}
 </div>
 """
-slides_html.append(s30)
+slides_html.append(s33)
 
 # ==============================================================================
-# SLIDE 32: THANK YOU & CONTACT DETAILS
+# SLIDE 34: THANK YOU & CONTACT DETAILS
 # ==============================================================================
-s31 = f"""
+s34 = f"""
 <div class="slide" style="flex-direction:row; background-color:#144732; padding:36px 44px;">
   <!-- Left Side Contact -->
   <div style="flex:1.2; display:flex; flex-direction:column; justify-content:space-between; padding-right:36px;">
@@ -1953,7 +1982,7 @@ s31 = f"""
     </div>
 
     <div style="font-size:14px; color:#94a3b8; font-weight:600; border-top:1px solid rgba(255,255,255,0.2); padding-top:14px;">
-      SGM MART ONLINE SERVICE PVT. LTD. • ALL RIGHTS RESERVED
+      SGM MART ONLINE SERVICE • ALL RIGHTS RESERVED
     </div>
   </div>
 
@@ -1989,7 +2018,7 @@ s31 = f"""
   </div>
 </div>
 """
-slides_html.append(s31)
+slides_html.append(s34)
 
 full_html = f"""<!DOCTYPE html>
 <html lang="hi">
