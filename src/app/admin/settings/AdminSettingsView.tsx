@@ -41,16 +41,20 @@ export default function AdminSettingsView({ initialSettings, isSuperAdmin }: Pro
   const searchParams = useSearchParams();
   const tabParam = searchParams.get('tab');
   const [activeTab, setActiveTab] = useState<'plan' | 'backup' | 'notice' | 'popup' | 'general' | 'drive'>(
-    (tabParam && ['plan', 'backup', 'notice', 'popup', 'general', 'drive'].includes(tabParam)) 
+    (tabParam && ['plan', 'backup', 'notice', 'popup', 'general', 'drive'].includes(tabParam) && !(tabParam === 'drive' && !isSuperAdmin)) 
       ? (tabParam as any) 
       : 'plan'
   );
 
   useEffect(() => {
     if (tabParam && ['plan', 'backup', 'notice', 'popup', 'general', 'drive'].includes(tabParam)) {
-      setActiveTab(tabParam as any);
+      if (tabParam === 'drive' && !isSuperAdmin) {
+        setActiveTab('plan');
+      } else {
+        setActiveTab(tabParam as any);
+      }
     }
-  }, [tabParam]);
+  }, [tabParam, isSuperAdmin]);
   const [formData, setFormData] = useState(initialSettings || {});
   const [saving, setSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<{ type: 'success' | 'error' | null; message: string }>({
@@ -134,7 +138,7 @@ export default function AdminSettingsView({ initialSettings, isSuperAdmin }: Pro
 
   const tabs = [
     { id: 'plan', label: '🎯 Plan Modify (प्लान)', desc: 'PV, Matching %, Deductions' },
-    { id: 'drive', label: '📁 Google Drive (ऑटो-अपलोड)', desc: 'Product & Member KYC Drive Sync' },
+    ...(isSuperAdmin ? [{ id: 'drive', label: '📁 Google Drive (ऑटो-अपलोड)', desc: 'Product & Member KYC Drive Sync' }] : []),
     { id: 'backup', label: '💾 Data Backup (डेटा बैकअप)', desc: '1-Click JSON & CSV Exports' },
     { id: 'notice', label: '📢 Admin Notice (सूचना)', desc: 'Dashboard Announcement & Marquee' },
     { id: 'popup', label: '🖼️ Popup Modal (पॉपअप)', desc: 'Greeting Dialog & Offers' },
@@ -201,7 +205,7 @@ export default function AdminSettingsView({ initialSettings, isSuperAdmin }: Pro
       )}
 
       {/* Tab Navigation Pill Bar */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 bg-white/70 p-2 rounded-2xl border border-black/10 shadow-xs">
+      <div className={`grid grid-cols-2 sm:grid-cols-3 ${isSuperAdmin ? 'lg:grid-cols-6' : 'lg:grid-cols-5'} gap-2 sm:gap-3 bg-white/70 p-2 rounded-2xl border border-black/10 shadow-xs`}>
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
           return (
@@ -527,7 +531,7 @@ export default function AdminSettingsView({ initialSettings, isSuperAdmin }: Pro
       {/* ======================================================== */}
       {/* TAB: GOOGLE DRIVE AUTO-UPLOAD (ड्राइव ऑटो-अपलोड) */}
       {/* ======================================================== */}
-      {activeTab === 'drive' && (
+      {activeTab === 'drive' && isSuperAdmin && (
         <div className="space-y-6">
           {/* Target Folder Header Card */}
           <div className="bg-gradient-to-br from-[#144732] to-[#0b2b1e] text-white rounded-3xl p-6 sm:p-8 shadow-xl border border-[#d4a359]/40 relative overflow-hidden">
