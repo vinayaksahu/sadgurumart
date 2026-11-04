@@ -1697,7 +1697,7 @@ slides_html.append(s29)
 # ==============================================================================
 def make_doc_card(badge_text, badge_color, title_hi, title_en, img_data, reg_label, reg_val, authority, val_color="#144732", border_color="#144732"):
     return f"""
-    <div style="flex:1; background:#ffffff; border:2.5px solid {border_color}; border-radius:24px; padding:18px 22px; display:flex; flex-direction:column; justify-content:space-between; box-shadow:0 8px 24px rgba(0,0,0,0.06); height:100%; box-sizing:border-box;">
+    <div style="flex:1; min-width:0; background:#ffffff; border:2.5px solid {border_color}; border-radius:22px; padding:16px 20px; display:flex; flex-direction:column; justify-content:space-between; box-shadow:0 8px 24px rgba(0,0,0,0.06); height:100%; box-sizing:border-box;">
       <!-- Card Header -->
       <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1.5px solid #f1f5f9; padding-bottom:10px;">
         <div>
@@ -1710,8 +1710,8 @@ def make_doc_card(badge_text, badge_color, title_hi, title_en, img_data, reg_lab
       </div>
 
       <!-- Large Certificate Image Preview (Fits comfortably with clear border) -->
-      <div style="flex:1; margin:12px 0; background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:16px; overflow:hidden; display:flex; align-items:center; justify-content:center; padding:10px; box-shadow:inset 0 2px 6px rgba(0,0,0,0.04);">
-        <img src="{img_data}" style="max-height:380px; max-width:100%; width:auto; height:auto; object-fit:contain; border-radius:8px; box-shadow:0 4px 18px rgba(0,0,0,0.15);" />
+      <div style="flex:1; min-height:0; margin:10px 0; background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:14px; overflow:hidden; display:flex; align-items:center; justify-content:center; padding:8px; box-shadow:inset 0 2px 6px rgba(0,0,0,0.03);">
+        <img src="{img_data}" style="max-height:100%; max-width:100%; width:auto; height:auto; object-fit:contain; border-radius:6px; box-shadow:0 4px 16px rgba(0,0,0,0.12);" />
       </div>
 
       <!-- Registration Value Box -->
@@ -1735,7 +1735,7 @@ s30 = f"""
 <div class="slide">
   {slide_header("16.A", "वैधानिक दस्तावेज (भाग-1)", "जीएसटी एवं खाद्य सुरक्षा प्रमाणपत्र", "GST & FSSAI Central Registration Certificates", "100% भारत सरकार एवं खाद्य संरक्षा मानक अधिनियम 2006 के तहत पंजीकृत", "Officially Registered Under Form GST REG-06 and Food Safety Act 2006")}
   
-  <div class="slide-body" style="padding:16px 36px; display:flex; gap:22px; height:680px; box-sizing:border-box;">
+  <div class="slide-body" style="padding:14px 40px 18px 40px; display:flex; flex-direction:row !important; align-items:stretch; gap:24px; height:690px; box-sizing:border-box;">
     {make_doc_card("GST CERTIFIED", "#144732", "GST रजिस्ट्रेशन प्रमाणपत्र", "Form GST REG-06 • Government of India", img_gst, "GSTIN रजिस्ट्रेशन नंबर", "22AGCFS2395A1ZC", "भारत सरकार (Govt. of India)", "#144732", "#144732")}
     {make_doc_card("FSSAI FOOD SAFETY", "#92580a", "FSSAI खाद्य सुरक्षा प्रमाणपत्र", "Food Safety and Standards Act, 2006", img_fssai, "FSSAI पंजीकरण संख्या", "20526059000322", "छ.ग. खाद्य एवं औषधि प्रशासन", "#92580a", "#d4a359")}
   </div>
@@ -1752,7 +1752,7 @@ s31 = f"""
 <div class="slide">
   {slide_header("16.B", "वैधानिक दस्तावेज (भाग-2)", "कंपनी पैन कार्ड एवं उद्यम रजिस्ट्रेशन", "Income Tax PAN Card & MSME Udyam Certificate", "आयकर विभाग भारत सरकार एवं सूक्ष्म, लघु व मध्यम उद्यम मंत्रालय द्वारा प्रमाणित", "Certified by Income Tax Dept. and Ministry of MSME, Govt. of India")}
   
-  <div class="slide-body" style="padding:16px 36px; display:flex; gap:22px; height:680px; box-sizing:border-box;">
+  <div class="slide-body" style="padding:14px 40px 18px 40px; display:flex; flex-direction:row !important; align-items:stretch; gap:24px; height:690px; box-sizing:border-box;">
     {make_doc_card("INCOME TAX DEPT", "#144732", "आयकर पैन कार्ड (e-PAN)", "Permanent Account Number • Govt. of India", img_pan, "पैन कार्ड नंबर (PAN)", "AGCFS2395A", "आयकर विभाग (Income Tax)", "#144732", "#144732")}
     {make_doc_card("MSME UDYAM", "#92580a", "एमएसएमई उद्यम रजिस्ट्रेशन", "Ministry of MSME, Government of India", img_udyam, "उद्यम रजिस्ट्रेशन संख्या", "UDYAM-CG-09-0021023", "सूक्ष्म एवं लघु उद्योग मंत्रालय", "#92580a", "#d4a359")}
   </div>
@@ -1769,11 +1769,11 @@ s32 = f"""
 <div class="slide">
   {slide_header("16.C", "वैधानिक दस्तावेज (भाग-3)", "पार्टनरशिप डीड एवं वैधानिक अनुपालन", "Registered Partnership Deed & Direct Selling 2021 Compliance", "कानूनी पंजीकृत व्यावसायिक इकाई एवं उपभोक्ता संरक्षण नियमों का 100% अनुपालन", "Legally Formed Partnership Firm & Consumer Protection Direct Selling Compliance")}
   
-  <div class="slide-body" style="padding:16px 36px; display:flex; gap:22px; height:680px; box-sizing:border-box;">
+  <div class="slide-body" style="padding:14px 40px 18px 40px; display:flex; flex-direction:row !important; align-items:stretch; gap:24px; height:690px; box-sizing:border-box;">
     {make_doc_card("REGISTERED ENTITY", "#144732", "पार्टनरशिप डीड (Deed)", "Registered Legal Partnership Document", img_deed, "पंजीकृत व्यावसायिक नाम", "S G M MART ONLINE SERVICE", "छ.ग. राज्य क्षेत्राधिकार", "#144732", "#144732")}
 
     <!-- Compliance Checklist Card -->
-    <div style="flex:1; background:#ffffff; border:2.5px solid #d4a359; border-radius:24px; padding:22px 24px; display:flex; flex-direction:column; justify-content:space-between; box-shadow:0 8px 24px rgba(0,0,0,0.06); height:100%; box-sizing:border-box;">
+    <div style="flex:1; min-width:0; background:#ffffff; border:2.5px solid #d4a359; border-radius:22px; padding:18px 22px; display:flex; flex-direction:column; justify-content:space-between; box-shadow:0 8px 24px rgba(0,0,0,0.06); height:100%; box-sizing:border-box;">
       <div>
         <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1.5px solid #f1f5f9; padding-bottom:12px; margin-bottom:16px;">
           <div>
