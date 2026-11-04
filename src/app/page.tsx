@@ -315,9 +315,9 @@ export default async function HomePage() {
             <div>
               <h4 className="text-sm font-bold text-[#d4a359] uppercase tracking-wider mb-4">Legal & Compliance</h4>
               <ul className="space-y-2 text-xs text-slate-300">
-                <li>Direct Selling Rules 2021 Compliant</li>
-                <li>TDS & Admin Statutory Terms</li>
-                <li>Grievance Officer Support</li>
+                <li><Link href="/rules#certificates" className="hover:text-white">वैधानिक दस्तावेज़ (Legal Documents)</Link></li>
+                <li><Link href="/rules#rules" className="hover:text-white">नियम व शर्तें (Terms & Conditions)</Link></li>
+                <li><Link href="/rules" className="hover:text-white">Direct Selling Rules 2021</Link></li>
               </ul>
             </div>
 

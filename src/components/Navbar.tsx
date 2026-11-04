@@ -80,7 +80,7 @@ export default function Navbar() {
     { label: 'Photo Gallery (गैलरी)', href: '/#gallery', icon: ImageIcon },
     { label: '16 Income Plan (प्लान)', href: '/#incomes', icon: TrendingUp },
     { label: 'Awards & Ranks (रिवार्ड्स)', href: '/#rewards', icon: Award },
-    { label: 'Rules & Legal (नियम)', href: '/#compliance', icon: ShieldCheck },
+    { label: 'Rules & Legal (नियम)', href: '/rules', icon: ShieldCheck },
   ];
 
   return (
@@ -129,7 +129,7 @@ export default function Navbar() {
             <Link href="/#products" className="hover:text-[#144732] transition-colors">Products (उत्पाद)</Link>
             <Link href="/#gallery" className="hover:text-[#144732] transition-colors">Gallery (गैलरी)</Link>
             <Link href="/#incomes" className="hover:text-[#144732] transition-colors">16 Income Plan</Link>
-            <Link href="/#compliance" className="hover:text-[#144732] transition-colors">Rules & Legal</Link>
+            <Link href="/rules" className="hover:text-[#144732] transition-colors">Rules & Legal</Link>
           </nav>
 
           {/* Right Action Buttons */}
