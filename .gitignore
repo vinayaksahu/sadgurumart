@@ -37,6 +37,8 @@ next-env.d.ts
 
 # Large Design Assets & Temporary Python Previews
 *.pdf
+!public/**/*.pdf
+!public/*.pdf
 compliance_preview/
 slides_preview/
 slides_4x3_preview/
