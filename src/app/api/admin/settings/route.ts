@@ -72,6 +72,9 @@ export async function POST(req: NextRequest) {
         autoPoolEnabled: Boolean(body.autoPoolEnabled),
         activationCashbackPercent: body.activationCashbackPercent !== undefined ? parseFloat(body.activationCashbackPercent) : (current as any).activationCashbackPercent ?? 100,
         repurchaseWalletUsagePercent: body.repurchaseWalletUsagePercent !== undefined ? parseFloat(body.repurchaseWalletUsagePercent) : (current as any).repurchaseWalletUsagePercent ?? 5,
+        closingMode: body.closingMode !== undefined ? body.closingMode : ((current as any).closingMode || 'INSTANT'),
+        autoClosingTime: body.autoClosingTime !== undefined ? body.autoClosingTime : ((current as any).autoClosingTime || '12:00 AM IST'),
+        lastClosingAt: body.lastClosingAt !== undefined ? (body.lastClosingAt ? new Date(body.lastClosingAt) : null) : (current as any).lastClosingAt,
 
         // Notice Settings
         noticeEnabled: Boolean(body.noticeEnabled),

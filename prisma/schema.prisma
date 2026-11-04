@@ -543,6 +543,11 @@ model SystemSetting {
   activationCashbackPercent Float  @default(100) // 100% cashback on ID activation
   repurchaseWalletUsagePercent Float @default(5) // Max 5% of product price can be paid from Repurchase Wallet
 
+  // Closing Mode Configuration
+  closingMode             String   @default("INSTANT") // "INSTANT" | "MIDNIGHT_12AM"
+  autoClosingTime         String   @default("12:00 AM IST")
+  lastClosingAt           DateTime?
+
   // Admin Notice & Ticker Announcement
   noticeEnabled           Boolean  @default(true)
   noticeType              String   @default("INFO") // INFO, WARNING, SUCCESS, DANGER

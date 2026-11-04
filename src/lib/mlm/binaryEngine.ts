@@ -70,20 +70,26 @@ export async function propagateBinaryVolume(
       });
     }
 
-    // Immediately calculate and credit matching income in real time
-    try {
-      const matchResult = await calculateUserBinaryMatching(parentId);
-      if (matchResult.matchingIncome > 0) {
-        const parentUser = await prisma.user.findUnique({
-          where: { id: parentId },
-          select: { sponsorId: true },
-        });
-        if (parentUser?.sponsorId) {
-          await creditSponsorMatchingRoyalty(parentId, matchResult.matchingIncome);
+    // Check if Instant Closing Mode is active (default is INSTANT)
+    const settings = await getSystemSettings();
+    const isInstantMode = !settings || (settings as any).closingMode !== 'MIDNIGHT_12AM';
+
+    if (isInstantMode) {
+      // Immediately calculate and credit matching income in real time
+      try {
+        const matchResult = await calculateUserBinaryMatching(parentId);
+        if (matchResult.matchingIncome > 0) {
+          const parentUser = await prisma.user.findUnique({
+            where: { id: parentId },
+            select: { sponsorId: true },
+          });
+          if (parentUser?.sponsorId) {
+            await creditSponsorMatchingRoyalty(parentId, matchResult.matchingIncome);
+          }
         }
+      } catch (matchErr) {
+        console.error('Real-time binary matching calculation error for parent:', parentId, matchErr);
       }
-    } catch (matchErr) {
-      console.error('Real-time binary matching calculation error for parent:', parentId, matchErr);
     }
 
     // Move up to the next ancestor

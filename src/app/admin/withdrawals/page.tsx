@@ -8,6 +8,7 @@ import { Wallet, ShieldCheck, CheckCircle2, Clock, FileSpreadsheet, ArrowLeftRig
 import AdminNavbar from '@/components/AdminNavbar';
 import AdminWithdrawalActions from './AdminWithdrawalActions';
 import DailyClosingRunner from './DailyClosingRunner';
+import { getSystemSettings } from '@/lib/settings';
 
 export default async function AdminWithdrawalsPage({
   searchParams,
@@ -32,7 +33,7 @@ export default async function AdminWithdrawalsPage({
     whereClause.status = 'PAID';
   }
 
-  const [withdrawals, totalPendingCount, totalPaidCount, activeMemberCount] = await Promise.all([
+  const [withdrawals, totalPendingCount, totalPaidCount, activeMemberCount, settings] = await Promise.all([
     prisma.withdrawalRequest.findMany({
       where: whereClause,
       include: {
@@ -43,6 +44,7 @@ export default async function AdminWithdrawalsPage({
     prisma.withdrawalRequest.count({ where: { status: 'PENDING' } }),
     prisma.withdrawalRequest.count({ where: { status: 'PAID' } }),
     prisma.user.count({ where: { isActive: true } }),
+    getSystemSettings(),
   ]);
 
   const totalGross = withdrawals.reduce((sum, w) => sum + w.requestedAmount, 0);
@@ -123,7 +125,12 @@ export default async function AdminWithdrawalsPage({
         </div>
 
         {view === 'closing' ? (
-          <DailyClosingRunner activeMemberCount={activeMemberCount} />
+          <DailyClosingRunner 
+            activeMemberCount={activeMemberCount}
+            initialClosingMode={(settings as any).closingMode || 'INSTANT'}
+            autoClosingTime={(settings as any).autoClosingTime || '12:00 AM IST'}
+            lastClosingAt={(settings as any).lastClosingAt ? new Date((settings as any).lastClosingAt).toISOString() : null}
+          />
         ) : (
           <>
             {/* Overview Stats Cards */}

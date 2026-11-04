@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { calculateUserBinaryMatching } from '@/lib/mlm/binaryEngine';
 import { creditSponsorMatchingRoyalty } from '@/lib/mlm/royaltyEngine';
+import { syncAllUsersRanks } from '@/lib/mlm/rankEngine';
 import { verifyAdminToken, verifySuperToken } from '@/lib/auth/jwt';
 
 async function processDailyClosing(req: NextRequest) {
@@ -57,41 +58,13 @@ async function processDailyClosing(req: NextRequest) {
     processedCount++;
   }
 
-  // Rank Promotion Check based on cumulative reward points (RP)
-  for (const user of activeUsers) {
-    const updatedUser = await prisma.user.findUnique({
-      where: { id: user.id },
-      select: { id: true, rewardPointsRP: true, rank: true },
-    });
+  // Rank Promotion Check strictly based on cumulative matching reward points (RP)
+  await syncAllUsersRanks();
 
-    if (updatedUser) {
-      const rp = updatedUser.rewardPointsRP;
-      let newRank = updatedUser.rank;
-
-      if (rp >= 20000000) newRank = 'CROWN_AMBASSADOR';
-      else if (rp >= 8000000) newRank = 'ROYAL_AMBASSADOR';
-      else if (rp >= 4000000) newRank = 'AMBASSADOR';
-      else if (rp >= 2000000) newRank = 'KOHINOOR';
-      else if (rp >= 1000000) newRank = 'TRIPLE_DIAMOND';
-      else if (rp >= 500000) newRank = 'DOUBLE_DIAMOND';
-      else if (rp >= 100000) newRank = 'DIAMOND';
-      else if (rp >= 40000) newRank = 'EMERALD';
-      else if (rp >= 20000) newRank = 'PLATINUM';
-      else if (rp >= 10000) newRank = 'RUBY';
-      else if (rp >= 5000) newRank = 'GOLD';
-      else if (rp >= 3000) newRank = 'SILVER';
-      else if (rp >= 500) newRank = 'STAR_3';
-      else if (rp >= 150) newRank = 'STAR_2';
-      else if (rp >= 30) newRank = 'STAR_1';
-
-      if (newRank !== updatedUser.rank) {
-        await prisma.user.update({
-          where: { id: user.id },
-          data: { rank: newRank },
-        });
-      }
-    }
-  }
+  // Update last closing timestamp in system settings
+  await prisma.systemSetting.updateMany({
+    data: { lastClosingAt: new Date() },
+  });
 
   console.log(`✅ Daily Closing Finished. Evaluated: ${processedCount}, Total Matching: ₹${totalMatchingPaid}, Royalty: ₹${totalRoyaltyPaid}`);
 
