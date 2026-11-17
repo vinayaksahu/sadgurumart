@@ -191,6 +191,36 @@ export async function POST(req: NextRequest) {
         isNewActivation = true;
       }
 
+      // 100% Cashback to Cashback Wallet ONLY on 1st time purchase (joining / first ID activation)
+      // Repeat/Repurchase orders do NOT receive cashback income
+      if (isNewActivation) {
+        const activationAmount = totalDp;
+
+        if (activationAmount > 0) {
+          let targetW = await tx.wallet.findUnique({ where: { userId } });
+          if (!targetW) {
+            targetW = await tx.wallet.create({ data: { userId } });
+          }
+          const updatedW = await tx.wallet.update({
+            where: { id: targetW.id },
+            data: {
+              shoppingBalance: { increment: activationAmount },
+            },
+          });
+          await tx.walletTransaction.create({
+            data: {
+              walletId: targetW.id,
+              type: 'PURCHASE_CASHBACK',
+              walletScope: 'SHOPPING',
+              amount: activationAmount,
+              closingBalance: updatedW.shoppingBalance,
+              referenceId: orderNumber,
+              remarks: `100% जॉइनिंग कैशबैक (कैशबैक वॉलेट में क्रेडिट) - ऑर्डर #${orderNumber}`,
+            },
+          });
+        }
+      }
+
       return newOrder;
     });
 

@@ -186,7 +186,7 @@ export default async function OrderConfirmationPage({ params }: OrderPageProps) 
               </div>
               {order.repurchaseWalletUsed > 0 && (
                 <div className="flex justify-between text-emerald-700 font-bold">
-                  <span>रीपरचेस वॉलेट छूट (5%):</span>
+                  <span>कैशबैक वॉलेट छूट (5%):</span>
                   <span>-₹{order.repurchaseWalletUsed.toFixed(2)}</span>
                 </div>
               )}

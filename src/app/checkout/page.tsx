@@ -578,7 +578,7 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
-                {/* Repurchase Wallet 5% Usage Banner */}
+                {/* Cashback Wallet 5% Usage Banner */}
                 {repurchaseBalance > 0 && (
                   <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-xs space-y-2">
                     <div className="flex items-center justify-between">
@@ -589,14 +589,14 @@ export default function CheckoutPage() {
                           onChange={(e) => setUseRepurchaseWallet(e.target.checked)}
                           className="w-4 h-4 rounded text-[#144732] focus:ring-[#144732]"
                         />
-                        <span>रीपरचेस वॉलेट (5% उपयोग)</span>
+                        <span>कैशबैक वॉलेट (5% उपयोग)</span>
                       </label>
                       <span className="font-mono font-bold text-amber-900 bg-amber-100/80 px-2 py-0.5 rounded-md">
                         बैलेंस: ₹{repurchaseBalance.toFixed(2)}
                       </span>
                     </div>
                     <p className="text-[11px] text-amber-800 leading-tight">
-                      उत्पाद कीमत का 5% (₹{maxRepurchaseUsage.toFixed(2)}) आपके रीपरचेस वॉलेट से काटा जाएगा।
+                      उत्पाद कीमत का 5% (₹{maxRepurchaseUsage.toFixed(2)}) आपके कैशबैक वॉलेट से काटा जाएगा।
                     </p>
                   </div>
                 )}
@@ -608,7 +608,7 @@ export default function CheckoutPage() {
                   </div>
                   {appliedRepurchaseDiscount > 0 && (
                     <div className="flex justify-between font-bold text-emerald-700">
-                      <span>रीपरचेस वॉलेट छूट (5%):</span>
+                      <span>कैशबैक वॉलेट छूट (5%):</span>
                       <span>-₹{appliedRepurchaseDiscount.toFixed(2)}</span>
                     </div>
                   )}

@@ -335,18 +335,18 @@ export default async function DashboardPage({
             </div>
           </div>
 
-          {/* Repurchase / Shopping Wallet */}
+          {/* Cashback / Shopping Wallet */}
           <div className="bg-white border-2 border-[#d4a359]/30 rounded-3xl p-6 shadow-sm flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-                <span>3. Repurchase Wallet (रीपरचेस)</span>
+                <span>3. Cashback Wallet (कैशबैक वॉलेट)</span>
                 <ShoppingBag className="w-4 h-4 text-[#92580a]" />
               </div>
               <div className="text-3xl font-black text-[#92580a]">
                 ₹{wallet.shoppingBalance.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </div>
               <div className="text-[11px] text-slate-500 mt-1">
-                रीपरचेस उत्पादों पर 5% डिस्काउंट उपयोग • रीपरचेस बैलेंस
+                1st टाइम जॉइनिंग पर 100% कैशबैक • रीपरचेस पर 5% उपयोग
               </div>
             </div>
             <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-[#92580a]">
