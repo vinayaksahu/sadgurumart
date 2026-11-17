@@ -237,7 +237,6 @@ export default function IncomeHistoryPage() {
               <option value="COMPANY_CTO">Company Turnover (5% CTO)</option>
               <option value="AWARD_REWARD">Awards & Rewards (3% Pool)</option>
               <option value="REPURCHASE_TEAM">Team Repurchase Bonus (10%)</option>
-              <option value="PURCHASE_CASHBACK">Self Purchase Cashback (10%)</option>
               <option value="MOBILE_FUND">Mobile Fund (2% CTO)</option>
               <option value="BIKE_FUND">Bike Fund (2% CTO)</option>
               <option value="CAR_FUND">Car Fund (2% CTO)</option>

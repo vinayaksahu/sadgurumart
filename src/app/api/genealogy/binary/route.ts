@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyUserToken, verifyAdminToken, verifySuperToken } from '@/lib/auth/jwt';
+import { getUserTeamVolumes } from '@/lib/mlm/teamUtils';
 
 export async function GET(req: NextRequest) {
   try {
@@ -124,9 +125,7 @@ export async function GET(req: NextRequest) {
       };
     }
 
-    const rootCarryLeft = (rootUser.leftVolumePV || 0) + (rootUser.leftCarryForwardPV || 0);
-    const rootCarryRight = (rootUser.rightVolumePV || 0) + (rootUser.rightCarryForwardPV || 0);
-    const rootMatched = rootUser.totalMatchingPaidPV || 0;
+    const rootVolumes = await getUserTeamVolumes(rootUser.id);
 
     const tree = {
       id: rootUser.id,
@@ -138,12 +137,14 @@ export async function GET(req: NextRequest) {
       rightVolumePV: rootUser.rightVolumePV,
       leftCarryForwardPV: rootUser.leftCarryForwardPV,
       rightCarryForwardPV: rootUser.rightCarryForwardPV,
-      totalMatchingPaidPV: rootMatched,
-      carryLeftPV: rootCarryLeft,
-      carryRightPV: rootCarryRight,
-      matchedPV: rootMatched,
-      totalLeftPV: rootCarryLeft + rootMatched,
-      totalRightPV: rootCarryRight + rootMatched,
+      totalMatchingPaidPV: rootVolumes.totalMatchedPV,
+      carryLeftPV: rootVolumes.leftCarryPV,
+      carryRightPV: rootVolumes.rightCarryPV,
+      matchedPV: rootVolumes.totalMatchedPV,
+      totalLeftPV: rootVolumes.totalLeftPV,
+      totalRightPV: rootVolumes.totalRightPV,
+      leftBV: rootVolumes.leftBV,
+      rightBV: rootVolumes.rightBV,
       placementParentId: rootUser.placementParentId,
       createdAt: rootUser.createdAt,
       children: await buildSubTree(rootUser.id, 1),

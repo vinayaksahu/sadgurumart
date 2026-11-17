@@ -11,16 +11,148 @@ export interface UserTeamSummary {
   totalTeamCount: number;
 }
 
+export interface UserTeamVolumes {
+  leftPV: number;
+  rightPV: number;
+  leftBV: number;
+  rightBV: number;
+  leftCarryPV: number;
+  rightCarryPV: number;
+  totalMatchedPV: number;
+  totalLeftPV: number;
+  totalRightPV: number;
+  totalTeamBV: number;
+}
+
 // In-memory cache for user team counts (30s TTL) to prevent repeated heavy queries
 const teamCountsCache = new Map<string, { summary: UserTeamSummary; expiresAt: number }>();
+const teamVolumesCache = new Map<string, { volumes: UserTeamVolumes; expiresAt: number }>();
 const CACHE_TTL_MS = 30 * 1000;
 
 export function invalidateUserTeamCountsCache(userId?: string) {
   if (userId) {
     teamCountsCache.delete(userId);
+    teamVolumesCache.delete(userId);
   } else {
     teamCountsCache.clear();
+    teamVolumesCache.clear();
   }
+}
+
+/**
+ * Accurately calculates Left and Right business volumes (PV and BV) for any distributor.
+ * Returns both Cumulative Total Volume and Current Active Carry Forward volume.
+ */
+export async function getUserTeamVolumes(userId: string): Promise<UserTeamVolumes> {
+  const now = Date.now();
+  const cached = teamVolumesCache.get(userId);
+  if (cached && now < cached.expiresAt) {
+    return cached.volumes;
+  }
+
+  // Fetch user record for stored carry forward and matched PV
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      leftVolumePV: true,
+      rightVolumePV: true,
+      leftCarryForwardPV: true,
+      rightCarryForwardPV: true,
+      totalMatchingPaidPV: true,
+    },
+  });
+
+  const leftCarryPV = (user?.leftVolumePV || 0) + (user?.leftCarryForwardPV || 0);
+  const rightCarryPV = (user?.rightVolumePV || 0) + (user?.rightCarryForwardPV || 0);
+  const totalMatchedPV = user?.totalMatchingPaidPV || 0;
+
+  try {
+    const results = await prisma.$queryRaw<Array<{
+      leftBV: number;
+      rightBV: number;
+      leftPV: number;
+      rightPV: number;
+    }>>`
+      WITH RECURSIVE
+      left_binary AS (
+        SELECT id, "userCode" FROM "users" WHERE "placementParentId" = ${userId} AND "placementPosition"::text = 'LEFT'
+        UNION ALL
+        SELECT u.id, u."userCode" FROM "users" u JOIN left_binary lb ON u."placementParentId" = lb.id
+      ),
+      right_binary AS (
+        SELECT id, "userCode" FROM "users" WHERE "placementParentId" = ${userId} AND "placementPosition"::text = 'RIGHT'
+        UNION ALL
+        SELECT u.id, u."userCode" FROM "users" u JOIN right_binary rb ON u."placementParentId" = rb.id
+      )
+      SELECT
+        COALESCE((
+          SELECT SUM("totalBV") FROM "orders"
+          WHERE ("userId" IN (SELECT id FROM left_binary) OR "targetUserCode" IN (SELECT "userCode" FROM left_binary))
+            AND "paymentStatus" = 'PAID'
+        ), 0)::float AS "leftBV",
+        COALESCE((
+          SELECT SUM("totalBV") FROM "orders"
+          WHERE ("userId" IN (SELECT id FROM right_binary) OR "targetUserCode" IN (SELECT "userCode" FROM right_binary))
+            AND "paymentStatus" = 'PAID'
+        ), 0)::float AS "rightBV",
+        COALESCE((
+          SELECT SUM("totalPV") FROM "orders"
+          WHERE ("userId" IN (SELECT id FROM left_binary) OR "targetUserCode" IN (SELECT "userCode" FROM left_binary))
+            AND "paymentStatus" = 'PAID'
+        ), 0)::float AS "leftPV",
+        COALESCE((
+          SELECT SUM("totalPV") FROM "orders"
+          WHERE ("userId" IN (SELECT id FROM right_binary) OR "targetUserCode" IN (SELECT "userCode" FROM right_binary))
+            AND "paymentStatus" = 'PAID'
+        ), 0)::float AS "rightPV";
+    `;
+
+    if (results && results.length > 0) {
+      const row = results[0];
+      const queryLeftPV = Number(row.leftPV || 0);
+      const queryRightPV = Number(row.rightPV || 0);
+      const leftBV = Number(row.leftBV || 0);
+      const rightBV = Number(row.rightBV || 0);
+
+      const totalLeftPV = Math.max(queryLeftPV, leftCarryPV + totalMatchedPV);
+      const totalRightPV = Math.max(queryRightPV, rightCarryPV + totalMatchedPV);
+
+      const volumes: UserTeamVolumes = {
+        leftPV: queryLeftPV,
+        rightPV: queryRightPV,
+        leftBV,
+        rightBV,
+        leftCarryPV,
+        rightCarryPV,
+        totalMatchedPV,
+        totalLeftPV,
+        totalRightPV,
+        totalTeamBV: leftBV + rightBV,
+      };
+
+      teamVolumesCache.set(userId, { volumes, expiresAt: now + CACHE_TTL_MS });
+      return volumes;
+    }
+  } catch (err) {
+    console.warn('Fast recursive team volume query failed, using stored volume fallback:', err);
+  }
+
+  // Fallback
+  const totalLeftPV = leftCarryPV + totalMatchedPV;
+  const totalRightPV = rightCarryPV + totalMatchedPV;
+  const fallback: UserTeamVolumes = {
+    leftPV: totalLeftPV,
+    rightPV: totalRightPV,
+    leftBV: 0,
+    rightBV: 0,
+    leftCarryPV,
+    rightCarryPV,
+    totalMatchedPV,
+    totalLeftPV,
+    totalRightPV,
+    totalTeamBV: 0,
+  };
+  return fallback;
 }
 
 /**

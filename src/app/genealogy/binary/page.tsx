@@ -172,6 +172,14 @@ export default function BinaryGenealogyPage() {
               <span title="मैचिंग के बाद बचा हुआ शेष PV">Carry: <strong className="text-amber-300 font-mono">{carryLeft} : {carryRight}</strong></span>
               <span title="1:1 में मैच हुआ PV (10% मैचिंग इनकम पेड)">Matched: <strong className="text-emerald-300 font-mono">{matchedPV}</strong></span>
             </div>
+
+            {/* Repurchase BV Breakdown */}
+            {(node.leftBV !== undefined || node.rightBV !== undefined) && (
+              <div className="flex items-center justify-between px-2 py-1 rounded-lg bg-amber-950/40 border border-amber-400/20 text-[9px] font-semibold text-amber-200">
+                <span>Repurchase BV:</span>
+                <strong className="font-mono text-amber-300">{node.leftBV || 0} L : {node.rightBV || 0} R</strong>
+              </div>
+            )}
           </div>
         </div>
       </div>

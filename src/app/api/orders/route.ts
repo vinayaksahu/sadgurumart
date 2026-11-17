@@ -191,38 +191,6 @@ export async function POST(req: NextRequest) {
         isNewActivation = true;
       }
 
-      // 100% Cashback to Repurchase Wallet if activation package order
-      const hasActivationItem = dbProducts.some((p) => p.isActivation);
-      if (hasActivationItem || isNewActivation) {
-        const activationAmount = hasActivationItem
-          ? dbProducts.filter((p) => p.isActivation).reduce((sum, p) => sum + p.dpPrice, 0)
-          : totalDp;
-
-        if (activationAmount > 0) {
-          let targetW = await tx.wallet.findUnique({ where: { userId } });
-          if (!targetW) {
-            targetW = await tx.wallet.create({ data: { userId } });
-          }
-          const updatedW = await tx.wallet.update({
-            where: { id: targetW.id },
-            data: {
-              shoppingBalance: { increment: activationAmount },
-            },
-          });
-          await tx.walletTransaction.create({
-            data: {
-              walletId: targetW.id,
-              type: 'PURCHASE_CASHBACK',
-              walletScope: 'SHOPPING',
-              amount: activationAmount,
-              closingBalance: updatedW.shoppingBalance,
-              referenceId: orderNumber,
-              remarks: `100% एक्टिवेशन कैशबैक (रीपरचेस वॉलेट में क्रेडिट) - ऑर्डर #${orderNumber}`,
-            },
-          });
-        }
-      }
-
       return newOrder;
     });
 

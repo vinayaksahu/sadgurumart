@@ -33,7 +33,7 @@ import AdminNoticeBanner from '@/components/AdminNoticeBanner';
 import AdminPopupModal from '@/components/AdminPopupModal';
 import AdminViewBanner from '@/components/AdminViewBanner';
 import { getEffectiveMemberAuth } from '@/lib/auth/session';
-import { getUserTeamCounts } from '@/lib/mlm/teamUtils';
+import { getUserTeamCounts, getUserTeamVolumes } from '@/lib/mlm/teamUtils';
 
 export default async function DashboardPage({
   searchParams,
@@ -76,7 +76,7 @@ export default async function DashboardPage({
   const isKYCApproved = user.kycDetail?.status === 'APPROVED';
 
   // Live Incomes & Team Analytics matching Member Portal Mobile View
-  const [walletTransactions, teamCounts, userPaidOrders] = await Promise.all([
+  const [walletTransactions, teamCounts, teamVolumes, userPaidOrders] = await Promise.all([
     user.wallet?.id
       ? prisma.walletTransaction.findMany({
           where: { walletId: user.wallet.id, walletScope: 'MAIN' },
@@ -84,6 +84,7 @@ export default async function DashboardPage({
         })
       : Promise.resolve([]),
     getUserTeamCounts(user.id),
+    getUserTeamVolumes(user.id),
     prisma.order.findMany({
       where: {
         OR: [
@@ -116,6 +117,8 @@ export default async function DashboardPage({
     { label: 'Total Team', value: String(totalTeamCount), gradient: 'from-[#06b6d4] to-[#2563eb]', icon: Users },
     { label: 'Total Direct Team', value: `${directTeamCount} (${teamCounts.activeDirectCount} Active)`, gradient: 'from-[#f43f5e] to-[#e11d48]', icon: User },
     { label: 'Left Team / Right Team', value: `${teamCounts.leftTeamCount} L : ${teamCounts.rightTeamCount} R`, gradient: 'from-[#0d9488] to-[#0f766e]', icon: GitFork },
+    { label: 'Left PV / Right PV', value: `${teamVolumes.totalLeftPV} L : ${teamVolumes.totalRightPV} R`, gradient: 'from-[#059669] to-[#047857]', icon: Award },
+    { label: 'Left BV / Right BV', value: `${teamVolumes.leftBV} L : ${teamVolumes.rightBV} R`, gradient: 'from-[#0891b2] to-[#0e7490]', icon: ShoppingBag },
     { label: 'Total Direct Income', value: `₹${getSum(['DIRECT_REFERRAL']).toFixed(2)}`, gradient: 'from-[#3b82f6] to-[#4f46e5]', icon: User },
     { label: 'Matching Income', value: `₹${getSum(['BINARY_MATCHING']).toFixed(2)}`, gradient: 'from-[#6366f1] to-[#7c3aed]', icon: User },
     { label: 'Direct Sponsor Income', value: `₹${getSum(['SPONSOR_ROYALTY']).toFixed(2)}`, gradient: 'from-[#f43f5e] to-[#ea580c]', icon: TrendingUp },
@@ -343,7 +346,7 @@ export default async function DashboardPage({
                 ₹{wallet.shoppingBalance.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </div>
               <div className="text-[11px] text-slate-500 mt-1">
-                100% एक्टिवेशन कैशबैक • रीपरचेस पर 5% उपयोग
+                रीपरचेस उत्पादों पर 5% डिस्काउंट उपयोग • रीपरचेस बैलेंस
               </div>
             </div>
             <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-[#92580a]">
@@ -352,40 +355,11 @@ export default async function DashboardPage({
             </div>
           </div>
 
-          {/* Binary Team Volume */}
-          <div className="bg-white border border-[#e8e3d5] rounded-3xl p-6 shadow-sm flex flex-col justify-between">
-            <div>
-              <div className="flex items-center justify-between text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-                <span>Team PV Volume (बाइनरी)</span>
-                <TrendingUp className="w-4 h-4 text-emerald-600" />
-              </div>
-              <div className="flex items-center justify-between mt-2">
-                <div>
-                  <div className="text-xs text-slate-500">Left PV</div>
-                  <div className="text-xl font-black text-[#144732]">
-                    {user.leftVolumePV + user.leftCarryForwardPV}
-                  </div>
-                </div>
-                <div className="h-8 w-px bg-slate-200" />
-                <div>
-                  <div className="text-xs text-slate-500">Right PV</div>
-                  <div className="text-xl font-black text-[#144732]">
-                    {user.rightVolumePV + user.rightCarryForwardPV}
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-slate-600">
-              <span>10% 1:1 मैचिंग</span>
-              <Link href="/genealogy/binary" className="text-[#144732] hover:underline">View Tree →</Link>
-            </div>
-          </div>
-
           {/* AutoPool Reserve */}
           <div className="bg-white border border-[#e8e3d5] rounded-3xl p-6 shadow-sm flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-                <span>AutoPool Reserve (अपग्रेड)</span>
+                <span>4. AutoPool Reserve (अपग्रेड)</span>
                 <Layers className="w-4 h-4 text-purple-600" />
               </div>
               <div className="text-3xl font-black text-slate-800">
@@ -398,6 +372,169 @@ export default async function DashboardPage({
             <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-purple-700">
               <span>7 लेवल्स 2x2</span>
               <Link href="/autopool" className="hover:underline">View Status →</Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Team Binary Volume & Repurchase Hub (Left & Right PV and BV) */}
+        <div className="bg-white border-2 border-[#144732]/20 rounded-3xl p-5 sm:p-7 shadow-sm space-y-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
+            <div>
+              <div className="flex items-center gap-2">
+                <div className="w-9 h-9 rounded-xl bg-[#144732]/10 text-[#144732] flex items-center justify-center">
+                  <TrendingUp className="w-5 h-5" />
+                </div>
+                <h2 className="text-lg sm:text-xl font-black text-slate-800">
+                  टीम बाइनरी वॉल्यूम स्थिति (Team Left & Right Volume)
+                </h2>
+              </div>
+              <p className="text-xs text-slate-500 mt-1 ml-11">
+                लेफ्ट एवं राइट दोनों साइड का कुल बिजनेस (PV) और रीपरचेस वॉल्यूम (BV) लाइव विवरण
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-bold px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200">
+                10% 1:1 मैचिंग अनुपात
+              </span>
+              <Link
+                href="/genealogy/binary"
+                className="text-xs font-black text-[#144732] hover:underline flex items-center gap-1"
+              >
+                <span>बाइनरी ट्री देखें →</span>
+              </Link>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            {/* LEFT TEAM VOLUME CARD */}
+            <div className="bg-gradient-to-br from-[#f0fdf4] to-white border-2 border-emerald-300/80 rounded-2xl p-5 shadow-xs relative overflow-hidden">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-xs font-black text-emerald-900 uppercase tracking-wider">
+                    LEFT TEAM (लेफ्ट विंग)
+                  </span>
+                </div>
+                <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                  {teamCounts.leftTeamCount} सदस्य
+                </span>
+              </div>
+
+              <div className="space-y-3">
+                <div className="bg-white/90 p-3.5 rounded-xl border border-emerald-200 shadow-2xs">
+                  <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    Total Left PV (कुल एक्टिवेशन PV)
+                  </div>
+                  <div className="text-2xl sm:text-3xl font-black text-emerald-900 mt-0.5">
+                    {teamVolumes.totalLeftPV.toLocaleString('en-IN')} <span className="text-sm font-bold text-emerald-700">PV</span>
+                  </div>
+                  <div className="text-[11px] text-slate-500 mt-1 flex items-center justify-between">
+                    <span>Carry Forward:</span>
+                    <strong className="text-emerald-800 font-mono font-bold">{teamVolumes.leftCarryPV.toLocaleString('en-IN')} PV</strong>
+                  </div>
+                </div>
+
+                <div className="bg-white/90 p-3.5 rounded-xl border border-emerald-200 shadow-2xs">
+                  <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    Total Left BV (कुल रीपरचेस BV)
+                  </div>
+                  <div className="text-2xl sm:text-3xl font-black text-[#92580a] mt-0.5">
+                    {teamVolumes.leftBV.toLocaleString('en-IN')} <span className="text-sm font-bold text-[#92580a]">BV</span>
+                  </div>
+                  <div className="text-[11px] text-slate-500 mt-1">
+                    लेफ्ट टीम की संपूर्ण स्टोर खरीदारी का BV
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* RIGHT TEAM VOLUME CARD */}
+            <div className="bg-gradient-to-br from-[#eff6ff] to-white border-2 border-blue-300/80 rounded-2xl p-5 shadow-xs relative overflow-hidden">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded-full bg-blue-500 animate-pulse" />
+                  <span className="text-xs font-black text-blue-900 uppercase tracking-wider">
+                    RIGHT TEAM (राइट विंग)
+                  </span>
+                </div>
+                <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800">
+                  {teamCounts.rightTeamCount} सदस्य
+                </span>
+              </div>
+
+              <div className="space-y-3">
+                <div className="bg-white/90 p-3.5 rounded-xl border border-blue-200 shadow-2xs">
+                  <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    Total Right PV (कुल एक्टिवेशन PV)
+                  </div>
+                  <div className="text-2xl sm:text-3xl font-black text-blue-900 mt-0.5">
+                    {teamVolumes.totalRightPV.toLocaleString('en-IN')} <span className="text-sm font-bold text-blue-700">PV</span>
+                  </div>
+                  <div className="text-[11px] text-slate-500 mt-1 flex items-center justify-between">
+                    <span>Carry Forward:</span>
+                    <strong className="text-blue-800 font-mono font-bold">{teamVolumes.rightCarryPV.toLocaleString('en-IN')} PV</strong>
+                  </div>
+                </div>
+
+                <div className="bg-white/90 p-3.5 rounded-xl border border-blue-200 shadow-2xs">
+                  <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    Total Right BV (कुल रीपरचेस BV)
+                  </div>
+                  <div className="text-2xl sm:text-3xl font-black text-[#92580a] mt-0.5">
+                    {teamVolumes.rightBV.toLocaleString('en-IN')} <span className="text-sm font-bold text-[#92580a]">BV</span>
+                  </div>
+                  <div className="text-[11px] text-slate-500 mt-1">
+                    राइट टीम की संपूर्ण स्टोर खरीदारी का BV
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* MATCHING & VOLUME SUMMARY */}
+            <div className="bg-gradient-to-br from-[#fdfaf3] to-white border-2 border-[#d4a359]/70 rounded-2xl p-5 shadow-xs flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-xs font-black text-[#92580a] uppercase tracking-wider">
+                    MATCHING & TEAM TOTALS
+                  </span>
+                  <Award className="w-4 h-4 text-[#92580a]" />
+                </div>
+
+                <div className="space-y-3">
+                  <div className="bg-white/90 p-3.5 rounded-xl border border-amber-200 shadow-2xs">
+                    <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                      Total Matched PV (कुल मैचिंग पेड)
+                    </div>
+                    <div className="text-2xl sm:text-3xl font-black text-[#144732] mt-0.5">
+                      {teamVolumes.totalMatchedPV.toLocaleString('en-IN')} <span className="text-sm font-bold text-[#144732]">PV</span>
+                    </div>
+                    <div className="text-[11px] text-slate-500 mt-1 flex items-center justify-between">
+                      <span>मैचिंग इनकम:</span>
+                      <strong className="text-emerald-700 font-bold">₹{getSum(['BINARY_MATCHING']).toFixed(2)}</strong>
+                    </div>
+                  </div>
+
+                  <div className="bg-white/90 p-3.5 rounded-xl border border-amber-200 shadow-2xs">
+                    <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                      Total Team BV (कुल रीपरचेस बिजनेस)
+                    </div>
+                    <div className="text-2xl sm:text-3xl font-black text-[#92580a] mt-0.5">
+                      {teamVolumes.totalTeamBV.toLocaleString('en-IN')} <span className="text-sm font-bold text-[#92580a]">BV</span>
+                    </div>
+                    <div className="text-[11px] text-slate-500 mt-1 flex items-center justify-between">
+                      <span>लेफ्ट + राइट:</span>
+                      <strong className="text-slate-700 font-mono">{teamVolumes.leftBV} L : {teamVolumes.rightBV} R</strong>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 pt-3 border-t border-slate-200 flex items-center justify-between text-xs font-bold text-[#144732]">
+                <span>1:1 बाइनरी सिस्टम</span>
+                <Link href="/genealogy/binary" className="hover:underline text-[#92580a]">
+                  संपूर्ण ट्री खोलें →
+                </Link>
+              </div>
             </div>
           </div>
         </div>

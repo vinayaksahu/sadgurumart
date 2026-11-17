@@ -734,7 +734,7 @@ export default function WalletView({
           </div>
         </div>
 
-        {/* CARD 3: REPURCHASE / PURCHASE WALLET (100% CASHBACK WALLET) */}
+        {/* CARD 3: REPURCHASE / PURCHASE WALLET */}
         <div className="bg-gradient-to-br from-[#1e1b4b] via-[#312e81] to-[#1e1b4b] text-white rounded-3xl p-6 sm:p-8 shadow-xl border-2 border-indigo-400/40 relative overflow-hidden flex flex-col justify-between">
           <div className="absolute top-0 right-0 w-64 h-64 bg-radial from-white/10 to-transparent rounded-full -mr-20 -mt-20 pointer-events-none" />
 
@@ -755,7 +755,7 @@ export default function WalletView({
               </div>
 
               <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-indigo-500/20 text-indigo-200 border border-indigo-400/30">
-                100% Cashback
+                Repurchase
               </span>
             </div>
 
@@ -766,7 +766,7 @@ export default function WalletView({
                 <span className="text-sm text-indigo-200 font-bold ml-1">Pts</span>
               </div>
               <p className="text-[11px] text-slate-300 mt-2 leading-relaxed">
-                आईडी एक्टिवेशन पर 100% कैशबैक इसी वॉलेट में क्रेडिट होता है। स्टोर खरीदारी पर <strong>उत्पाद कीमत का 5% उपयोग</strong> मान्य है (1 Point = ₹1)।
+                स्टोर खरीदारी पर <strong>उत्पाद कीमत का 5% उपयोग</strong> मान्य है (1 Point = ₹1)।
               </p>
             </div>
           </div>
@@ -865,7 +865,7 @@ export default function WalletView({
             { id: 'ALL', label: 'All Transactions (सभी)' },
             { id: 'MAIN', label: 'Main Wallet (मेन वॉलेट)' },
             { id: 'P2P', label: 'P2P Wallet (P2P वॉलेट)' },
-            { id: 'REPURCHASE', label: 'Repurchase Wallet (रीपरचेस / कैशबैक)' },
+            { id: 'REPURCHASE', label: 'Repurchase Wallet (रीपरचेस वॉलेट)' },
             { id: 'TRANSFERS', label: 'P2P Transfers (ट्रांसफर)' },
             { id: 'ACTIVATIONS', label: 'ID Activations (एक्टिवेशन)' },
             { id: 'FUND_REQUESTS', label: `फंड रिक्वेस्ट इतिहास (${fundRequests.length})` },

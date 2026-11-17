@@ -17,7 +17,7 @@ export const DEFAULT_SYSTEM_SETTINGS = {
   leadershipCTOPercent: 5,
   companyCTOPercent: 5,
   autoPoolEnabled: true,
-  activationCashbackPercent: 100,
+  activationCashbackPercent: 0,
   repurchaseWalletUsagePercent: 5,
   closingMode: 'INSTANT', // 'INSTANT' or 'MIDNIGHT_12AM'
   autoClosingTime: '12:00 AM IST',
