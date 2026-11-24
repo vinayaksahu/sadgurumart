@@ -901,13 +901,13 @@ export default function AdminSettingsView({ initialSettings, isSuperAdmin }: Pro
                   <input
                     type="text"
                     readOnly
-                    value={typeof window !== 'undefined' ? `${window.location.origin}/api/shiprocket/webhook` : 'https://sadgurumart.com/api/shiprocket/webhook'}
+                    value={typeof window !== 'undefined' ? `${window.location.origin}/api/delivery/webhook` : 'https://www.sadgurumart.com/api/delivery/webhook'}
                     className="flex-1 px-3 py-2 rounded-xl border border-indigo-200 bg-white font-mono text-xs text-indigo-950 focus:outline-none"
                   />
                   <button
                     type="button"
                     onClick={() => {
-                      const url = typeof window !== 'undefined' ? `${window.location.origin}/api/shiprocket/webhook` : 'https://sadgurumart.com/api/shiprocket/webhook';
+                      const url = typeof window !== 'undefined' ? `${window.location.origin}/api/delivery/webhook` : 'https://www.sadgurumart.com/api/delivery/webhook';
                       navigator.clipboard.writeText(url);
                       setCopiedWebhook(true);
                       setTimeout(() => setCopiedWebhook(false), 2000);
