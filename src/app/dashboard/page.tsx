@@ -34,6 +34,7 @@ import AdminPopupModal from '@/components/AdminPopupModal';
 import AdminViewBanner from '@/components/AdminViewBanner';
 import { getEffectiveMemberAuth } from '@/lib/auth/session';
 import { getUserTeamCounts, getUserTeamVolumes } from '@/lib/mlm/teamUtils';
+import { syncUserRank } from '@/lib/mlm/rankEngine';
 
 export default async function DashboardPage({
   searchParams,
@@ -45,6 +46,9 @@ export default async function DashboardPage({
 
   const auth = await getEffectiveMemberAuth(requestedUser);
   if (!auth) redirect('/login');
+
+  // Automatically sync rank & credit rank rewards if eligible
+  await syncUserRank(auth.userId);
 
   const [user, settings] = await Promise.all([
     prisma.user.findUnique({
@@ -128,6 +132,7 @@ export default async function DashboardPage({
     { label: 'Left PV / Right PV', value: `${teamVolumes.totalLeftPV} L : ${teamVolumes.totalRightPV} R`, gradient: 'from-[#059669] to-[#047857]', icon: Award },
     { label: 'Left BV / Right BV', value: `${teamVolumes.leftBV} L : ${teamVolumes.rightBV} R`, gradient: 'from-[#0891b2] to-[#0e7490]', icon: ShoppingBag },
     { label: 'Self Repurchase BV', value: `${selfRepurchaseBV.toLocaleString('en-IN')} BV (₹${selfRepurchaseAmount.toLocaleString('en-IN', { maximumFractionDigits: 0 })})`, gradient: 'from-[#7c3aed] to-[#9333ea]', icon: ShoppingBag },
+    { label: 'Award & Reward Income', value: `₹${getSum(['AWARD_REWARD']).toFixed(2)}`, gradient: 'from-[#f59e0b] to-[#d97706]', icon: Award },
     { label: 'Total Direct Income', value: `₹${getSum(['DIRECT_REFERRAL']).toFixed(2)}`, gradient: 'from-[#3b82f6] to-[#4f46e5]', icon: User },
     { label: 'Matching Income', value: `₹${getSum(['BINARY_MATCHING']).toFixed(2)}`, gradient: 'from-[#6366f1] to-[#7c3aed]', icon: User },
     { label: 'Direct Sponsor Income', value: `₹${getSum(['SPONSOR_ROYALTY']).toFixed(2)}`, gradient: 'from-[#f43f5e] to-[#ea580c]', icon: TrendingUp },

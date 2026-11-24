@@ -6,7 +6,7 @@ import { redirect } from 'next/navigation';
 import { getEffectiveMemberAuth } from '@/lib/auth/session';
 import Link from 'next/link';
 import { ArrowLeft, Award, Sparkles } from 'lucide-react';
-import { calculateRankProgress } from '@/lib/mlm/rankEngine';
+import { calculateRankProgress, syncUserRank } from '@/lib/mlm/rankEngine';
 import RewardsView from './RewardsView';
 
 export default async function RewardsPage({
@@ -20,17 +20,31 @@ export default async function RewardsPage({
   const auth = await getEffectiveMemberAuth(requestedUser);
   if (!auth) redirect('/login');
 
+  // Automatically sync rank & credit rank rewards to Main Wallet if qualified
+  await syncUserRank(auth.userId);
+
   const user = await prisma.user.findUnique({
     where: { id: auth.userId },
     include: {
-      wallet: true,
+      wallet: {
+        include: {
+          transactions: {
+            where: { type: 'AWARD_REWARD' },
+            select: { referenceId: true, amount: true, createdAt: true },
+          },
+        },
+      },
       kycDetail: true,
     },
   });
 
   if (!user) redirect('/login');
 
-  const rankStatus = calculateRankProgress(user);
+  const creditedRewardIds = (user.wallet?.transactions || [])
+    .map((t) => t.referenceId)
+    .filter(Boolean) as string[];
+
+  const rankStatus = calculateRankProgress(user, creditedRewardIds);
 
   return (
     <div className="min-h-screen bg-[#f8f6f0] text-[#1f2937] font-sans flex flex-col">

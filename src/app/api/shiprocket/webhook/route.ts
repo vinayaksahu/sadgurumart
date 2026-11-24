@@ -4,12 +4,29 @@ import { prisma } from '@/lib/prisma';
 /**
  * Shiprocket Webhook Endpoint
  * Listens for tracking updates, delivery confirmation, RTO, and courier changes
- * URL to register in Shiprocket Dashboard -> Settings -> API -> Webhooks:
- * https://yourdomain.com/api/shiprocket/webhook
+ * URL to register in Shiprocket Dashboard -> Settings -> Webhooks:
+ * https://www.sadgurumart.com/api/shiprocket/webhook
  */
+
+// GET method for browser checks or webhook reachability tests
+export async function GET() {
+  return NextResponse.json(
+    { success: true, message: 'Shiprocket Webhook endpoint is active and listening.' },
+    { status: 200 }
+  );
+}
+
 export async function POST(req: NextRequest) {
   try {
-    const payload = await req.json();
+    const payload = await req.json().catch(() => ({}));
+
+    // Handle Shiprocket verification ping or test payload
+    if (!payload || Object.keys(payload).length === 0 || payload.test || payload.event === 'ping') {
+      return NextResponse.json(
+        { success: true, message: 'Webhook test ping received successfully' },
+        { status: 200 }
+      );
+    }
 
     // Shiprocket sends updates with awb, current_status, order_id, etc.
     const awb = payload.awb || payload.awb_code;
@@ -17,8 +34,8 @@ export async function POST(req: NextRequest) {
     const currentStatus = (payload.current_status || payload.status || '').toUpperCase();
     const courierName = payload.courier_name;
 
-    if (!awb && !orderNumber) {
-      return NextResponse.json({ message: 'No AWB or Order Number in payload' }, { status: 200 });
+    if (!awb && !orderNumber && !payload.shipment_id) {
+      return NextResponse.json({ success: true, message: 'Webhook acknowledged (no tracking payload)' }, { status: 200 });
     }
 
     // Find the corresponding order

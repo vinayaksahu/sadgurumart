@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { getSystemSettings } from '@/lib/settings';
 import { creditIncomeWithAutoPoolCheck } from './incomeDistributor';
 import { creditSponsorMatchingRoyalty } from './royaltyEngine';
+import { syncUserRank } from './rankEngine';
 
 export interface BinaryPlacementResult {
   parentId: string;
@@ -266,6 +267,15 @@ export async function calculateUserBinaryMatching(
       type: 'BINARY_MATCHING',
       remarks: `Binary Matching ${matchingPercent}% on ${payablePV} PV (${pairDescription}) [Total L: ${totalLeft}, R: ${totalRight}]`,
     });
+  }
+
+  // Automatically sync rank & credit rank rewards upon binary matching milestone
+  if (matchedPV > 0) {
+    try {
+      await syncUserRank(userId);
+    } catch (syncErr) {
+      console.error('Error auto-syncing rank rewards for user:', userId, syncErr);
+    }
   }
 
   return { matchedPV: payablePV, matchingIncome, leftCarry, rightCarry };

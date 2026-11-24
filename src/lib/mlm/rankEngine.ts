@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { RankDesignation, User } from '@prisma/client';
 import { RANK_DEFINITIONS, RankDefinition, LIFESTYLE_FUNDS } from './rankData';
+import { creditIncomeWithAutoPoolCheck } from './incomeDistributor';
 
 export interface UserRankStatus {
   currentRank: RankDefinition | null;
@@ -19,6 +20,7 @@ export interface UserRankStatus {
       status: 'ACHIEVED' | 'CURRENT' | 'NEXT' | 'LOCKED';
       progressPercent: number;
       rpNeeded: number;
+      isCredited?: boolean;
     }
   >;
 }
@@ -26,15 +28,18 @@ export interface UserRankStatus {
 /**
  * Calculates real-time RP and rank progression for a given user
  */
-export function calculateRankProgress(user: {
-  rank: RankDesignation;
-  leftVolumePV?: number;
-  rightVolumePV?: number;
-  leftCarryForwardPV?: number;
-  rightCarryForwardPV?: number;
-  totalMatchingPaidPV?: number;
-  rewardPointsRP?: number;
-}): UserRankStatus {
+export function calculateRankProgress(
+  user: {
+    rank: RankDesignation;
+    leftVolumePV?: number;
+    rightVolumePV?: number;
+    leftCarryForwardPV?: number;
+    rightCarryForwardPV?: number;
+    totalMatchingPaidPV?: number;
+    rewardPointsRP?: number;
+  },
+  creditedRewardIds: string[] = []
+): UserRankStatus {
   // Activation PV volume (Repurchase BV is NOT included in RP or Binary Matching)
   const leftVolPV = (user.leftVolumePV || 0) + (user.leftCarryForwardPV || 0) + (user.totalMatchingPaidPV || 0);
   const rightVolPV = (user.rightVolumePV || 0) + (user.rightCarryForwardPV || 0) + (user.totalMatchingPaidPV || 0);
@@ -76,6 +81,8 @@ export function calculateRankProgress(user: {
     rpNeededForNext = 0;
   }
 
+  const creditedSet = new Set(creditedRewardIds);
+
   const allRanks = RANK_DEFINITIONS.map((r) => {
     let status: 'ACHIEVED' | 'CURRENT' | 'NEXT' | 'LOCKED' = 'LOCKED';
     let rankProgress = 0;
@@ -99,11 +106,14 @@ export function calculateRankProgress(user: {
       rankProgress = Math.min(99, Math.round((matchedRP / r.requiredRP) * 100));
     }
 
+    const isCredited = creditedSet.has(`REWARD_${r.id}`) || creditedSet.has(r.id);
+
     return {
       ...r,
       status,
       progressPercent: rankProgress,
       rpNeeded,
+      isCredited,
     };
   });
 
@@ -124,7 +134,72 @@ export function calculateRankProgress(user: {
 }
 
 /**
- * Re-evaluates a single user's rank from DB and upgrades/syncs user.rank to matchedRP
+ * Credits eligible rank rewards to user's main wallet if not already credited.
+ * Uses referenceId 'REWARD_' + rank.id for idempotency.
+ */
+export async function creditEligibleRankRewards(userId: string): Promise<{
+  creditedCount: number;
+  creditedAmount: number;
+  creditedRanks: string[];
+}> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    include: {
+      wallet: {
+        include: {
+          transactions: {
+            where: {
+              type: 'AWARD_REWARD',
+            },
+            select: {
+              referenceId: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!user || !user.wallet) {
+    return { creditedCount: 0, creditedAmount: 0, creditedRanks: [] };
+  }
+
+  const existingRewardRefIds = new Set(
+    user.wallet.transactions.map((t) => t.referenceId).filter(Boolean)
+  );
+
+  const matchedRP = Math.floor((user.totalMatchingPaidPV || 0) / 100);
+
+  let creditedCount = 0;
+  let creditedAmount = 0;
+  const creditedRanks: string[] = [];
+
+  for (const rank of RANK_DEFINITIONS) {
+    // If qualified for this rank and reward has not been credited
+    if (matchedRP >= rank.requiredRP) {
+      const refId = `REWARD_${rank.id}`;
+      if (!existingRewardRefIds.has(refId) && rank.rewardValueApprox > 0) {
+        await creditIncomeWithAutoPoolCheck({
+          userId: user.id,
+          amount: rank.rewardValueApprox,
+          type: 'AWARD_REWARD',
+          referenceId: refId,
+          remarks: `रैंक रिवार्ड - ${rank.name} (${rank.hindiName}): ${rank.rewardHindi}`,
+        });
+        existingRewardRefIds.add(refId);
+        creditedCount++;
+        creditedAmount += rank.rewardValueApprox;
+        creditedRanks.push(rank.name);
+      }
+    }
+  }
+
+  return { creditedCount, creditedAmount, creditedRanks };
+}
+
+/**
+ * Re-evaluates a single user's rank from DB, upgrades user.rank to matchedRP,
+ * and credits any eligible rank rewards to the user's Main Wallet.
  */
 export async function syncUserRank(userId: string): Promise<UserRankStatus | null> {
   const user = await prisma.user.findUnique({
@@ -138,12 +213,27 @@ export async function syncUserRank(userId: string): Promise<UserRankStatus | nul
       rightCarryForwardPV: true,
       totalMatchingPaidPV: true,
       rewardPointsRP: true,
+      wallet: {
+        select: {
+          transactions: {
+            where: { type: 'AWARD_REWARD' },
+            select: { referenceId: true },
+          },
+        },
+      },
     },
   });
 
   if (!user) return null;
 
-  const status = calculateRankProgress(user);
+  // Credit any eligible uncredited rank rewards first
+  await creditEligibleRankRewards(userId);
+
+  const existingRewardRefIds = (user.wallet?.transactions || [])
+    .map((t) => t.referenceId)
+    .filter(Boolean) as string[];
+
+  const status = calculateRankProgress(user, existingRewardRefIds);
   const correctRank = status.currentRank ? status.currentRank.id : 'DISTRIBUTOR';
 
   if (user.rank !== correctRank || user.rewardPointsRP !== status.matchedRP) {
@@ -160,11 +250,14 @@ export async function syncUserRank(userId: string): Promise<UserRankStatus | nul
 }
 
 /**
- * Evaluates all active members across the database and updates their rank designations
+ * Evaluates all active members across the database, updates their rank designations,
+ * and credits any eligible rank rewards to their Main Wallet.
  */
 export async function syncAllUsersRanks(): Promise<{
   totalProcessed: number;
   upgradedCount: number;
+  totalRewardsCredited: number;
+  totalRewardAmount: number;
 }> {
   const users = await prisma.user.findMany({
     select: {
@@ -180,6 +273,8 @@ export async function syncAllUsersRanks(): Promise<{
   });
 
   let upgradedCount = 0;
+  let totalRewardsCredited = 0;
+  let totalRewardAmount = 0;
 
   for (const u of users) {
     const status = calculateRankProgress(u);
@@ -195,10 +290,16 @@ export async function syncAllUsersRanks(): Promise<{
       });
       upgradedCount++;
     }
+
+    const rewardRes = await creditEligibleRankRewards(u.id);
+    totalRewardsCredited += rewardRes.creditedCount;
+    totalRewardAmount += rewardRes.creditedAmount;
   }
 
   return {
     totalProcessed: users.length,
     upgradedCount,
+    totalRewardsCredited,
+    totalRewardAmount,
   };
 }

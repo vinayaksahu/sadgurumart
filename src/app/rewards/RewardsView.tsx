@@ -364,25 +364,44 @@ export default function RewardsView({ rankStatus, userName, userCode }: RewardsV
 
                     {/* Reward Details Box */}
                     <div className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-3.5 mb-4">
-                      <div className="text-[10px] font-black text-[#92580a] uppercase tracking-wider flex items-center gap-1 mb-1">
-                        <Gift className="w-3 h-3" />
-                        <span>शानदार रिवॉर्ड / नकद पुरस्कार</span>
+                      <div className="text-[10px] font-black text-[#92580a] uppercase tracking-wider flex items-center justify-between mb-1">
+                        <div className="flex items-center gap-1">
+                          <Gift className="w-3 h-3" />
+                          <span>शानदार रिवॉर्ड / नकद पुरस्कार</span>
+                        </div>
+                        {isAchieved && (
+                          <span className="text-[9px] font-black px-2 py-0.5 rounded-md bg-emerald-600 text-white shadow-2xs">
+                            वॉलेट में क्रेडिटेड ✓
+                          </span>
+                        )}
                       </div>
                       <div className="font-black text-base text-[#144732] leading-snug">
                         {rank.rewardHindi}
                       </div>
-                      <div className="text-[11px] font-semibold text-slate-600 mt-0.5">
-                        {rank.rewardTitle}
+                      <div className="text-[11px] font-semibold text-slate-600 mt-0.5 flex items-center justify-between">
+                        <span>{rank.rewardTitle}</span>
+                        <span className="font-bold text-[#92580a]">मूल्य: ₹{rank.rewardValueApprox.toLocaleString('en-IN')}</span>
                       </div>
                     </div>
                   </div>
 
-                  {/* Progress Indicator for Next / Locked */}
+                  {/* Progress Indicator for Next / Locked / Credited Achieved */}
                   <div className="pt-3 border-t border-slate-100">
                     {isAchieved ? (
-                      <div className="flex items-center justify-between text-xs font-bold text-emerald-700">
-                        <span>योग्यता पूर्ण</span>
-                        <span>100% Qualified</span>
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between text-xs font-bold text-emerald-700">
+                          <span className="flex items-center gap-1">
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            <span>योग्यता पूर्ण (100% Qualified)</span>
+                          </span>
+                          <span className="font-mono font-black text-emerald-800">
+                            ₹{rank.rewardValueApprox.toLocaleString('en-IN')}
+                          </span>
+                        </div>
+                        <div className="px-3 py-1.5 rounded-xl bg-emerald-100/90 border border-emerald-300 text-emerald-900 text-[11px] font-black flex items-center justify-between shadow-2xs">
+                          <span>✓ मेन वॉलेट में क्रेडिटेड (Main Wallet)</span>
+                          <span className="text-emerald-700 text-[10px] font-bold">1:1 RP रिवार्ड</span>
+                        </div>
                       </div>
                     ) : (
                       <div className="space-y-1.5">

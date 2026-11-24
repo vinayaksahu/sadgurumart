@@ -51,6 +51,15 @@ export async function GET(request: NextRequest) {
         rightCarryForwardPV: true,
         totalMatchingPaidPV: true,
         rewardPointsRP: true,
+        wallet: {
+          select: {
+            mainBalance: true,
+            transactions: {
+              where: { type: 'AWARD_REWARD' },
+              select: { referenceId: true, amount: true, createdAt: true },
+            },
+          },
+        },
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -62,6 +71,8 @@ export async function GET(request: NextRequest) {
       const matchedRP = Math.floor((u.totalMatchingPaidPV || 0) / 100);
 
       const rankDef = RANK_DEFINITIONS.find((r) => r.id === u.rank) || null;
+      const creditedRewardIds = (u.wallet?.transactions || []).map((t) => t.referenceId).filter(Boolean);
+      const totalRewardCredited = (u.wallet?.transactions || []).reduce((sum, t) => sum + (t.amount || 0), 0);
 
       return {
         id: u.id,
@@ -75,6 +86,8 @@ export async function GET(request: NextRequest) {
         leftRP,
         rightRP,
         matchedRP,
+        creditedRewardIds,
+        totalRewardCredited,
       };
     });
 
@@ -150,7 +163,7 @@ export async function POST(request: NextRequest) {
       const result = await syncAllUsersRanks();
       return NextResponse.json({
         success: true,
-        message: `Successfully checked ${result.totalProcessed} members and upgraded ${result.upgradedCount} rank(s).`,
+        message: `Successfully checked ${result.totalProcessed} members, upgraded ${result.upgradedCount} rank(s), and credited ${result.totalRewardsCredited} reward(s) (₹${result.totalRewardAmount.toLocaleString('en-IN')}) to Main Wallet.`,
         ...result,
       });
     }
