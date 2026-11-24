@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { verifyUserToken } from '@/lib/auth/jwt';
 import { propagateBinaryVolume } from '@/lib/mlm/binaryEngine';
 import { creditDirectReferralBonus } from '@/lib/mlm/royaltyEngine';
+import { getShiprocketConfig, createShiprocketOrder } from '@/lib/shiprocket';
 
 export async function POST(req: NextRequest) {
   try {
@@ -64,13 +65,15 @@ export async function POST(req: NextRequest) {
       const qty = item.quantity || 1;
       totalMrp += p.mrp * qty;
       totalDp += p.dpPrice * qty;
-      totalPV += p.pv * qty;
-      totalBV += p.bv * qty;
 
       // Only Activation products generate Binary PV and Reward Points (RP)
-      // Repurchase (BV) does NOT add to Binary Matching PV or Reward Points (RP)
+      // Activation products do NOT generate Repurchase BV
+      // Repurchase products (BV) do NOT add to Binary Matching PV or Reward Points (RP)
       if (p.isActivation) {
+        totalPV += p.pv * qty;
         activationPV += p.pv * qty;
+      } else {
+        totalBV += p.bv * qty;
       }
 
       return {
@@ -78,8 +81,8 @@ export async function POST(req: NextRequest) {
         quantity: qty,
         unitMrp: p.mrp,
         unitDp: p.dpPrice,
-        unitPV: p.pv,
-        unitBV: p.bv,
+        unitPV: p.isActivation ? p.pv : 0,
+        unitBV: p.isActivation ? 0 : p.bv,
       };
     });
 
@@ -157,6 +160,22 @@ export async function POST(req: NextRequest) {
         });
       }
 
+      // Check if user was inactive and now qualifies for activation
+      const user = await tx.user.findUnique({ where: { id: userId } });
+      const willActivate = Boolean(user && !user.isActive && (activationPV >= 100 || totalPV >= 100));
+      if (willActivate) {
+        await tx.user.update({
+          where: { id: userId },
+          data: {
+            isActive: true,
+            activatedAt: new Date(),
+          },
+        });
+        isNewActivation = true;
+      }
+
+      const isOrderActivation = Boolean(isNewActivation || (activationPV > 0 && totalBV === 0));
+
       const newOrder = await tx.order.create({
         data: {
           orderNumber,
@@ -168,6 +187,7 @@ export async function POST(req: NextRequest) {
           deliveryFee,
           totalPV,
           totalBV,
+          isActivation: isOrderActivation,
           orderStatus: 'CONFIRMED',
           paymentStatus: 'PAID',
           paymentMethod: paymentMethod || 'ONLINE',
@@ -177,19 +197,6 @@ export async function POST(req: NextRequest) {
           },
         },
       });
-
-      // Check if user was inactive and now qualifies for activation
-      const user = await tx.user.findUnique({ where: { id: userId } });
-      if (user && !user.isActive && totalPV >= 100) {
-        await tx.user.update({
-          where: { id: userId },
-          data: {
-            isActive: true,
-            activatedAt: new Date(),
-          },
-        });
-        isNewActivation = true;
-      }
 
       // 100% Cashback to Cashback Wallet ONLY on 1st time purchase (joining / first ID activation)
       // Repeat/Repurchase orders do NOT receive cashback income
@@ -256,6 +263,18 @@ export async function POST(req: NextRequest) {
       } catch (err) {
         console.error('Direct bonus credit warning:', err);
       }
+    }
+
+    // Auto-create Shiprocket Order in background if enabled
+    try {
+      const shipConfig = await getShiprocketConfig();
+      if (shipConfig.enabled && shipConfig.autoCreate && shipConfig.email) {
+        createShiprocketOrder(order.id).catch((shipErr) => {
+          console.warn('Background Shiprocket order creation error:', shipErr);
+        });
+      }
+    } catch (shipCheckErr) {
+      console.warn('Shiprocket auto-order check failed:', shipCheckErr);
     }
 
     return NextResponse.json({

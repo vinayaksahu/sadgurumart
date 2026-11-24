@@ -89,11 +89,13 @@ export async function getUserTeamVolumes(userId: string): Promise<UserTeamVolume
           SELECT SUM("totalBV") FROM "orders"
           WHERE ("userId" IN (SELECT id FROM left_binary) OR "targetUserCode" IN (SELECT "userCode" FROM left_binary))
             AND "paymentStatus" = 'PAID'
+            AND "isActivation" = false
         ), 0)::float AS "leftBV",
         COALESCE((
           SELECT SUM("totalBV") FROM "orders"
           WHERE ("userId" IN (SELECT id FROM right_binary) OR "targetUserCode" IN (SELECT "userCode" FROM right_binary))
             AND "paymentStatus" = 'PAID'
+            AND "isActivation" = false
         ), 0)::float AS "rightBV",
         COALESCE((
           SELECT SUM("totalPV") FROM "orders"

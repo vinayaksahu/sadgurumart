@@ -62,6 +62,19 @@ export const DEFAULT_SYSTEM_SETTINGS = {
   companyBranch: 'State Bank of India',
   companyUpiId: '6267392508-1@nyes',
   companyQrImageUrl: '/payment-qr.jpg',
+
+  // Shiprocket Logistics Integration
+  shiprocketEnabled: false,
+  shiprocketEmail: '',
+  shiprocketPassword: '',
+  shiprocketToken: '',
+  shiprocketTokenExpiry: null as Date | null,
+  shiprocketPickupLocation: 'Primary',
+  shiprocketDefaultWeightKg: 0.5,
+  shiprocketLengthCm: 10,
+  shiprocketBreadthCm: 10,
+  shiprocketHeightCm: 10,
+  shiprocketAutoCreate: true,
 };
 
 // In-memory cache for ultra-fast performance (<1ms)

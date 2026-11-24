@@ -27,7 +27,11 @@ import {
   FolderCheck,
   Copy,
   Check,
-  UploadCloud
+  UploadCloud,
+  Truck,
+  EyeOff,
+  PackageCheck,
+  MapPin
 } from 'lucide-react';
 import AdminNoticeBanner from '@/components/AdminNoticeBanner';
 import AdminPopupModal from '@/components/AdminPopupModal';
@@ -40,14 +44,14 @@ interface Props {
 export default function AdminSettingsView({ initialSettings, isSuperAdmin }: Props) {
   const searchParams = useSearchParams();
   const tabParam = searchParams.get('tab');
-  const [activeTab, setActiveTab] = useState<'plan' | 'backup' | 'notice' | 'popup' | 'general' | 'drive'>(
-    (tabParam && ['plan', 'backup', 'notice', 'popup', 'general', 'drive'].includes(tabParam) && !(tabParam === 'drive' && !isSuperAdmin)) 
+  const [activeTab, setActiveTab] = useState<'plan' | 'shipping' | 'backup' | 'notice' | 'popup' | 'general' | 'drive'>(
+    (tabParam && ['plan', 'shipping', 'backup', 'notice', 'popup', 'general', 'drive'].includes(tabParam) && !(tabParam === 'drive' && !isSuperAdmin)) 
       ? (tabParam as any) 
       : 'plan'
   );
 
   useEffect(() => {
-    if (tabParam && ['plan', 'backup', 'notice', 'popup', 'general', 'drive'].includes(tabParam)) {
+    if (tabParam && ['plan', 'shipping', 'backup', 'notice', 'popup', 'general', 'drive'].includes(tabParam)) {
       if (tabParam === 'drive' && !isSuperAdmin) {
         setActiveTab('plan');
       } else {
@@ -61,6 +65,13 @@ export default function AdminSettingsView({ initialSettings, isSuperAdmin }: Pro
     type: null,
     message: '',
   });
+
+  // Shiprocket Tab State
+  const [testingShiprocket, setTestingShiprocket] = useState(false);
+  const [shiprocketTestResult, setShiprocketTestResult] = useState<any>(null);
+  const [shiprocketPickupLocations, setShiprocketPickupLocations] = useState<any[]>([]);
+  const [showShiprocketPassword, setShowShiprocketPassword] = useState(false);
+  const [copiedWebhook, setCopiedWebhook] = useState(false);
 
   // Google Drive Tab State
   const [testingDrive, setTestingDrive] = useState(false);
@@ -136,8 +147,34 @@ export default function AdminSettingsView({ initialSettings, isSuperAdmin }: Pro
     }
   };
 
+  const handleTestShiprocket = async () => {
+    setTestingShiprocket(true);
+    setShiprocketTestResult(null);
+    try {
+      const res = await fetch('/api/admin/shiprocket/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'TEST_CONNECTION',
+          email: formData.shiprocketEmail,
+          password: formData.shiprocketPassword,
+        }),
+      });
+      const data = await res.json();
+      setShiprocketTestResult(data);
+      if (data.pickupLocations && data.pickupLocations.length > 0) {
+        setShiprocketPickupLocations(data.pickupLocations);
+      }
+    } catch (err: any) {
+      setShiprocketTestResult({ success: false, error: err.message || 'Connection test failed' });
+    } finally {
+      setTestingShiprocket(false);
+    }
+  };
+
   const tabs = [
     { id: 'plan', label: '🎯 Plan Modify (प्लान)', desc: 'PV, Matching %, Deductions' },
+    { id: 'shipping', label: '🚚 Shiprocket (डिलीवरी)', desc: 'Couriers, Pincodes & Pickups' },
     ...(isSuperAdmin ? [{ id: 'drive', label: '📁 Google Drive (ऑटो-अपलोड)', desc: 'Product & Member KYC Drive Sync' }] : []),
     { id: 'backup', label: '💾 Data Backup (डेटा बैकअप)', desc: '1-Click JSON & CSV Exports' },
     { id: 'notice', label: '📢 Admin Notice (सूचना)', desc: 'Dashboard Announcement & Marquee' },
@@ -205,7 +242,7 @@ export default function AdminSettingsView({ initialSettings, isSuperAdmin }: Pro
       )}
 
       {/* Tab Navigation Pill Bar */}
-      <div className={`grid grid-cols-2 sm:grid-cols-3 ${isSuperAdmin ? 'lg:grid-cols-6' : 'lg:grid-cols-5'} gap-2 sm:gap-3 bg-white/70 p-2 rounded-2xl border border-black/10 shadow-xs`}>
+      <div className={`grid grid-cols-2 sm:grid-cols-3 ${isSuperAdmin ? 'lg:grid-cols-7' : 'lg:grid-cols-6'} gap-2 sm:gap-3 bg-white/70 p-2 rounded-2xl border border-black/10 shadow-xs`}>
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
           return (
@@ -522,6 +559,381 @@ export default function AdminSettingsView({ initialSettings, isSuperAdmin }: Pro
               >
                 <Save className="w-4 h-4 text-[#d4a359]" />
                 <span>{saving ? 'सुरक्षित हो रहा है...' : 'प्लान सेटिंग्स सुरक्षित करें (Save Plan Config)'}</span>
+              </button>
+            </div>
+          </div>
+        </form>
+      )}
+
+      {/* ======================================================== */}
+      {/* TAB: SHIPROCKET LOGISTICS & DELIVERY (शिपराकेट डिलीवरी) */}
+      {/* ======================================================== */}
+      {activeTab === 'shipping' && (
+        <form onSubmit={handleSaveSettings} className="space-y-6">
+          {/* Hero Integration Header Card */}
+          <div className="bg-gradient-to-br from-[#1e1b4b] via-[#312e81] to-[#0f172a] text-white rounded-3xl p-6 sm:p-8 shadow-xl border border-indigo-400/30 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="relative z-10 space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-indigo-500/20 text-indigo-200 border border-indigo-400/30">
+                      India&apos;s Leading Courier Aggregator
+                    </span>
+                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wide ${
+                      formData.shiprocketEnabled
+                        ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/30'
+                        : 'bg-amber-500/20 text-amber-300 border border-amber-400/30'
+                    }`}>
+                      {formData.shiprocketEnabled ? '● LIVE & ACTIVE' : '○ DISABLED'}
+                    </span>
+                  </div>
+                  <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight mt-2 flex items-center gap-2">
+                    <Truck className="w-7 h-7 text-indigo-400" />
+                    <span>Shiprocket Automated Logistics Integration</span>
+                  </h2>
+                  <p className="text-xs text-indigo-200/80 mt-1 max-w-2xl">
+                    दिल्लीवरी, ब्लू डार्ट, शैडोफैक्स, डीटीडीसी, एक्सप्रेसबीज आदि 20+ कूरियर पार्टनर्स के साथ 29,000+ पिनकोड्स पर ऑटोमैटिक डोरस्टेप पिकअप, AWB जनरेशन व लाइव ट्रैकिंग।
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-3 shrink-0">
+                  <a
+                    href="https://app.shiprocket.in"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/20 transition-colors"
+                  >
+                    <span>Shiprocket Dashboard</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+
+                  <button
+                    type="button"
+                    onClick={handleTestShiprocket}
+                    disabled={testingShiprocket}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs shadow-lg transition-all cursor-pointer disabled:opacity-50"
+                  >
+                    {testingShiprocket ? (
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <CheckCircle2 className="w-4 h-4" />
+                    )}
+                    <span>{testingShiprocket ? 'कनेक्शन जाँचा जा रहा है...' : 'Test Connection (कनेक्शन जाँचें)'}</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Test Connection Result Alert */}
+              {shiprocketTestResult && (
+                <div className={`p-4 rounded-2xl border ${
+                  shiprocketTestResult.success
+                    ? 'bg-emerald-950/60 border-emerald-500/50 text-emerald-200'
+                    : 'bg-red-950/60 border-red-500/50 text-red-200'
+                } flex items-start justify-between gap-3 animate-in fade-in`}>
+                  <div className="flex items-start gap-3">
+                    {shiprocketTestResult.success ? (
+                      <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                    ) : (
+                      <AlertCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+                    )}
+                    <div>
+                      <div className="font-black text-sm">
+                        {shiprocketTestResult.success ? 'सफल कनेक्शन (Shiprocket Connected)' : 'कनेक्शन त्रुटि (Connection Failed)'}
+                      </div>
+                      <p className="text-xs mt-0.5 opacity-90">
+                        {shiprocketTestResult.message || shiprocketTestResult.error}
+                      </p>
+                      {shiprocketTestResult.pickupLocations?.length > 0 && (
+                        <div className="mt-2 text-[11px] text-emerald-300">
+                          ✓ {shiprocketTestResult.pickupLocations.length} पिकअप गोदाम मिले। नीचे सूची से चुनें।
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShiprocketTestResult(null)}
+                    className="text-xs underline opacity-80 hover:opacity-100"
+                  >
+                    Dismiss
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Configuration Form Card */}
+          <div className="bg-white border-2 border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+              <div>
+                <h3 className="text-lg font-black text-[#144732]">API क्रेडेंशियल्स व डिलीवरी सेटिंग्स</h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Shiprocket API खाते का ईमेल व पासवर्ड दर्ज करें। यह डेटा एन्क्रिप्टेड रखा जाता है।
+                </p>
+              </div>
+            </div>
+
+            {/* Master Switches */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 rounded-2xl bg-[#faf8f4] border border-[#e8e3d5]">
+              <div className="flex items-center justify-between p-3 rounded-xl bg-white border border-slate-200 shadow-2xs">
+                <div>
+                  <div className="font-black text-xs text-slate-800">Shiprocket Integration सक्रिय करें</div>
+                  <div className="text-[10px] text-slate-500">सभी ऑर्डर्स के लिए शिपमेंट सुविधा ऑन करें</div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleInputChange('shiprocketEnabled', !formData.shiprocketEnabled)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer ${
+                    formData.shiprocketEnabled ? 'bg-[#144732]' : 'bg-slate-300'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      formData.shiprocketEnabled ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+
+              <div className="flex items-center justify-between p-3 rounded-xl bg-white border border-slate-200 shadow-2xs">
+                <div>
+                  <div className="font-black text-xs text-slate-800">ऑटो-ऑर्डर क्रिएशन (Auto-Create Order)</div>
+                  <div className="text-[10px] text-slate-500">ग्राहक द्वारा ऑर्डर प्लेस होते ही Shiprocket पर ड्राफ्ट बनाएँ</div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleInputChange('shiprocketAutoCreate', !formData.shiprocketAutoCreate)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer ${
+                    formData.shiprocketAutoCreate ? 'bg-[#144732]' : 'bg-slate-300'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      formData.shiprocketAutoCreate ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+            </div>
+
+            {/* Credentials Fields */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1.5">
+                  Shiprocket रजिस्टर्ड ईमेल (Email ID)
+                </label>
+                <input
+                  type="email"
+                  value={formData.shiprocketEmail || ''}
+                  onChange={(e) => handleInputChange('shiprocketEmail', e.target.value)}
+                  placeholder="e.g. logistics@sgmmart.com"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#144732] bg-white font-medium"
+                />
+                <p className="text-[10px] text-slate-500 mt-1">
+                  आपके Shiprocket लॉगिन खाते का रजिस्टर्ड ईमेल
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1.5">
+                  Shiprocket खाता पासवर्ड (Password)
+                </label>
+                <div className="relative">
+                  <input
+                    type={showShiprocketPassword ? 'text' : 'password'}
+                    value={formData.shiprocketPassword || ''}
+                    onChange={(e) => handleInputChange('shiprocketPassword', e.target.value)}
+                    placeholder="••••••••••••"
+                    className="w-full px-4 py-2.5 pr-10 rounded-xl border border-slate-300 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#144732] bg-white font-medium"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowShiprocketPassword(!showShiprocketPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  >
+                    {showShiprocketPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+                <p className="text-[10px] text-slate-500 mt-1">
+                  Shiprocket API ऑटो-टोकन जनरेशन के लिए उपयोग किया जाता है
+                </p>
+              </div>
+            </div>
+
+            {/* Warehouse Pickup Location */}
+            <div className="pt-4 border-t border-slate-100 space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <label className="block text-xs font-black text-slate-700 uppercase tracking-wider">
+                    पिकअप लोकेशन उपनाम (Pickup Location Nickname)
+                  </label>
+                  <p className="text-[10px] text-slate-500">
+                    Shiprocket Dashboard में दर्ज वेयरहाउस का निकनेम (जैसे Primary, Warehouse 1, Central Hub)
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleTestShiprocket}
+                  disabled={testingShiprocket}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors cursor-pointer shrink-0"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${testingShiprocket ? 'animate-spin' : ''}`} />
+                  <span>पिकअप गोदाम खोजें (Fetch Locations)</span>
+                </button>
+              </div>
+
+              <input
+                type="text"
+                value={formData.shiprocketPickupLocation || ''}
+                onChange={(e) => handleInputChange('shiprocketPickupLocation', e.target.value)}
+                placeholder="e.g. Primary"
+                className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#144732] bg-white font-medium"
+              />
+
+              {/* Detected Pickup Locations Quick-Select */}
+              {shiprocketPickupLocations.length > 0 && (
+                <div className="space-y-1.5">
+                  <div className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">
+                    Shiprocket खाते में उपलब्ध वेयरहाउस (चुनने के लिए क्लिक करें):
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {shiprocketPickupLocations.map((loc: any, idx: number) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => handleInputChange('shiprocketPickupLocation', loc.pickup_location)}
+                        className={`px-3 py-2 rounded-xl text-left text-xs border transition-all cursor-pointer ${
+                          formData.shiprocketPickupLocation === loc.pickup_location
+                            ? 'bg-[#144732] text-white border-[#144732] font-bold shadow-xs'
+                            : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
+                        }`}
+                      >
+                        <div className="font-bold flex items-center gap-1">
+                          <MapPin className="w-3 h-3 text-[#d4a359]" />
+                          <span>{loc.pickup_location}</span>
+                        </div>
+                        <div className="text-[10px] opacity-80 mt-0.5">
+                          {loc.city}, {loc.state} - {loc.pin_code}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Default Package Dimensions & Weight */}
+            <div className="pt-4 border-t border-slate-100 space-y-4">
+              <div>
+                <h4 className="text-xs font-black text-slate-700 uppercase tracking-wider">
+                  डिफ़ॉल्ट पार्सल माप व वज़न (Default Parcel Dimensions & Weight)
+                </h4>
+                <p className="text-[10px] text-slate-500">
+                  यदि किसी उत्पाद का व्यक्तिगत माप तय न हो, तो यह डिफ़ॉल्ट माप कूरियर दर की गणना में उपयोग होगा।
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1">वज़न (Weight in Kg)</label>
+                  <input
+                    type="number"
+                    step="0.05"
+                    min="0.05"
+                    value={formData.shiprocketDefaultWeightKg ?? 0.5}
+                    onChange={(e) => handleInputChange('shiprocketDefaultWeightKg', e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#144732]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1">लंबाई (Length in cm)</label>
+                  <input
+                    type="number"
+                    step="1"
+                    min="1"
+                    value={formData.shiprocketLengthCm ?? 10}
+                    onChange={(e) => handleInputChange('shiprocketLengthCm', e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#144732]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1">चौड़ाई (Breadth in cm)</label>
+                  <input
+                    type="number"
+                    step="1"
+                    min="1"
+                    value={formData.shiprocketBreadthCm ?? 10}
+                    onChange={(e) => handleInputChange('shiprocketBreadthCm', e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#144732]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1">ऊँचाई (Height in cm)</label>
+                  <input
+                    type="number"
+                    step="1"
+                    min="1"
+                    value={formData.shiprocketHeightCm ?? 10}
+                    onChange={(e) => handleInputChange('shiprocketHeightCm', e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#144732]"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Webhook Configuration Guide */}
+            <div className="pt-4 border-t border-slate-100">
+              <div className="p-4 rounded-2xl bg-indigo-50/60 border border-indigo-200 space-y-3">
+                <div className="flex items-center gap-2 text-indigo-900 font-black text-xs">
+                  <PackageCheck className="w-4 h-4 text-indigo-600" />
+                  <span>रियल-टाइम ट्रैकिंग वेबहुक (Real-Time Tracking Webhook)</span>
+                </div>
+                <p className="text-[11px] text-indigo-800 leading-relaxed">
+                  जब कूरियर पार्टनर पार्सल पिक करता है, इन-ट्रांजिट या डिलीवर करता है, तो आपका SGM Mart पोर्टल स्वतः अपडेट हो जाता है। इसके लिए नीचे दिया गया वेबहुक URL अपने Shiprocket डैशबोर्ड में जोड़ें:
+                </p>
+
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    readOnly
+                    value={typeof window !== 'undefined' ? `${window.location.origin}/api/shiprocket/webhook` : 'https://sadgurumart.com/api/shiprocket/webhook'}
+                    className="flex-1 px-3 py-2 rounded-xl border border-indigo-200 bg-white font-mono text-xs text-indigo-950 focus:outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const url = typeof window !== 'undefined' ? `${window.location.origin}/api/shiprocket/webhook` : 'https://sadgurumart.com/api/shiprocket/webhook';
+                      navigator.clipboard.writeText(url);
+                      setCopiedWebhook(true);
+                      setTimeout(() => setCopiedWebhook(false), 2000);
+                    }}
+                    className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
+                  >
+                    {copiedWebhook ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>{copiedWebhook ? 'Copied!' : 'Copy URL'}</span>
+                  </button>
+                </div>
+
+                <div className="text-[10px] text-indigo-700">
+                  <strong>स्टेप्स:</strong> Shiprocket Dashboard खोलें → <strong>Settings</strong> → <strong>API</strong> → <strong>Webhooks</strong> → <strong>Add Webhook</strong> में यह URL पेस्ट करें।
+                </div>
+              </div>
+            </div>
+
+            {/* Save Button */}
+            <div className="pt-4 flex justify-end">
+              <button
+                type="submit"
+                disabled={saving}
+                className="flex items-center gap-2 px-8 py-3 rounded-2xl bg-gradient-to-r from-[#144732] to-[#0b2b1e] text-[#fef08a] font-black text-sm shadow-md border border-[#d4a359] hover:scale-[1.02] active:scale-95 transition-all cursor-pointer"
+              >
+                <Save className="w-4 h-4 text-[#d4a359]" />
+                <span>{saving ? 'सुरक्षित हो रहा है...' : 'लॉजिस्टिक्स सेटिंग्स सुरक्षित करें (Save Shiprocket Config)'}</span>
               </button>
             </div>
           </div>

@@ -331,7 +331,7 @@ export default async function AdminDashboardPage() {
                     </td>
                     <td className="py-3 px-4 font-bold text-slate-900">₹{ord.totalDp}</td>
                     <td className="py-3 px-4 font-semibold text-[#92580a]">
-                      {ord.totalPV} PV | {ord.totalBV} BV
+                      {ord.totalPV} PV {ord.totalBV > 0 ? `| ${ord.totalBV} BV` : ''}
                     </td>
                     <td className="py-3 px-4">
                       <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">

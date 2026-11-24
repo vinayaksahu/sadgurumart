@@ -50,6 +50,9 @@ interface OrderData {
   isActivation: boolean;
   targetUserCode?: string | null;
   notes?: string | null;
+  shiprocketAwbCode?: string | null;
+  shiprocketCourierName?: string | null;
+  shiprocketStatus?: string | null;
   createdAt: string;
   items: OrderItem[];
 }
@@ -225,6 +228,14 @@ export default function OrdersView({ initialOrders, currentUserCode }: Props) {
                       <CheckCircle2 className="w-3 h-3 text-emerald-600" />
                       <span>{ord.paymentStatus}</span>
                     </span>
+
+                    {/* Shiprocket Delivery Badge */}
+                    {ord.shiprocketAwbCode && (
+                      <span className="bg-indigo-50 text-indigo-900 border border-indigo-200 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 font-mono">
+                        <Truck className="w-3 h-3 text-indigo-600" />
+                        <span>{ord.shiprocketCourierName || 'Shiprocket'}: {ord.shiprocketAwbCode}</span>
+                      </span>
+                    )}
                   </div>
 
                   <div className="text-xs text-slate-400 flex items-center gap-1.5 font-medium">

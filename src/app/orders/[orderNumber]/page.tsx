@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { CheckCircle2, Printer, ShoppingBag, ArrowLeft, ShieldCheck, Sparkles } from 'lucide-react';
 import PrintButton from './PrintButton';
+import OrderTrackingCard from './OrderTrackingCard';
 
 interface OrderPageProps {
   params: Promise<{ orderNumber: string }>;
@@ -79,6 +80,17 @@ export default async function OrderConfirmationPage({ params }: OrderPageProps) 
             </Link>
           </div>
         )}
+
+        {/* Live Shiprocket Tracking Card */}
+        <div className="mb-8">
+          <OrderTrackingCard
+            orderNumber={order.orderNumber}
+            orderStatus={order.orderStatus}
+            awbCode={order.shiprocketAwbCode || (shipping?.trackingNumber ?? null)}
+            courierName={order.shiprocketCourierName || (shipping?.courierName ?? null)}
+            shiprocketStatus={order.shiprocketStatus}
+          />
+        </div>
 
         {/* Printable Invoice Container */}
         <div id="invoice-printable" className="bg-white border-2 border-[#144732]/20 rounded-3xl p-6 sm:p-10 shadow-xl space-y-8">
@@ -170,9 +182,11 @@ export default async function OrderConfirmationPage({ params }: OrderPageProps) 
               <div className="text-sm font-bold text-slate-800">
                 कुल मैचिंग PV: <strong className="text-[#144732]">{order.totalPV} PV</strong>
               </div>
-              <div className="text-sm font-bold text-slate-800">
-                कुल रीपरचेस BV: <strong className="text-[#92580a]">{order.totalBV} BV</strong>
-              </div>
+              {order.totalBV > 0 && (
+                <div className="text-sm font-bold text-slate-800">
+                  कुल रीपरचेस BV: <strong className="text-[#92580a]">{order.totalBV} BV</strong>
+                </div>
+              )}
               <p className="text-[11px] text-slate-500 pt-1">
                 * आपके आईडी पर बिज़नेस पॉइंट्स क्रेडिट कर दिए गए हैं।
               </p>

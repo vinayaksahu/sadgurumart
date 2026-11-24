@@ -1289,7 +1289,7 @@ export default function MembersManager() {
                             <div className="text-right sm:border-l sm:pl-4 border-slate-200 shrink-0">
                               <div className="text-sm font-black text-slate-900">₹{ord.totalDp}</div>
                               <div className="text-[11px] font-bold text-[#92580a]">
-                                +{ord.totalPV} PV | +{ord.totalBV} BV
+                                +{ord.totalPV} PV {ord.totalBV > 0 ? `| +${ord.totalBV} BV` : ''}
                               </div>
                             </div>
                           </div>

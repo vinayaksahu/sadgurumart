@@ -115,6 +115,17 @@ export async function POST(req: NextRequest) {
         companyBranch: body.companyBranch !== undefined ? body.companyBranch : (current as any).companyBranch,
         companyUpiId: body.companyUpiId !== undefined ? body.companyUpiId : (current as any).companyUpiId,
         companyQrImageUrl: finalQrImage,
+
+        // Shiprocket Delivery Logistics Settings
+        shiprocketEnabled: body.shiprocketEnabled !== undefined ? Boolean(body.shiprocketEnabled) : (current as any).shiprocketEnabled,
+        shiprocketEmail: body.shiprocketEmail !== undefined ? body.shiprocketEmail.trim() : (current as any).shiprocketEmail,
+        shiprocketPassword: body.shiprocketPassword !== undefined && body.shiprocketPassword !== '' ? body.shiprocketPassword : (current as any).shiprocketPassword,
+        shiprocketPickupLocation: body.shiprocketPickupLocation !== undefined ? body.shiprocketPickupLocation.trim() : (current as any).shiprocketPickupLocation,
+        shiprocketDefaultWeightKg: body.shiprocketDefaultWeightKg !== undefined ? parseFloat(body.shiprocketDefaultWeightKg) : (current as any).shiprocketDefaultWeightKg,
+        shiprocketLengthCm: body.shiprocketLengthCm !== undefined ? parseFloat(body.shiprocketLengthCm) : (current as any).shiprocketLengthCm,
+        shiprocketBreadthCm: body.shiprocketBreadthCm !== undefined ? parseFloat(body.shiprocketBreadthCm) : (current as any).shiprocketBreadthCm,
+        shiprocketHeightCm: body.shiprocketHeightCm !== undefined ? parseFloat(body.shiprocketHeightCm) : (current as any).shiprocketHeightCm,
+        shiprocketAutoCreate: body.shiprocketAutoCreate !== undefined ? Boolean(body.shiprocketAutoCreate) : (current as any).shiprocketAutoCreate,
       },
     });
 

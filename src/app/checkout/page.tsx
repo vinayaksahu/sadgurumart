@@ -46,6 +46,53 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // Shiprocket Pincode Check State
+  const [pincodeCheck, setPincodeCheck] = useState<{
+    checking: boolean;
+    serviceable?: boolean;
+    courierName?: string;
+    estimatedDeliveryDays?: number;
+    message?: string;
+  } | null>(null);
+
+  // Auto-check Shiprocket delivery whenever a 6-digit PIN code is present
+  useEffect(() => {
+    const pin = (shipping.pinCode || '').trim();
+    if (pin.length === 6 && /^\d{6}$/.test(pin)) {
+      let isCancelled = false;
+      setPincodeCheck({ checking: true });
+      fetch(`/api/shiprocket/check-pincode?pincode=${pin}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (!isCancelled) {
+            setPincodeCheck({
+              checking: false,
+              serviceable: data.serviceable !== false,
+              courierName: data.courierName,
+              estimatedDeliveryDays: data.estimatedDeliveryDays || 3,
+              message: data.message,
+            });
+          }
+        })
+        .catch(() => {
+          if (!isCancelled) {
+            setPincodeCheck({
+              checking: false,
+              serviceable: true,
+              estimatedDeliveryDays: 3,
+              courierName: 'Shiprocket Delivery',
+              message: 'डिलीवरी उपलब्ध है',
+            });
+          }
+        });
+      return () => {
+        isCancelled = true;
+      };
+    } else {
+      setPincodeCheck(null);
+    }
+  }, [shipping.pinCode]);
+
   // Fetch logged-in member profile to check saved address
   useEffect(() => {
     const fetchUser = async () => {
@@ -313,6 +360,29 @@ export default function CheckoutPage() {
                               📍 {currentUser.addressLine}, {currentUser.city}, {currentUser.state} -{' '}
                               <span className="font-bold">{currentUser.pincode}</span>
                             </div>
+
+                            {/* Shiprocket Delivery Badge on Profile Address */}
+                            {pincodeCheck && (
+                              <div className="pt-2">
+                                {pincodeCheck.checking ? (
+                                  <div className="text-[11px] text-indigo-600 font-bold flex items-center gap-1.5 animate-pulse">
+                                    <Truck className="w-3.5 h-3.5" />
+                                    <span>Shiprocket कूरियर सेवा जांची जा रही है...</span>
+                                  </div>
+                                ) : pincodeCheck.serviceable ? (
+                                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-bold">
+                                    <Truck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                                    <span>
+                                      ✓ Shiprocket एक्सप्रेस डिलीवरी उपलब्ध ({pincodeCheck.estimatedDeliveryDays}-{pincodeCheck.estimatedDeliveryDays! + 2} दिन)
+                                    </span>
+                                  </div>
+                                ) : (
+                                  <div className="text-[11px] text-amber-700 font-bold">
+                                    {pincodeCheck.message}
+                                  </div>
+                                )}
+                              </div>
+                            )}
                           </div>
 
                           <Link
@@ -473,6 +543,27 @@ export default function CheckoutPage() {
                           required
                           className="w-full bg-[#faf8f4] border border-[#d8d0bf] focus:border-[#144732] rounded-xl px-4 py-2.5 text-sm font-mono text-slate-900 focus:outline-none"
                         />
+
+                        {/* Shiprocket Delivery Badge on Manual Pin */}
+                        {pincodeCheck && (
+                          <div className="mt-1.5">
+                            {pincodeCheck.checking ? (
+                              <div className="text-[10px] text-indigo-600 font-bold flex items-center gap-1 animate-pulse">
+                                <Truck className="w-3 h-3" />
+                                <span>पिनकोड सेवा जांची जा रही है...</span>
+                              </div>
+                            ) : pincodeCheck.serviceable ? (
+                              <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-800 text-[10px] font-bold">
+                                <Truck className="w-3 h-3 text-emerald-600 shrink-0" />
+                                <span>✓ डिलीवरी उपलब्ध ({pincodeCheck.estimatedDeliveryDays}-{pincodeCheck.estimatedDeliveryDays! + 2} दिन)</span>
+                              </div>
+                            ) : (
+                              <div className="text-[10px] text-amber-700 font-bold">
+                                {pincodeCheck.message}
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
 

@@ -287,6 +287,19 @@ model Order {
   targetUserCode  String?       // Populated when package bought for another member
   notes           String?
 
+  // Shiprocket Logistics Integration
+  shiprocketOrderId       Int?
+  shiprocketShipmentId    Int?
+  shiprocketAwbCode       String?
+  shiprocketCourierName   String?
+  shiprocketCourierId     Int?
+  shiprocketStatus        String?
+  shiprocketLabelUrl      String?
+  shiprocketInvoiceUrl    String?
+  shiprocketManifestUrl   String?
+  shiprocketTrackingUrl   String?
+  shiprocketEtc           Json?
+
   items           OrderItem[]
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
@@ -587,6 +600,19 @@ model SystemSetting {
   companyBranch           String?  @default("State Bank of India")
   companyUpiId            String?  @default("6267392508-1@nyes")
   companyQrImageUrl       String?  @default("/payment-qr.jpg")
+
+  // Shiprocket Logistics Integration
+  shiprocketEnabled       Boolean  @default(false)
+  shiprocketEmail         String?  @default("")
+  shiprocketPassword      String?  @default("")
+  shiprocketToken         String?  @default("")
+  shiprocketTokenExpiry   DateTime?
+  shiprocketPickupLocation String? @default("Primary")
+  shiprocketDefaultWeightKg Float? @default(0.5)
+  shiprocketLengthCm      Float?   @default(10)
+  shiprocketBreadthCm     Float?   @default(10)
+  shiprocketHeightCm      Float?   @default(10)
+  shiprocketAutoCreate    Boolean  @default(true)
 
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt

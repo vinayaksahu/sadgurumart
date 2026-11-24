@@ -116,7 +116,7 @@ export async function POST(req: NextRequest) {
           totalDiscount: Math.max(0, product.mrp - product.dpPrice),
           deliveryFee: 0,
           totalPV: product.pv,
-          totalBV: product.bv,
+          totalBV: 0, // Activation packages generate Binary PV only; Repurchase BV is 0
           orderStatus: 'CONFIRMED',
           paymentStatus: 'PAID',
           paymentMethod: 'P2P_WALLET',
@@ -135,7 +135,7 @@ export async function POST(req: NextRequest) {
                 unitMrp: product.mrp,
                 unitDp: product.dpPrice,
                 unitPV: product.pv,
-                unitBV: product.bv,
+                unitBV: 0,
               },
             ],
           },
