@@ -93,7 +93,7 @@ export default async function DashboardPage({
         ],
         paymentStatus: 'PAID',
       },
-      select: { totalPV: true, isActivation: true },
+      select: { userId: true, totalPV: true, totalBV: true, totalDp: true, isActivation: true },
       orderBy: { createdAt: 'desc' },
     }),
   ]);
@@ -102,6 +102,14 @@ export default async function DashboardPage({
   const activationOrder = userPaidOrders.find((o) => o.isActivation || o.totalPV >= 100);
   const totalPersonalPV = userPaidOrders.reduce((sum, o) => sum + (o.totalPV || 0), 0);
   const activePackagePV = activationOrder?.totalPV || (user.isActive ? Math.max(100, totalPersonalPV) : 0);
+
+  // Compute Self Repurchase Volume (BV) and Total Repurchased Amount (Excluding Activation orders)
+  const selfRepurchaseOrders = userPaidOrders.filter(
+    (o) => o.userId === user.id && !o.isActivation
+  );
+  const selfRepurchaseBV = selfRepurchaseOrders.reduce((sum, o) => sum + (o.totalBV || 0), 0);
+  const selfRepurchaseAmount = selfRepurchaseOrders.reduce((sum, o) => sum + (o.totalDp || 0), 0);
+  const selfRepurchaseCount = selfRepurchaseOrders.length;
 
   const getSum = (typeList: string[]) => {
     return walletTransactions
@@ -119,6 +127,7 @@ export default async function DashboardPage({
     { label: 'Left Team / Right Team', value: `${teamCounts.leftTeamCount} L : ${teamCounts.rightTeamCount} R`, gradient: 'from-[#0d9488] to-[#0f766e]', icon: GitFork },
     { label: 'Left PV / Right PV', value: `${teamVolumes.totalLeftPV} L : ${teamVolumes.totalRightPV} R`, gradient: 'from-[#059669] to-[#047857]', icon: Award },
     { label: 'Left BV / Right BV', value: `${teamVolumes.leftBV} L : ${teamVolumes.rightBV} R`, gradient: 'from-[#0891b2] to-[#0e7490]', icon: ShoppingBag },
+    { label: 'Self Repurchase BV', value: `${selfRepurchaseBV.toLocaleString('en-IN')} BV (₹${selfRepurchaseAmount.toLocaleString('en-IN', { maximumFractionDigits: 0 })})`, gradient: 'from-[#7c3aed] to-[#9333ea]', icon: ShoppingBag },
     { label: 'Total Direct Income', value: `₹${getSum(['DIRECT_REFERRAL']).toFixed(2)}`, gradient: 'from-[#3b82f6] to-[#4f46e5]', icon: User },
     { label: 'Matching Income', value: `₹${getSum(['BINARY_MATCHING']).toFixed(2)}`, gradient: 'from-[#6366f1] to-[#7c3aed]', icon: User },
     { label: 'Direct Sponsor Income', value: `₹${getSum(['SPONSOR_ROYALTY']).toFixed(2)}`, gradient: 'from-[#f43f5e] to-[#ea580c]', icon: TrendingUp },
@@ -376,7 +385,7 @@ export default async function DashboardPage({
           </div>
         </div>
 
-        {/* Team Binary Volume & Repurchase Hub (Left & Right PV and BV) */}
+        {/* Team Binary Volume & Repurchase Hub (Left & Right PV and BV + Self BV) */}
         <div className="bg-white border-2 border-[#144732]/20 rounded-3xl p-5 sm:p-7 shadow-sm space-y-5">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
             <div>
@@ -389,7 +398,7 @@ export default async function DashboardPage({
                 </h2>
               </div>
               <p className="text-xs text-slate-500 mt-1 ml-11">
-                लेफ्ट एवं राइट दोनों साइड का कुल बिजनेस (PV) और रीपरचेस वॉल्यूम (BV) लाइव विवरण
+                लेफ्ट-राइट टीम वॉल्यूम (PV व BV) एवं स्वयं की रीपरचेस खरीदारी (Self BV) का लाइव विवरण
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -405,7 +414,7 @@ export default async function DashboardPage({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
             {/* LEFT TEAM VOLUME CARD */}
             <div className="bg-gradient-to-br from-[#f0fdf4] to-white border-2 border-emerald-300/80 rounded-2xl p-5 shadow-xs relative overflow-hidden">
               <div className="flex items-center justify-between mb-4">
@@ -487,6 +496,57 @@ export default async function DashboardPage({
                     राइट टीम की संपूर्ण स्टोर खरीदारी का BV
                   </div>
                 </div>
+              </div>
+            </div>
+
+            {/* SELF REPURCHASE CARD */}
+            <div className="bg-gradient-to-br from-[#faf5ff] to-white border-2 border-purple-300/80 rounded-2xl p-5 shadow-xs relative overflow-hidden flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full bg-purple-600 animate-pulse" />
+                    <span className="text-xs font-black text-purple-900 uppercase tracking-wider">
+                      SELF REPURCHASE (स्वयं खरीदारी)
+                    </span>
+                  </div>
+                  <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-800">
+                    {selfRepurchaseCount} ऑर्डर
+                  </span>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="bg-white/90 p-3.5 rounded-xl border border-purple-200 shadow-2xs">
+                    <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                      Self Repurchase BV (स्वयं का रीपरचेस BV)
+                    </div>
+                    <div className="text-2xl sm:text-3xl font-black text-purple-900 mt-0.5">
+                      {selfRepurchaseBV.toLocaleString('en-IN')} <span className="text-sm font-bold text-purple-700">BV</span>
+                    </div>
+                    <div className="text-[11px] text-slate-500 mt-1 flex items-center justify-between">
+                      <span>कैशबैक दर:</span>
+                      <strong className="text-purple-800 font-bold">10% Self BV</strong>
+                    </div>
+                  </div>
+
+                  <div className="bg-white/90 p-3.5 rounded-xl border border-purple-200 shadow-2xs">
+                    <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                      Total Purchased Amount (कुल खरीदारी राशि)
+                    </div>
+                    <div className="text-2xl sm:text-3xl font-black text-[#92580a] mt-0.5">
+                      ₹{selfRepurchaseAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </div>
+                    <div className="text-[11px] text-slate-500 mt-1">
+                      स्वयं की सफल स्टोर रीपरचेस खरीदारी
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 pt-3 border-t border-purple-100 flex items-center justify-between text-xs font-bold text-purple-900">
+                <span>स्टोर रीपरचेस</span>
+                <Link href="/products" className="hover:underline text-purple-700 flex items-center gap-1">
+                  <span>शॉपिंग करें →</span>
+                </Link>
               </div>
             </div>
 
