@@ -144,9 +144,12 @@ export async function creditEligibleRankRewards(userId: string): Promise<{
 }> {
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    include: {
+    select: {
+      id: true,
+      totalMatchingPaidPV: true,
       wallet: {
-        include: {
+        select: {
+          id: true,
           transactions: {
             where: {
               type: 'AWARD_REWARD',
@@ -164,11 +167,14 @@ export async function creditEligibleRankRewards(userId: string): Promise<{
     return { creditedCount: 0, creditedAmount: 0, creditedRanks: [] };
   }
 
+  const matchedRP = Math.floor((user.totalMatchingPaidPV || 0) / 100);
+  if (matchedRP < 30) {
+    return { creditedCount: 0, creditedAmount: 0, creditedRanks: [] };
+  }
+
   const existingRewardRefIds = new Set(
     user.wallet.transactions.map((t) => t.referenceId).filter(Boolean)
   );
-
-  const matchedRP = Math.floor((user.totalMatchingPaidPV || 0) / 100);
 
   let creditedCount = 0;
   let creditedAmount = 0;
@@ -291,9 +297,11 @@ export async function syncAllUsersRanks(): Promise<{
       upgradedCount++;
     }
 
-    const rewardRes = await creditEligibleRankRewards(u.id);
-    totalRewardsCredited += rewardRes.creditedCount;
-    totalRewardAmount += rewardRes.creditedAmount;
+    if (status.matchedRP >= 30) {
+      const rewardRes = await creditEligibleRankRewards(u.id);
+      totalRewardsCredited += rewardRes.creditedCount;
+      totalRewardAmount += rewardRes.creditedAmount;
+    }
   }
 
   return {
